@@ -1,0 +1,14 @@
+[
+ {
+  "id": "NotoSansTC-Variable",
+  "file": "NotoSansTC-Variable.ttf",
+  "license": "OFL 1.1",
+  "source": "google/fonts (Noto)"
+ },
+ {
+  "id": "NotoSerifTC-Variable",
+  "file": "NotoSerifTC-Variable.ttf",
+  "license": "OFL 1.1",
+  "source": "google/fonts (Noto)"
+ }
+]
