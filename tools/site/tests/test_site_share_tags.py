@@ -62,11 +62,19 @@ def test_share_urls_start_with_base_url_and_image_exists(page, lang):
         assert (DOCS / (rel + "index.html" if rel == "" or rel.endswith("/") else rel)).is_file(), u
 
 
-def test_og_image_size():
+@pytest.mark.parametrize("lang", ["zh", "en"])
+def test_og_image_size(lang):
     from PIL import Image
-    f = DOCS / "site" / "og.jpg"
+    from site_config import OG_IMAGE
+    f = DOCS / OG_IMAGE[lang]
     assert Image.open(f).size == OG_IMAGE_SIZE
     assert f.stat().st_size < 300 * 1024
+
+
+@pytest.mark.parametrize("page,lang", CASES)
+def test_each_language_shares_its_own_image(page, lang):
+    from site_config import OG_IMAGE
+    assert meta(head(page, lang), "og:image") == [BASE_URL + OG_IMAGE[lang]]
 
 
 @pytest.mark.parametrize("page,lang", CASES)

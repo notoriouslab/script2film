@@ -21,8 +21,8 @@ BEGIN = "<!-- share preview: written by tools/site/og_tags.py -->"
 END = "<!-- /share preview -->"
 LOCALE = {"zh": "zh_TW", "en": "en_US"}
 HREFLANG = {"zh": "zh-Hant", "en": "en"}
-IMAGE_ALT = {"zh": "Script2Film 字樣，底圖是用這套工具做的一支短劇的畫面",
-             "en": "The Script2Film name over a frame from a short drama made with it"}
+IMAGE_ALT = {"zh": "Script2Film 字樣與「給 AI agent 用的影片與解說片工具組」，旁邊是兩格每日得力一分鐘的成片畫面",
+             "en": "The Script2Film name beside two frames from films: a dinosaur chasing explorers, and a host with English subtitles"}
 BLOCK_RX = re.compile(r"\n[ \t]*" + re.escape(BEGIN) + r".*?" + re.escape(END), re.S)
 
 
@@ -63,7 +63,7 @@ def block(text, page, lang, indent="  "):
         f'<meta property="og:url" content="{page_url(page, lang)}">',
         f'<meta property="og:locale" content="{LOCALE[lang]}">',
         f'<meta property="og:locale:alternate" content="{LOCALE[other]}">',
-        f'<meta property="og:image" content="{BASE_URL + OG_IMAGE}">',
+        f'<meta property="og:image" content="{BASE_URL + OG_IMAGE[lang]}">',
         f'<meta property="og:image:width" content="{w}">',
         f'<meta property="og:image:height" content="{h}">',
         f'<meta property="og:image:alt" content="{_attr(IMAGE_ALT[lang])}">',

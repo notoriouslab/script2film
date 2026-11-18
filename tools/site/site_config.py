@@ -5,6 +5,6 @@ og_tags.py builds every share-preview URL (og:url, og:image, canonical, hreflang
 """
 BASE_URL = "https://notoriouslab.github.io/script2film/"
 SITE_NAME = "Script2Film"
-OG_IMAGE = "site/og.jpg"          # relative to docs/; made by tools/site/make_og.py
+OG_IMAGE = {"zh": "site/og-zh.jpg", "en": "site/og.jpg"}   # relative to docs/; made by tools/site/make_og.py
 OG_IMAGE_SIZE = (1200, 630)
 PAGES = ("index", "gallery", "tools", "studio")   # docs/<page>.html and docs/en/<page>.html
