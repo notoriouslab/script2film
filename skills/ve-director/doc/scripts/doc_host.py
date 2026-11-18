@@ -13,7 +13,7 @@ with the lead silence) landed 0.45 s late, inside a word; cutting in the pauses 
 """
 import json, sys
 
-from doc_align import LEAD
+from doc_align import END_HOLD, LEAD
 from doc_common import duration, load, read_json, sh
 
 MIN_PART = 10.0
@@ -34,15 +34,21 @@ def cut_points(lines, total, cap, least=MIN_PART):
 
 def split(doc, P, cap, least=MIN_PART):
     lines, voice = read_json(P / "tts/lines.json", "run doc_voice.py first"), P / "tts/voice.wav"
-    total = duration(voice)
-    edges = [0.0, *cut_points(lines, total, cap, least), total]
+    total, end = duration(voice), max(0.6, float(doc.get("end_hold", END_HOLD)))
+    edges = [0.0, *cut_points(lines, total + end, cap, least), total]   # the last part's closing silence counts toward --max
     out = P / "host/parts"
     out.mkdir(parents=True, exist_ok=True)
     parts = []
+    last = len(edges) - 1
     for k, (a, b) in enumerate(zip(edges, edges[1:]), 1):
-        sh("ffmpeg", "-v", "error", "-y", "-i", voice, "-ss", f"{a:.3f}", "-to", f"{b:.3f}", "-b:a", "192k", out / f"part{k}.mp3")
-        parts.append({"k": k, "start": round(a, 3), "end": round(b, 3)})
-        print(f"part{k}.mp3 {a:7.2f}-{b:7.2f} ({b - a:.1f}s)")
+        # the last part ends in silence as long as the film runs on after the voice (doc_align end_hold), so the host's
+        # face can settle instead of freezing on the frame of the last word (2026-11-18). TalkingPhotos trims that silence
+        # (a 20.04 s part came back 18.05 s; join then holds the last frame), so for TP it does not help yet
+        tail = end if k == last else 0.0
+        sh("ffmpeg", "-v", "error", "-y", "-i", voice, "-ss", f"{a:.3f}", "-to", f"{b:.3f}", "-af", f"apad=pad_dur={tail:.2f}",
+           "-b:a", "192k", out / f"part{k}.mp3")
+        parts.append({"k": k, "start": round(a, 3), "end": round(b, 3), "tail": tail})
+        print(f"part{k}.mp3 {a:7.2f}-{b:7.2f} ({b - a + tail:.1f}s)")
     (P / "host/parts.json").write_text(json.dumps(parts, indent=1), encoding="utf-8")
 
 
@@ -51,7 +57,7 @@ def join(doc, P, out):
     tmp = P / "host/parts"
     segs = []
     for p in parts:
-        src, seg, d = tmp / f"part{p['k']}.mp4", tmp / f"_seg{p['k']}.mp4", p["end"] - p["start"]
+        src, seg, d = tmp / f"part{p['k']}.mp4", tmp / f"_seg{p['k']}.mp4", p["end"] - p["start"] + p.get("tail", 0.0)
         if not src.exists():
             sys.exit(f"✗ missing TP take {src}")
         hold = LEAD if p["k"] == 1 else 0.0    # the subtitle timeline starts with LEAD s of silence before the voice

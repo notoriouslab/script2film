@@ -24,6 +24,27 @@ SFX_IMPACT = ("[0]volume=1.0,afade=t=out:st=0.05:d=2.1:curve=exp[s];[1]lowpass=f
               "[s][n]amix=inputs=2:normalize=0,alimiter=limit=0.9")
 
 
+def sub_highlight(doc):
+    """doc.json "sub_highlight": {"words": [...], "color": "#RRGGBB"} → the burned subtitles show those words bold in that
+    colour (the product names a film is made for, 2026-11-18); absent → None."""
+    h = doc.get("sub_highlight")
+    if not h:
+        return None
+    words, color = h.get("words") or [], h.get("color", "#C8553D")
+    if not words or not all(isinstance(w, str) and w.strip() for w in words) or not re.fullmatch(r"#[0-9A-Fa-f]{6}", color):
+        sys.exit(f"✗ sub_highlight needs words (a list of strings) and color #RRGGBB: {h!r}")
+    return {"words": words, "color": color}
+
+
+def sub_markup(text, hl):
+    """One subtitle as HTML: escaped, the sub_highlight words (whole words, longest first) in <span class="hl">."""
+    out = html.escape(text)
+    if hl:
+        alt = "|".join(re.escape(html.escape(w)) for w in sorted(hl["words"], key=len, reverse=True))
+        out = re.sub(rf"(?<!\w)({alt})(?!\w)", r'<span class="hl">\1</span>', out)
+    return out
+
+
 def sub_bg(doc):
     """doc.json "sub_bg": {"color": "#RRGGBB", "alpha": 0-1} → that box, checked; absent → None."""
     bg = doc.get("sub_bg")
@@ -106,6 +127,8 @@ def shell(P, doc, beats, total, theme, hits, plan):
     sub_bg_css = (f"#sub {{ color: #fff; text-shadow: none; padding: 6px 24px; border-radius: 8px; "
                   f"background: rgba({','.join(str(int(bg['color'][i:i + 2], 16)) for i in (1, 3, 5))},{bg['alpha']}); }} "
                   "#sub:empty { display: none; } .mist { display: none; }") if bg else ""
+    hl = sub_highlight(doc)
+    hl_css = f" #sub .hl {{ color: {hl['color']}; font-weight: 900; }}" if hl else ""
     (S / "index.html").write_text(f"""<!DOCTYPE html>
 <html lang="{html.escape(doc['lang'])}"><head><meta charset="UTF-8"><title>{html.escape(doc['title'])}</title>
 <script src="gsap.min.js"></script>
@@ -118,7 +141,7 @@ def shell(P, doc, beats, total, theme, hits, plan):
   .subs {{ position: absolute; left: 0; width: 1920px; top: 900px; text-align: center; z-index: 100; }}
   #sub {{ display: inline-block; white-space: pre-line; font-size: 48px; font-weight: 700; letter-spacing: 2px; color: {ink};
           text-shadow: 0 0 10px rgba({glow},.95), 0 0 22px rgba({glow},.85); }}
-  {sub_bg_css}
+  {sub_bg_css}{hl_css}
 </style></head><body>
 <div id="root" data-composition-id="main" data-width="1920" data-height="1080" data-start="0" data-duration="{total}">
   <video id="visual" class="clip" src="visual.mp4" muted playsinline data-start="0" data-duration="{total}" data-track-index="1"
@@ -129,7 +152,7 @@ def shell(P, doc, beats, total, theme, hits, plan):
 {"".join(f'  <audio id="impact{k}" class="clip" src="sfx/impact.wav" data-start="{h}" data-duration="2.2" data-volume="0.9" data-track-index="{12 + k}"></audio>' + chr(10) for k, h in enumerate(hits))}{sfxbed_audio(doc, total, hits)}</div>
 <script>
   const main = gsap.timeline({{ paused: true }});
-  {json.dumps(cues, ensure_ascii=False)}.forEach(([t, txt]) => main.set("#sub", {{ textContent: txt }}, t));
+  {json.dumps([[t, sub_markup(txt, hl)] for t, txt in cues] if hl else cues, ensure_ascii=False)}.forEach(([t, txt]) => main.set("#sub", {{ {"innerHTML" if hl else "textContent"}: txt }}, t));
   main.set({{}}, {{}}, {total});
   window.__timelines = window.__timelines || {{}}; window.__timelines["main"] = main;
 </script></body></html>

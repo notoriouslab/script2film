@@ -130,7 +130,7 @@ def plan_host(doc, P, look, who, where, resolution):
     from doc_common import read_json
     parts = read_json(P / "host/parts.json", "run doc_host.py split <doc.json> --max 15 --min 4 first")
     lines = read_json(P / "tts/lines.json", "run doc_voice.py first")
-    long = [p for p in parts if p["end"] - p["start"] > MAX_LOCK + 0.05]
+    long = [p for p in parts if p["end"] - p["start"] + p.get("tail", 0.0) > MAX_LOCK + 0.05]   # tail: doc_host's closing silence
     if long:
         sys.exit(f"✗ H3 locks at most {MAX_LOCK:g} s of audio; part{long[0]['k']} is {long[0]['end'] - long[0]['start']:.1f} s: "
                  f"run doc_host.py split <doc.json> --max 15 --min 4 again")
@@ -148,7 +148,7 @@ def plan_host(doc, P, look, who, where, resolution):
             sys.exit(f"✗ missing {mp3}: run doc_host.py split first")
         shutil.copy2(mp3, inp / mp3.name)
         jobs.append({"id": f"host{p['k']}", "type": "video", "mode": "ref", "inputs": [f"inputs/look{src.suffix.lower()}"],
-                     "drive_audio": f"inputs/{mp3.name}", "seconds": round(p["end"] - p["start"], 3), "aspect": "16:9",
+                     "drive_audio": f"inputs/{mp3.name}", "seconds": round(p["end"] - p["start"] + p.get("tail", 0.0), 3), "aspect": "16:9",
                      "resolution": resolution, "intensity": "off",
                      "prompt": host_prompt(who, where, host_lines(lines, p), lang)})
     return jobs

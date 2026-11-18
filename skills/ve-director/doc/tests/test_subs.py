@@ -108,3 +108,17 @@ def test_english_main_subtitle_leaves_out_burst_lines(tmp_path):
         [{"line": k, "text": t, "at": k, "end": k + 0.8} for k, t in ((1, "一"), (2, "二"), (3, "三"))], ensure_ascii=False))
     assert [c["text"] for c in line_cues(tmp_path, doc)] == ["One.", "Two."]
     assert [c["text"] for c in line_cues(tmp_path, doc, skip={1})] == ["Two."]
+
+
+def test_sub_highlight_wraps_whole_words_only():
+    from doc_cut import sub_highlight, sub_markup
+    hl = sub_highlight({"sub_highlight": {"words": ["VideoExpress", "TalkingPhotos"], "color": "#D65440"}})
+    assert sub_markup("then VideoExpress turns it", hl) == 'then <span class="hl">VideoExpress</span> turns it'
+    assert sub_markup("TalkingPhotosX & <b>", hl) == "TalkingPhotosX &amp; &lt;b&gt;"      # not part of a longer word; text escaped
+    assert sub_markup("plain", None) == "plain"
+
+
+def test_sub_highlight_rejects_a_bad_colour():
+    from doc_cut import sub_highlight
+    with pytest.raises(SystemExit):
+        sub_highlight({"sub_highlight": {"words": ["X"], "color": "red"}})

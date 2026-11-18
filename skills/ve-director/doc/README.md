@@ -126,6 +126,8 @@ shorter than its new window is slowed down (`max_stretch`, default 1.2×, at mos
   "palette": "出埃及與曠野",                                         // optional, collage only: an era palette from doc_themes.PALETTES
   "voice": {"ref_wav": "refs/x.wav", "ref_text": "refs/x.txt", "seed": 11, "tail_fade": 0.08},   // tail_fade optional: fade-out on each line end
   "gaps": {"default": 0.32, "after": {"6": 0.9, "7": 1.6}},        // pause after line n (seconds)
+  "end_hold": 2.0,                                                  // optional: seconds of picture after the last word (default 2.0)
+  "sub_highlight": {"words": ["VideoExpress"], "color": "#D65440"},  // optional: these words bold and coloured in the burned subtitles
   "lines": [{"text": "...", "tts": "optional pronunciation-safe text", "speaker": "optional: a name from voices"}],
   "voices": {"老闆": {"ref_wav": "refs/keeper.wav", "ref_text": "refs/keeper.txt", "seed": 21}},   // optional: a second voice for dialogue
   "en": ["...", "..."],                                              // optional: one English subtitle per line, under the Chinese (Concat layer + subtitles_en.srt)

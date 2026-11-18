@@ -27,3 +27,10 @@ def test_unmatched_first_screen_keeps_a_later_start():
 
 def test_unmatched_first_screen_never_runs_past_its_end():
     assert first_screen_at(19.0, 20.2, 20.0) == 20.2 - 0.3
+
+
+def test_the_picture_runs_on_after_the_last_word():
+    from doc_align import END_HOLD, film_end
+    assert film_end(100.0, {}) == round(100.0 + END_HOLD, 2)
+    assert film_end(100.0, {"end_hold": 3}) == 103.0
+    assert film_end(100.0, {"end_hold": 0}) == 100.6        # never shorter than the old 0.6 s

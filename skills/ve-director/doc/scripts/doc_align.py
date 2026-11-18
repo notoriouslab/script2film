@@ -25,6 +25,7 @@ from doc_common import (asr_mode, duration, eleven_key, has_local_asr, load, loc
                         tokens)
 
 LEAD, PRE = 0.45, 0.25
+END_HOLD = 2.0   # seconds of picture after the last word
 MAX = {"zh": 18, "en": 84}   # en: up to two lines of 42
 
 
@@ -177,6 +178,12 @@ def tail_report(sj, audio):
             " (listed, not removed; re-voice that line or re-time with --retime)")
 
 
+def film_end(spoken, doc):
+    """The film runs on after the last word ("end_hold" seconds, default END_HOLD, at least 0.6): a face or a chart is
+    not cut off the moment the voice stops (2026-11-18)."""
+    return round(spoken + max(0.6, float(doc.get("end_hold", END_HOLD))), 2)
+
+
 def first_screen_at(at, end, voiced):
     """An unmatched screen that opens its line: no earlier than the line's voiced start in tts/lines.json (plus LEAD),
     and at least 0.3 s before its end."""
@@ -238,12 +245,13 @@ def main():
         t = time_of[i][1] if time_of[i] else (line_tok[n][-1][1] if line_tok.get(n) else None)
         if t is not None:
             line_tok.setdefault(n, []).append([ref[i], round(t, 3)])
-    total = round(duration(C / "audio.m4a") + 0.6, 2)
+    spoken = duration(C / "audio.m4a")
+    total = film_end(spoken, doc)   # the last subtitle still ends 0.6 s after the voice (below)
     speech_end = {n: max(o["end"] for o in out if o["line"] == n) for n in range(1, len(lines) + 1)}
     first_at = {n: min(o["at"] for o in out if o["line"] == n) for n in range(1, len(lines) + 1)}
     for i in range(len(out) - 1):
         out[i]["end"] = out[i + 1]["at"]
-    out[-1]["end"] = total
+    out[-1]["end"] = round(min(total, spoken + 0.6), 2)
     fmt = lambda t: f"{int(t // 3600):02d}:{int(t % 3600 // 60):02d}:{int(t % 60):02d},{min(999, int(round((t % 1) * 1000))):03d}"
     (C / "final.srt").write_text("\n".join(f"{i}\n{fmt(o['at'])} --> {fmt(o['end'])}\n{o['text']}\n" for i, o in enumerate(out, 1)), encoding="utf-8")
     # the same screens with the script line each belongs to: doc_cut times a second-language line (doc.json "en") by it
