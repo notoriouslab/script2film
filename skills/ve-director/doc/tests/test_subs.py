@@ -6,7 +6,7 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 from doc_common import series_of, subs_problems, subtitle_plan  # noqa: E402
-from doc_cut import write_caption_files  # noqa: E402
+from doc_cut import line_cues, write_caption_files  # noqa: E402
 
 A = {"lang": "zh", "lines": [{"text": "一"}]}                                  # Chinese narration only
 B = {"lang": "en", "lines": [{"text": "One."}], "zh": ["一"]}                 # English narration, Chinese translation
@@ -36,6 +36,7 @@ def test_burn_names_the_one_language():
     assert plan(C, ZH) == ("narration", False)               # the English goes out as a caption file only
     assert plan(D, EN) == ("narration", False)
     assert plan(B, EN) == ("narration", False)               # English viewers: the Chinese translation is not burned
+    assert plan(C, EN) == ("en", False)                      # Chinese narration for English viewers: only the "en" lines
     assert plan({**A, "lang": "zh-Hant"}, ZH) == ("narration", False)
 
 
@@ -48,7 +49,7 @@ def test_the_episode_overrides_the_series():
     ({**A, "subs": {"burn": "ja"}}, None, "must be zh or en"),
     ({**B, "en_layer": False}, ZH, "keep only one of"),
     (D, ZH, "has no Chinese translation"),
-    (A, EN, "not supported yet"),
+    (A, EN, "has no English translation"),
     ({**D, "en": ["One."]}, None, "needs no en field"),
 ])
 def test_bad_settings_are_listed_and_stop_the_plan(doc, series, word):
@@ -58,7 +59,7 @@ def test_bad_settings_are_listed_and_stop_the_plan(doc, series, word):
 
 
 def test_good_settings_have_no_problems():
-    for doc, series in [(A, None), (B, None), (C, None), (D, None), (A, ZH), (B, ZH), (C, ZH), (D, EN), (B, EN)]:
+    for doc, series in [(A, None), (B, None), (C, None), (D, None), (A, ZH), (B, ZH), (C, ZH), (D, EN), (B, EN), (C, EN)]:
         assert subs_problems(doc, series) == []
 
 
@@ -96,3 +97,14 @@ def test_subs_must_be_an_object():
     assert "must be an object" in subs_problems({**A, "subs": "zh"}, None)[0]
     assert "must be an object" in subs_problems(A, {"name": "s", "subs": "zh"})[0]
     assert subs_problems(A, {"name": "s", "subs": {}}) == []
+
+
+def test_english_main_subtitle_leaves_out_burst_lines(tmp_path):
+    """subs.burn "en" over Chinese narration: doc_cut writes the burned subtitle from line_cues, without the burst_title
+    lines (they show as a title) and without lines whose "en" is empty."""
+    doc = {"lang": "zh", "lines": [{"text": "一"}, {"text": "二"}, {"text": "三"}], "en": ["One.", "Two.", ""]}
+    (tmp_path / "voice.cleaned").mkdir()
+    (tmp_path / "voice.cleaned/screens.json").write_text(json.dumps(
+        [{"line": k, "text": t, "at": k, "end": k + 0.8} for k, t in ((1, "一"), (2, "二"), (3, "三"))], ensure_ascii=False))
+    assert [c["text"] for c in line_cues(tmp_path, doc)] == ["One.", "Two."]
+    assert [c["text"] for c in line_cues(tmp_path, doc, skip={1})] == ["Two."]

@@ -169,6 +169,8 @@ Several beats per line: `"from": "<phrase>"` opens a beat on that phrase inside 
 beat ends there), so a sentence can cut every 1-2 s; trigger tokens are trimmed to each beat's own span.
 A host take: `"source": "clip", "clip": "host/<full-narration take>.mp4", "clip_sync": true` cuts that beat's window
 out of a TalkingPhoto take rendered on the whole narration (lips stay on the voice); `"vf"` is its ffmpeg scale filter.
+`"clip_in"` (seconds) cuts from that point of the take instead of the beat's start: after the pauses around other lines
+were lengthened, a take made on the earlier narration still fits the host's own lines (they did not change length).
 `"pip"` (top level) puts the same take in a round frame over the listed beats, interleaved:
 `{"clip", "beats", "crop", "d", "ring", "vf"}`. `"sticker"`: a corner badge carried over the next beats, cut from the
 last frame of a code shot that ends on it (`merge_bubble` `badge`). `"wipes"`: [beat ids] get a torn-paper sheet wiping

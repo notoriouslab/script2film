@@ -177,6 +177,12 @@ def tail_report(sj, audio):
             " (listed, not removed; re-voice that line or re-time with --retime)")
 
 
+def first_screen_at(at, end, voiced):
+    """An unmatched screen that opens its line: no earlier than the line's voiced start in tts/lines.json (plus LEAD),
+    and at least 0.3 s before its end."""
+    return min(max(at, voiced + float(LEAD)), end - 0.3)
+
+
 def main():
     doc, P = load(sys.argv[1])
     lang, C = doc["lang"], P / "voice.cleaned"
@@ -219,6 +225,12 @@ def main():
             if k == 0 or k == len(out) - 1 or out[k - 1]["at"] is None or out[k + 1]["at"] is None:
                 sys.exit(f"✗ subtitle not found in the transcript: {o['src']}")
             o["at"], o["end"] = out[k - 1]["end"], out[k + 1]["at"]
+            if out[k - 1]["line"] != o["line"] and (P / "tts/lines.json").exists():
+                # the first screen of its line: it starts where the voice table says the line is voiced, not right after the
+                # previous line (2026-11-18: an unheard "蛤？" took over the pause before it, so the card before ran short)
+                voiced = next((x["start"] for x in json.loads((P / "tts/lines.json").read_text(encoding="utf-8")) if x["n"] == o["line"]), None)
+                if voiced is not None:
+                    o["at"] = first_screen_at(o["at"], o["end"], voiced)
             del o["src"]
             print(f"  unmatched screen placed between its neighbours: {o['text']} {o['at']:.2f}-{o['end']:.2f}")
     for i, o in enumerate(owner):              # per-line token times; an unmatched token takes the previous token's time

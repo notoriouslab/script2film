@@ -60,6 +60,14 @@ def leaf_texts(pattern):
               f"/{pattern}/.test(e.textContent.trim())).map(e=>e.textContent.trim())") or []
 
 
+def tp_name(prefix):
+    """The name TP shows for a file named <prefix>: underscores become spaces and the first letter is capitalised
+    ("boba_emma" shows as "Boba emma"; 2026-11-18 a prefix with "_" uploaded fine but was never found in the media
+    library). has() and card() compare with what TP shows, so the labels are built from this."""
+    p = prefix.replace("_", " ")
+    return p[:1].upper() + p[1:]
+
+
 def has(label):
     return label.lower() in [t.lower() for t in leaf_texts(".")]
 
@@ -206,8 +214,7 @@ def main():
         sys.exit(f"✗ cannot reach the TP browser ({url or 'no response'}): run python3 tools/tp/tp_browser.py serve in the background first")
     if "login" in url.lower() or leaf_texts("^(Log ?in|Sign ?in)$"):
         sys.exit(TP_LOGIN)
-    # TP 會把檔名第一個字母轉大寫（「tpcheck」顯示成「Tpcheck」）；tp_swap／tp_pick 用全等比對卡片文字，所以名稱先轉好
-    prefix = a.prefix[:1].upper() + a.prefix[1:]
+    prefix = tp_name(a.prefix)
     labels = {k: f"{prefix} part{k}" for k in parts}
 
     for k in labels:

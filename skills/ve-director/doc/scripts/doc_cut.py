@@ -69,11 +69,14 @@ def shell(P, doc, beats, total, theme, hits, plan):
         screens = json.loads((P / "voice.cleaned/screens.json").read_text(encoding="utf-8"))
         (S / "voice.cleaned/final.srt").write_text(srt(zh_screens(doc, screens, skip=burst)), encoding="utf-8")
         blocks = (S / "voice.cleaned/final.srt").read_text(encoding="utf-8").strip().split("\n\n")   # the fallback film burns these
+    elif plan["main"] == "en":   # Chinese narration for English viewers: one English cue per line ("en"), nothing in Chinese
+        (S / "voice.cleaned/final.srt").write_text(srt([{**c, "text": en_wrap(c["text"])} for c in line_cues(P, doc, skip=burst)]), encoding="utf-8")
+        blocks = (S / "voice.cleaned/final.srt").read_text(encoding="utf-8").strip().split("\n\n")   # the film burns these
     # the subtitles that are burned in (this file, whichever way it was made): too brief to read → listed here, and
     # tools/nightly/check.py fails the film on any under MIN_SUB_FAIL_S (this step does not stop: previews still build)
     fail, warn = short_cues(parse_srt((S / "voice.cleaned/final.srt").read_text(encoding="utf-8")))
     (P / "voice.cleaned/short_subs.json").write_text(json.dumps(
-        {"source": "zh_screens" if plan["main"] == "zh" else "final.srt", "fail": fail, "warn": warn}, ensure_ascii=False, indent=1), encoding="utf-8")
+        {"source": {"zh": "zh_screens", "en": "en lines"}.get(plan["main"], "final.srt"), "fail": fail, "warn": warn}, ensure_ascii=False, indent=1), encoding="utf-8")
     print(f"subtitles: {len(fail)} shorter than {MIN_SUB_FAIL_S:g}s, {len(warn)} at {MIN_SUB_FAIL_S:g}–{MIN_SUB_WARN_S:g}s"
           + (" (the film check will fail: merge that line with the one before or after into one screen)" if fail else ""))
     for c in fail:
@@ -312,7 +315,13 @@ def zh_screens(doc, screens, skip=()):
     return cues
 
 
-def line_cues(P, doc):
+def clip_start(entry, beat):
+    """Where a clip_sync beat starts in its take: "clip_in" when the narration was retimed after the take was made
+    (longer pauses after other lines), so the lips follow the take's own timing; otherwise the beat's start."""
+    return float(entry.get("clip_in", beat["start"]))
+
+
+def line_cues(P, doc, skip=()):
     """One cue per script line, held for as long as that line's screens (voice.cleaned/screens.json from doc_align), with
     doc.json "en" as the text (one English line per script line, for a Chinese narration with Chinese and English subtitles); without "en"
     (an English narration with "zh") the narration itself. An empty "en" entry gives no cue: a line already in English
@@ -326,7 +335,7 @@ def line_cues(P, doc):
         mine = [o for o in screens if o["line"] == k]
         if not mine:
             sys.exit(f"✗ line {k} has no subtitle screen: run doc_align.py again")
-        if en[k - 1].strip():
+        if en[k - 1].strip() and k not in skip:
             cues.append({"start": mine[0]["at"], "end": mine[-1]["end"], "text": en[k - 1].strip()})
     return cues
 
@@ -699,7 +708,7 @@ def main():
             src = P / plan[b["id"]]["clip"]
             if plan[b["id"]].get("clip_sync"):   # a full-narration take: cut this beat's window so the lips match the voice
                 cut = picks / f"clip_{b['id']}.mp4"
-                sh("ffmpeg", "-v", "error", "-y", "-ss", f"{b['start']:.3f}", "-i", src, "-t", f"{b['duration'] + 0.1:.3f}",
+                sh("ffmpeg", "-v", "error", "-y", "-ss", f"{clip_start(plan[b['id']], b):.3f}", "-i", src, "-t", f"{b['duration'] + 0.1:.3f}",
                    "-an", "-vf", plan[b["id"]].get("vf", "scale=1920:1080") + ",fps=30,tpad=stop_mode=clone:stop_duration=3",
                    "-c:v", "libx264",
                    "-pix_fmt", "yuv420p", "-crf", "18", cut)

@@ -145,8 +145,8 @@ def subs_problems(doc, series):
         out.append("keep only one of subs.burn and en_layer (en_layer is the old form)")
     if lang == "en" and burn == "zh" and not doc.get("zh"):
         out.append('subs.burn is zh, but the script has no Chinese translation ("zh" field)')
-    if lang == "zh" and burn == "en":
-        out.append("burning only English subtitles over Chinese narration is not supported yet")
+    if lang == "zh" and burn == "en" and not doc.get("en"):
+        out.append('subs.burn is en, but the script has no English translation ("en" field)')
     return out
 
 
@@ -162,7 +162,7 @@ def subtitle_plan(doc, series):
     if burn is None:
         return {"burn": None, "main": "zh" if doc.get("zh") else "narration",
                 "second": bool((doc.get("en") or doc.get("zh")) and doc.get("en_layer", True))}
-    return {"burn": burn, "main": "narration" if burn == sub_lang(doc) else "zh", "second": False}
+    return {"burn": burn, "main": "narration" if burn == sub_lang(doc) else burn, "second": False}
 
 
 def spoken_text(doc, line):
