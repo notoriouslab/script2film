@@ -111,7 +111,8 @@ def plan_shots(doc, P, theme, resolution):
     from doc_common import read_beats
     from doc_runsheet import style_for
     from doc_themes import ve_look, ve_theme
-    th = ve_theme(ve_look(doc, theme), doc.get("palette"))
+    look = ve_look(doc, theme)
+    th = ve_theme(look, doc.get("palette") if look == "collage" else None)   # a palette re-inks collage only (doc_themes)
     spec = {b["id"]: b for b in doc["beats"]}
     jobs = []
     for k, b in enumerate([b for b in read_beats(P / "beats.json")["beats"] if b["source"] == "ve"], 1):

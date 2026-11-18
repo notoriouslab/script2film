@@ -25,7 +25,7 @@ from doc_common import (asr_mode, duration, eleven_key, has_local_asr, load, loc
                         tokens)
 
 LEAD, PRE = 0.45, 0.25
-END_HOLD = 2.0   # seconds of picture after the last word
+END_HOLD = 1.0   # seconds of picture after the last word
 MAX = {"zh": 18, "en": 84}   # en: up to two lines of 42
 
 
