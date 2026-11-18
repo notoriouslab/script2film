@@ -15,9 +15,9 @@ Where to put a project: outside the repository, or under `examples/<name>/` (wha
 | F4 | Scenes drawn by code | yes | |
 | F5 | Cut | yes | |
 | F6 | Check the film | yes | numbers fail: do not deliver |
-| Optional A | Generated shots (VideoExpress) | | **ask before sending**; the user logs in |
-| Optional B | Host (TalkingPhoto) | | **the user picks the look image; ask before sending**; the user logs in |
-| Optional C | Music and sound effects | | |
+| Optional A | Generated shots (VideoExpress, or MiniMax H3 on Colab) | | **ask before sending**; the user logs in |
+| Optional B | Host (TalkingPhoto, or MiniMax H3 on Colab) | | **the user picks the look image; ask before sending**; the user logs in |
+| Optional C | Music and sound effects (or a song from MiniMax Music 3 on Colab) | | |
 | Optional D | Final film in Concat | | |
 | Optional E | Start and release checklists | | answer truthfully; ask the user when you do not know |
 | Optional F | Upload to YouTube | | **upload, publish, schedule or delete only when the user says so** |
@@ -146,6 +146,7 @@ Read this before Optional A or B, and before driving any other website with a sc
 |---|---|---|---|
 | VideoExpress | `tools/ve-runner/.profile` inside the repository (not in git, so a fresh copy has none) | none by default | `S2F_VE_HEADED=1 python3 tools/ve-runner/ve_runner.py --login` |
 | TalkingPhotos | outside the repository (`S2F_TP_PROFILE`, default `~/.config/script2film/tp-profile`; a profile already made at an earlier version's default location keeps being used), shared by every copy | always | `python3 tools/tp/tp_browser.py serve` in the background, the user logs in there; the window closes itself after 10 idle minutes |
+| MiniMax H3 (Colab) | `~/.config/colab-cli/token.json` (Google account with Google AI Pro) | none | the upstream `scripts/colab_login.py url`: give the user the link, they sign in and paste the code back (`tools/h3/README.md`) |
 
 `python3 tools/doctor/doctor.py` shows both as optional items ("VE login", "TP profile folder").
 
@@ -174,6 +175,14 @@ Nothing here is tied to VideoExpress: the cut only needs clips in the right fold
 - A clip shorter than its beat is slowed down (by at most `max_stretch` in `doc.json`, default 1.2, never more than 1.5) and then held on its last frame.
 - Then run `ve_clipcheck.py <project>/ve_<look> --strips` (without `--run`) and go on to F5.
 - The rules above still apply on any platform: ask the user before spending their credits, the user logs in, no real person's photo into a video model.
+
+### MiniMax H3 on Colab (shots)
+
+`tools/h3/README.md`. Generates on the user's own Colab GPU (Google AI Pro); the clips land in `ve_<look>/shotK.mp4` like the VideoExpress ones.
+
+- **Licence first**: the H3 open weights do not cover the United States, the European Union, the United Kingdom or South Korea. The start checklist asks `h3-territory` once the episode has `h3/manifest.json`, and `h3_film.py run` releases the GPU at once when the Colab machine is outside the territory.
+- `python3 tools/h3/h3_film.py plan <project>/doc.json --shots` writes one job per VE beat with a **draft** prompt from `doc.json` `shots`. Rewrite each one into 350-500 English words (the upstream `references/prompt-guide.md`; short prompts make H3 burn subtitles) and delete `"draft"`; `run` refuses drafts and prompts under 300 words.
+- **Ask the user before sending**, with the spec (number of clips, seconds, resolution) and the cost in compute units; then `python3 tools/h3/h3_film.py run <project>/doc.json --confirmed`, then `python3 tools/h3/h3_film.py collect <project>/doc.json` and `ve_clipcheck.py <project>/ve_<look> --strips`.
 
 ## Optional B: host (TalkingPhoto)
 
@@ -218,6 +227,14 @@ python3 skills/ve-director/doc/scripts/doc_host.py join <project>/doc.json
 - `doc_host.py join` works as before.
 - The portrait is whatever that tool takes; it has to be the user, or a likeness the user has the right to use. Ask the user before spending their credits there too.
 
+### MiniMax H3 on Colab (host)
+
+`tools/h3/README.md`. H3 locks the narration audio into the clip: the lips follow the recording and the sound is the narration itself. The person comes from the look image (the same rules as above: the user picks it, it has to be the user or a likeness the user has the right to use), and the prompt can make them gesture, walk along a counter or film a handheld selfie.
+
+- H3 takes at most 15 s per clip: `python3 skills/ve-director/doc/scripts/doc_host.py split <project>/doc.json --max 15 --min 4`.
+- `python3 tools/h3/h3_film.py plan <project>/doc.json --host --look <look image> --who "<person, clothes>" [--where "<place>"]` writes one locked job per part with the lines at their times; it can be sent as it is.
+- Same licence check and the same **ask before sending** as the shots; then `run --confirmed`, `collect` (it writes `host/parts/partK.mp4`) and `doc_host.py join` as above.
+
 ## Optional C: music and sound effects
 
 Not checked with the example film. The music is composed by a program and needs no network; installation and the sound font are in `tools/score/README.md`.
@@ -228,6 +245,10 @@ python3 skills/ve-director/doc/scripts/doc_sfx.py <project>/doc.json --report
 ```
 
 The first needs `bgm.arc` in `doc.json`; afterwards point `bgm.src` at `score_bgm.wav`. The second needs `"sfx_on": true` and runs before F5. Someone else's music needs a licence; put the credit in `bgm.credit`.
+
+### MiniMax Music 3 on Colab (a song or an instrumental)
+
+`tools/music3/README.md`. A notebook the user runs in their own Colab (Google AI Pro); there is no adapter script yet. No territory limit. The lyrics must be the user's own, and a published film is labelled as AI-generated (`--synthetic`). Put the WAV in the project folder, point `bgm.src` at it and write `MiniMax Music 3 (AI generated)` in `bgm.credit`. Measured on an L4: a 60 s song takes about 5 minutes. **Ask the user before booting a GPU** if you run it for them.
 
 ## Optional D: final film in Concat
 

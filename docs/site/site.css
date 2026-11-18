@@ -241,6 +241,7 @@ footer a { color: var(--muted); }
 .lead.wide { max-width: 44em; font-size: 1.05em; }
 .tools { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
 .tools.two { grid-template-columns: repeat(2, 1fr); }
+.tools.colab { margin-top: 18px; }
 .tool { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 22px; display: flex; flex-direction: column; }
 .tool .stage { color: var(--gold); font-weight: 700; font-size: .82em; letter-spacing: .06em; }
 .tool h3 { margin: 2px 0 6px; }

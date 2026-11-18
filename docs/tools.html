@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>每個環節用什麼工具｜Script2Film</title>
   <meta name="description"
-    content="Script2Film 每個環節的預設工具、在哪裡跑、要不要錢、能換成什麼：Qwen3-TTS、mlx-whisper、HyperFrames、VideoExpress、TalkingPhotos、Concat、YouTube。">
+    content="Script2Film 每個環節的預設工具、在哪裡跑、要不要錢、能換成什麼：Qwen3-TTS、mlx-whisper、HyperFrames、VideoExpress、TalkingPhotos、MiniMax H3、MiniMax Music 3、Concat、YouTube。">
   <!-- share preview: written by tools/site/og_tags.py -->
   <link rel="canonical" href="https://notoriouslab.github.io/script2film/tools.html">
   <link rel="alternate" hreflang="zh-Hant" href="https://notoriouslab.github.io/script2film/tools.html">
@@ -15,7 +15,7 @@
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Script2Film">
   <meta property="og:title" content="每個環節用什麼工具｜Script2Film">
-  <meta property="og:description" content="Script2Film 每個環節的預設工具、在哪裡跑、要不要錢、能換成什麼：Qwen3-TTS、mlx-whisper、HyperFrames、VideoExpress、TalkingPhotos、Concat、YouTube。">
+  <meta property="og:description" content="Script2Film 每個環節的預設工具、在哪裡跑、要不要錢、能換成什麼：Qwen3-TTS、mlx-whisper、HyperFrames、VideoExpress、TalkingPhotos、MiniMax H3、MiniMax Music 3、Concat、YouTube。">
   <meta property="og:url" content="https://notoriouslab.github.io/script2film/tools.html">
   <meta property="og:locale" content="zh_TW">
   <meta property="og:locale:alternate" content="en_US">
@@ -74,7 +74,7 @@
             <dt>費用</dt>
             <dd>免費，開源（Apache-2.0）</dd>
             <dt>可以換成</dt>
-            <dd>其他聲音製作工具</dd>
+            <dd>其他聲音製作工具，例如 <a href="https://paykstrt.com/56038/180754" target="_blank" rel="noopener sponsored">CloneVoice.ai</a></dd>
           </dl>
         </div>
         <div class="tool">
@@ -126,7 +126,7 @@
             <dt>費用</dt>
             <dd>免費；SoundFont 要自己下載</dd>
             <dt>可以換成</dt>
-            <dd>自己的音樂（CC BY 的曲子要標註）</dd>
+            <dd>自己的音樂（CC BY 的曲子要標註），或下面的 MiniMax Music 3 生成的歌</dd>
           </dl>
         </div>
         <div class="tool">
@@ -149,8 +149,8 @@
   <section>
     <div class="wrap">
       <div class="kicker">選用</div>
-      <h2>要實景、要主持人、要生成各種影片的時候，可以考慮這兩個平台</h2>
-      <p class="intro">這兩個是選用的：不接也做得出片。接的時候，工具會開一個瀏覽器，在<strong>你自己登入的帳號</strong>裡操作：送出、等候、收回、檢查。花額度之前 agent
+      <h2>要實景、要主持人、要生成各種影片或歌曲的時候，可以考慮這幾個選擇</h2>
+      <p class="intro">這些都是選用的：不接也做得出片。接的時候，工具在<strong>你自己登入的帳號</strong>裡操作：送出、等候、收回、檢查。花額度或運算點數之前 agent
         會先問你，帳號密碼由你自己輸入。</p>
       <div class="tools two">
         <div class="tool feature">
@@ -166,7 +166,7 @@
             <dt>可以換成</dt>
             <dd>任何影片生成工具（例如 Seedance、Kling 等）：照跑單的秒數與提示詞生成，按檔名放回資料夾</dd>
           </dl>
-          <a class="btn primary" href="https://paykstrt.com/50942/180754" target="_blank" rel="noopener sponsored">了解
+          <a class="btn" href="https://paykstrt.com/50942/180754" target="_blank" rel="noopener sponsored">了解
             VideoExpress（終身版約美金143元）</a>
         </div>
         <div class="tool feature">
@@ -181,11 +181,47 @@
             <dt>可以換成</dt>
             <dd>任何對嘴工具：把切好的每段聲音餵進去，產出的片照同樣的檔名放回來</dd>
           </dl>
-          <a class="btn primary" href="https://paykstrt.com/52357/180754" target="_blank" rel="noopener sponsored">了解
+          <a class="btn" href="https://paykstrt.com/52357/180754" target="_blank" rel="noopener sponsored">了解
             TalkingPhotos（終身版約美金78元）</a>
         </div>
       </div>
-      <p class="disclose">說明：上面兩個是推薦連結。這兩個平台是作者自己每週在用的；透過連結購買，作者會收到一點推廣費，你付的價錢不變（2026年11月）。不買也完全不影響核心流程。</p>
+      <div class="tools two colab">
+        <div class="tool feature">
+          <div class="stage">生成鏡頭與主持人</div>
+          <h3>MiniMax H3（需要有 Google Colab 帳號）</h3>
+          <p>開放權重的影片模型，在你自己 Google 帳號的 Colab GPU 上生成。拿旁白錄音驅動主持人，嘴型跟著錄音走，人物照提示詞比手勢、邊走邊講，或拍成手持自拍的 vlog；也能生成鏡頭、接著往下延伸。Script2Film 把旁白切成 15 秒內的段落、寫好主持人的提示詞、開機前先查機器在哪個國家，做完收回放進時間軸。</p>
+          <dl>
+            <dt>在哪跑</dt>
+            <dd>你自己 Google 帳號的 Colab GPU，電腦不需要顯示卡</dd>
+            <dt>費用</dt>
+            <dd>要 Google AI Pro（附 Colab 運算點數）。實測 L4 一段 12 秒的主持人約 4 分鐘，試了十幾支約用掉 2 點</dd>
+            <dt>授權</dt>
+            <dd>開放權重的授權不涵蓋美國、歐盟、英國、南韓，在這些地方不能用</dd>
+            <dt>可以換成</dt>
+            <dd>上面的 VideoExpress、TalkingPhotos，或任何能照檔名放回的工具</dd>
+          </dl>
+          <a class="btn" href="https://github.com/notoriouslab/script2film/blob/main/tools/h3/README.md" target="_blank"
+            rel="noopener">怎麼接 MiniMax H3</a>
+        </div>
+        <div class="tool feature">
+          <div class="stage">配樂與歌曲</div>
+          <h3>MiniMax Music 3（需要有 Google Colab 帳號）</h3>
+          <p>開放權重的音樂模型，給歌詞和一段曲風描述，生成有人聲的歌或純配樂，台語、華語都唱得出來。在 Colab 開一份 notebook 貼上程式就能跑，做好的 WAV 當成片的背景音樂。</p>
+          <dl>
+            <dt>在哪跑</dt>
+            <dd>你自己 Google 帳號的 Colab GPU，電腦不需要顯示卡</dd>
+            <dt>費用</dt>
+            <dd>要 Google AI Pro（附 Colab 運算點數）。實測 L4 一首 60 秒的歌約 5 分鐘，開機加生成約 0.3 到 0.5 點</dd>
+            <dt>授權</dt>
+            <dd>沒有地區限制；歌詞要是你自己的，公開發布要標示 AI 生成</dd>
+            <dt>可以換成</dt>
+            <dd>上面的程式作曲，或任何有授權的音樂</dd>
+          </dl>
+          <a class="btn" href="https://github.com/notoriouslab/script2film/blob/main/tools/music3/README.md" target="_blank"
+            rel="noopener">怎麼用 MiniMax Music 3</a>
+        </div>
+      </div>
+      <p class="disclose">說明：VideoExpress 和 TalkingPhotos 的按鈕、上面旁白一欄的 CloneVoice.ai 連結是推薦連結。VideoExpress 和 TalkingPhotos 是作者自己每週在用的；透過連結購買，作者會收到一點推廣費，你付的價錢不變（2026年11月）。不買也完全不影響核心流程。</p>
     </div>
   </section>
 

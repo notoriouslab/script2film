@@ -79,9 +79,10 @@ ANSWERS = "checklist_answers.json"
 NOT_ANSWERED, NARRATION_CHANGED = "not answered", "narration changed, confirm again"   # answer states besides "ok"
 
 
-def questions(series, fmt, want):
+def questions(series, fmt, want, ep=None):
     """這個格式、這幾段要回答的題目：通則的（rules.json）、系列選的題目包（packs/<名>.json，series.json 的 checklist.packs）、
-    系列自己寫的（checklist.rules）。"""
+    系列自己寫的（checklist.rules）。題目有 when_file（集資料夾裡的相對路徑）時，只有那個檔存在才問（例如用了 MiniMax H3
+    的集才有 h3/manifest.json）；沒給 ep 就不問這類題目。"""
     base = json.loads(RULES.read_text(encoding="utf-8"))["rules"]
     cfg = (series or {}).get("checklist") or {}
     own, names = cfg.get("rules") or [], cfg.get("packs") or []
@@ -102,6 +103,9 @@ def questions(series, fmt, want):
             raise ConfigError(f"duplicate question id: {r['id']}")
         seen.add(r["id"])
         stages = [r["stage"]] if isinstance(r["stage"], str) else r["stage"]
+        when = r.get("when_file")
+        if when is not None and (ep is None or not (Path(ep) / when).exists()):
+            continue
         if r.get("format") in (None, fmt) and set(stages) & set(want):
             out.append(r)
     return out
@@ -193,7 +197,7 @@ def run(ep_dir, stage, environ=None, write=True):
             rows = [(x["label"], False, f"could not check: {type(e).__name__} {e}")]
         for name, ok, detail in rows:
             res.append({"id": x["id"], "item": name, "state": "pass" if ok else "fail", "ok": bool(ok), "detail": detail})
-    todo = [(q, st) for q, st, _ in answer_state(ep, doc, fmt, questions(series, fmt, want)) if st != "ok"]
+    todo = [(q, st) for q, st, _ in answer_state(ep, doc, fmt, questions(series, fmt, want, ep)) if st != "ok"]
     res.append({"id": "answers", "item": "answers", "state": "fail" if todo else "pass", "ok": not todo,
                 "detail": "; ".join(f"{q['id']}: {st}" for q, st in todo) + (" (see the questions: checklist.py questions)" if todo else "")})
     out = {"ok": all(r["ok"] for r in res), "stage": stage, "format": fmt, "items": res}
@@ -281,12 +285,12 @@ def main(argv=None):
     try:
         if a.cmd == "questions":
             ep, fmt, doc = load_episode(a.episode)
-            for qn, st, ans in answer_state(ep, doc, fmt, questions(series_of(ep)[0], fmt, STAGES[:STAGES.index(a.stage) + 1])):
+            for qn, st, ans in answer_state(ep, doc, fmt, questions(series_of(ep)[0], fmt, STAGES[:STAGES.index(a.stage) + 1], ep)):
                 print(f"{MARK['pass' if st == 'ok' else 'fail']} {qn['id']} ({st})\n   Q: {qn['ask']}\n   source: {qn.get('source') or '—'}\n   A: {ans or '—'}")
             return 0
         if a.cmd == "answer":
             ep, fmt, doc = load_episode(a.episode)
-            known = {r["id"] for r in questions(series_of(ep)[0], fmt, STAGES)}
+            known = {r["id"] for r in questions(series_of(ep)[0], fmt, STAGES, ep)}
             if a.id not in known:
                 print(f"✗ no such question: {a.id} (this episode's questions: {', '.join(sorted(known)) or 'none'})")
                 return 2

@@ -252,6 +252,22 @@ def test_shipped_rules_by_format_and_stage():
 
 
 @pytest.mark.real_rules
+def test_h3_question_only_for_episodes_that_use_h3(tmp_path, fakes):
+    """h3-territory has when_file h3/manifest.json: asked (and answerable) only once tools/h3 planned this episode."""
+    fakes(fake("a", "base", "start"))
+    ep = doc_episode(tmp_path)
+    ids = lambda: [r["id"] for r in checklist.questions(None, "doc", ["start"], ep)]
+    assert "h3-territory" not in ids()
+    assert checklist.main(["answer", str(ep), "h3-territory", "台灣"]) == 2
+    (ep / "h3").mkdir()
+    (ep / "h3/manifest.json").write_text("{}", encoding="utf-8")
+    assert ids()[-1] == "h3-territory"
+    assert "h3-territory: not answered" in answers_row(checklist.run(ep, "start"))["detail"]
+    assert checklist.main(["answer", str(ep), "h3-territory", "台灣，片子在台灣用"]) == 0
+    assert "h3-territory" not in answers_row(checklist.run(ep, "start"))["detail"]
+
+
+@pytest.mark.real_rules
 def test_unanswered_then_answered_then_narration_changed(tmp_path, fakes):
     fakes(fake("a", "base", "start"))
     ep = doc_episode(tmp_path)

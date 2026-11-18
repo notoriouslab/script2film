@@ -81,6 +81,19 @@ def test_host_short_narration_needs_no_cut():
     assert cut_points([{"start": 0.1, "end": 40.0}], 40.2, 58) == []
 
 
+def test_host_cut_points_for_h3_stay_under_15_s():
+    """MiniMax H3 locks at most 15 s of audio: --max 15 --min 4 gives parts of 4-15 s, cut in the pauses."""
+    import pytest
+    from doc_host import cut_points
+    lines = [{"start": i * 4.0 + 0.1, "end": i * 4.0 + 3.6} for i in range(10)]   # 3.5 s lines, pauses at 3.85, 7.85, …
+    total = 40.0
+    cuts = cut_points(lines, total, 15, 4)
+    edges = [0.0, *cuts, total]
+    assert all(4 <= b - a <= 15 for a, b in zip(edges, edges[1:])) and len(edges) > 3
+    with pytest.raises(SystemExit):
+        cut_points(lines, total, 15)            # the TP minimum (10 s) leaves no pause to cut at in this case
+
+
 def test_era_palette_reinks_code_and_ve_and_leaves_tables_alone():
     import pytest
     from doc_themes import CODE_THEMES, VE_THEMES, code_theme, ve_theme

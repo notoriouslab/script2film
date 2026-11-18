@@ -57,7 +57,7 @@ python3 tools/checklist/checklist.py answer <集資料夾> <題目代號> "<這�
 
 有些規則只能靠判斷，例如「生成畫面不能冒充具名的真實地點」。這類規則寫成題目，每一集都要用一句話回答，答案要指得出拍號或檔名。
 
-- 通則的題目在 `tools/checklist/rules.json`（每題有 `id`、`stage`、`ask`、`source`，選用的 `format` 限定只問哪一種格式）。
+- 通則的題目在 `tools/checklist/rules.json`（每題有 `id`、`stage`、`ask`、`source`，選用的 `format` 限定只問哪一種格式；選用的 `when_file` 是集資料夾裡的相對路徑，那個檔存在才問，例如 `h3-territory` 只問有 `h3/manifest.json` 的集，見 `tools/h3/README.md`）。
 - 系列的題目寫在 `series.json`：
 
   ```json

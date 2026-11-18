@@ -33,6 +33,7 @@ KEYS = {
     "S2F_YT_DIR": ("newdir", "YouTube credentials folder"),
     "S2F_YT_PYTHON": ("file", "interpreter that runs yt_upload.py (a venv with the Google packages)"),
     "S2F_TP_PROFILE": ("newdir", "browser profile folder for TalkingPhotos"),
+    "S2F_H3_SKILL_DIR": ("dir", "h3-multimodal-colab folder of github.com/dseditor/h3-colab-skill (MiniMax H3 on Colab)"),
     "S2F_TP_IDLE_MIN": ("value", "minutes of idle before the TP browser closes itself (0 = never)"),
     "S2F_SPEECHBRAIN_CACHE": ("newdir", "cache folder for the speaker-embedding model"),
     "S2F_SCRIBE_MODEL": ("value", "ElevenLabs model for cloud word timing"),

@@ -1,7 +1,8 @@
 """TalkingPhoto host take for a narration longer than one TP render (High Quality takes at most 1 minute, at least 10 s).
 
-  python3 doc_host.py split <project>/doc.json [--max 58]
-      tts/voice.wav → host/parts/part1.mp3 … cut in the pause between two lines, each part ≤ --max s and ≥ 10 s;
+  python3 doc_host.py split <project>/doc.json [--max 58] [--min 10]
+      tts/voice.wav → host/parts/part1.mp3 … cut in the pause between two lines, each part ≤ --max s and ≥ --min s
+      (TP takes at least 10 s; MiniMax H3 takes at most 15 s: --max 15 --min 4);
       host/parts.json keeps where each part sits in voice.wav. Render every part in TP on the same character.
   python3 doc_host.py join <project>/doc.json [--out host/tp_host.mp4]
       host/parts/partK.mp4 (the downloaded TP takes) → one take on the subtitle timeline (voice.cleaned/audio.m4a), so
@@ -18,23 +19,23 @@ from doc_common import duration, load, read_json, sh
 MIN_PART = 10.0
 
 
-def cut_points(lines, total, cap):
-    """Cuts at the middle of the pauses between lines: as late as the cap allows, the last part kept ≥ MIN_PART."""
+def cut_points(lines, total, cap, least=MIN_PART):
+    """Cuts at the middle of the pauses between lines: as late as the cap allows, the last part kept ≥ least."""
     pauses = [(a["end"] + b["start"]) / 2 for a, b in zip(lines, lines[1:])]
     cuts, start = [], 0.0
     while total - start > cap:
-        ok = [p for p in pauses if MIN_PART <= p - start <= cap and total - p >= MIN_PART]
+        ok = [p for p in pauses if least <= p - start <= cap and total - p >= least]
         if not ok:
-            sys.exit(f"✗ no pause between {start + MIN_PART:.1f}s and {start + cap:.1f}s to cut at")
+            sys.exit(f"✗ no pause between {start + least:.1f}s and {start + cap:.1f}s to cut at")
         cuts.append(max(ok))
         start = cuts[-1]
     return cuts
 
 
-def split(doc, P, cap):
+def split(doc, P, cap, least=MIN_PART):
     lines, voice = read_json(P / "tts/lines.json", "run doc_voice.py first"), P / "tts/voice.wav"
     total = duration(voice)
-    edges = [0.0, *cut_points(lines, total, cap), total]
+    edges = [0.0, *cut_points(lines, total, cap, least), total]
     out = P / "host/parts"
     out.mkdir(parents=True, exist_ok=True)
     parts = []
@@ -72,7 +73,11 @@ def main():
     cmd, doc_path, args = sys.argv[1], sys.argv[2], sys.argv[3:]
     doc, P = load(doc_path)
     if cmd == "split":
-        split(doc, P, max(2 * MIN_PART, min(float(args[args.index("--max") + 1]) if "--max" in args else 58.0, 60.0)))
+        least = float(args[args.index("--min") + 1]) if "--min" in args else MIN_PART
+        if not 1.0 <= least <= MIN_PART:
+            sys.exit(f"✗ --min must be between 1 and {MIN_PART:g} s")
+        cap = float(args[args.index("--max") + 1]) if "--max" in args else 58.0
+        split(doc, P, max(2 * least, min(cap, 60.0)), least)
     elif cmd == "join":
         join(doc, P, args[args.index("--out") + 1] if "--out" in args else "host/tp_host.mp4")
     else:
