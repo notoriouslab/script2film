@@ -33,7 +33,7 @@ import soundfile as sf
 
 import doc_pauses
 import doc_common
-from doc_common import asr_mode, line_key, load, local_asr, need_local_asr, tokens
+from doc_common import asr_mode, line_key, load, local_asr, need_local_asr, speaker_of, tokens, voice_of
 
 SR, PAD = 48000, 0.08
 
@@ -105,6 +105,18 @@ def by_pitch(rows, tol):
     if not f0:
         return None, ok
     return float(np.median(f0)), ok
+
+
+def pitch_targets(rows, speakers, tol):
+    """by_pitch for each speaker on its own lines: {speaker: median f0 or None} and the per-line takes in range. One
+    film-wide median would pull a dialogue's second voice toward the narrator's."""
+    targets, ok = {}, [None] * len(rows)
+    for s in dict.fromkeys(speakers):
+        idx = [i for i, x in enumerate(speakers) if x == s]
+        targets[s], sub = by_pitch([rows[i] for i in idx], tol)
+        for i, o in zip(idx, sub):
+            ok[i] = o
+    return targets, ok
 
 
 def word_timings(P, cands_by_line, lang):
@@ -212,12 +224,15 @@ def main():
                 f0s[k] = pitch(raw)
             row.append((sc, c, cuts, hits, speech, raw, gap, f0s.get(k)))
         rows.append(row)
-    target, ok = by_pitch(rows, pm["tol"]) if pm else (None, None)
+    spk = [speaker_of(doc, line) for line in doc["lines"]]
+    targets, ok = pitch_targets(rows, spk, pm["tol"]) if pm else ({}, [None] * len(rows))
     if pm:
         f0_p.write_text(json.dumps(f0s, indent=1))
-        print(f"  pitch: film median {target:.0f} Hz over takes within {pm['tol']} of each line's best score" if target else "  pitch: no voiced takes", flush=True)
+        for s, target in targets.items():
+            who = "" if len(targets) == 1 else f" ({s})"
+            print(f"  pitch{who}: median {target:.0f} Hz over takes within {pm['tol']} of each line's best score" if target else f"  pitch{who}: no voiced takes", flush=True)
     for n, line in enumerate(doc["lines"], 1):
-        row = rows[n - 1]
+        row, target, v = rows[n - 1], targets.get(spk[n - 1]), voice_of(doc, line)
         if target and ok[n - 1]:
             best = min(ok[n - 1], key=lambda c: (abs(c[7] - target), -c[3], c[6]))   # nearest the film's pitch, then pauses, then pace
         else:
@@ -226,14 +241,14 @@ def main():
         f = doc_pauses.tempo(line["text"], best[4], pp["max_rate"], pp["max_slow"]) if pp else None
         if f:
             x = post(x, f"atempo={f}")
-        if doc["voice"].get("post"):   # an ffmpeg filter on each picked line (e.g. asetrate=45120,aresample=48000: lower and slower)
-            x = post(x, doc["voice"]["post"])
-        x = tail_fade(x, max(0.0, min(float(doc["voice"].get("tail_fade", 0)), 0.5)))
+        if v.get("post"):   # an ffmpeg filter on each picked line (e.g. asetrate=45120,aresample=48000: lower and slower)
+            x = post(x, v["post"])
+        x = tail_fade(x, max(0.0, min(float(v.get("tail_fade", 0)), 0.5)))
         if n > 1:
             g = max(0.0, min(float(gaps.get("after", {}).get(str(n - 1), gaps.get("default", 0.32))), 5.0))
             pieces.append(np.zeros(int(g * SR), np.float32)); t += g
         start = t; pieces.append(x); t += len(x) / SR
-        meta.append({"n": n, "speaker": doc.get("speaker", "narrator"), "text": line["text"], "start": round(start + PAD, 3),
+        meta.append({"n": n, "speaker": spk[n - 1], "text": line["text"], "start": round(start + PAD, 3),
                      "end": round(t - PAD, 3), "pick": best[1].name, "score": best[0], "heard": cache[best[1].name],
                      "pauses": [[round(a, 2), round(b, 2)] for a, b in best[2]], "atempo": f,
                      **({"f0": round(best[7])} if best[7] else {})})

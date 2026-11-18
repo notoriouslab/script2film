@@ -96,6 +96,8 @@ def lines_hash(doc, fmt="doc"):
     given for; change any line and it changes. fmt "doc": lines[].text; "book" (day.json): narration[].text.
     tools/checklist (its answers) and doc_approval (script approval) share this one definition."""
     texts = [l["text"] for l in doc.get("lines", [])] if fmt == "doc" else [x["text"] for x in doc.get("narration", [])]
+    if fmt == "doc":   # who says a line is part of the script; a line without "speaker" hashes as before
+        texts = [f'{l["speaker"]}\t{t}' if l.get("speaker") else t for l, t in zip(doc.get("lines", []), texts)]
     return hashlib.sha256("\n".join(texts).encode("utf-8")).hexdigest()[:12]
 
 
@@ -169,11 +171,49 @@ def spoken_text(doc, line):
     return lexicon.spoken(line.get("tts") or line["text"], doc["lang"])
 
 
+def speaker_of(doc, line):
+    """Who says this line: its "speaker", else the film's "speaker" (default "narrator")."""
+    return line.get("speaker") or doc.get("speaker", "narrator")
+
+
+def voice_of(doc, line):
+    """The voice settings for a line. A line whose "speaker" names an entry of doc["voices"] gets that entry laid over
+    doc["voice"] (its ref_wav and ref_text, and seed, tail_fade or post when it gives them); every other line gets
+    doc["voice"]. A "speaker" that is not the film's speaker and not in "voices" stops with one line (doc_lint reports it
+    first)."""
+    spk = line.get("speaker")
+    if not spk or spk == doc.get("speaker", "narrator"):
+        return doc["voice"]
+    vs = doc.get("voices") or {}
+    if spk not in vs:
+        sys.exit(f"✗ line speaker \"{spk}\" has no entry in doc.json \"voices\" (give it ref_wav and ref_text)")
+    return {**doc["voice"], **vs[spk]}
+
+
+def speaker_problems(doc, P=None):
+    """doc_lint: every line speaker needs a voice; each "voices" entry needs ref_wav and ref_text (and the files, when P is given)."""
+    out, film = [], doc.get("speaker", "narrator")
+    vs = doc.get("voices") or {}
+    if not isinstance(vs, dict):
+        return ['voices: must be an object {"<speaker>": {"ref_wav": ..., "ref_text": ...}}']
+    for n, line in enumerate(doc.get("lines", []), 1):
+        s = line.get("speaker")
+        if s and s != film and s not in vs:
+            out.append(f'speakers: line {n} speaker "{s}" has no entry in "voices"')
+    for name, v in vs.items():
+        for k in ("ref_wav", "ref_text"):
+            if not isinstance(v, dict) or not v.get(k):
+                out.append(f'speakers: voices["{name}"] has no {k}')
+            elif P is not None and not (Path(P) / v[k]).exists():
+                out.append(f'speakers: voices["{name}"].{k} {v[k]} not found')
+    return out
+
+
 def line_key(doc, P, line):
     """Name of a line's TTS candidates: a hash of everything that changes the synthesis (spoken text, language, reference
     voice). Inserting or deleting a line no longer shifts other lines onto stale takes, and an edited line gets new takes
     (2026-10-28; the old <NN>_<seed> names went stale when a script was restructured)."""
-    v = doc["voice"]
+    v = voice_of(doc, line)
     h = hashlib.sha256()
     for part in (doc["lang"], spoken_text(doc, line), (P / v["ref_text"]).read_text(encoding="utf-8").strip()):
         h.update(part.encode("utf-8") + b"\0")

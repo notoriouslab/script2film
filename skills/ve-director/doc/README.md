@@ -126,7 +126,8 @@ shorter than its new window is slowed down (`max_stretch`, default 1.2×, at mos
   "palette": "出埃及與曠野",                                         // optional, collage only: an era palette from doc_themes.PALETTES
   "voice": {"ref_wav": "refs/x.wav", "ref_text": "refs/x.txt", "seed": 11, "tail_fade": 0.08},   // tail_fade optional: fade-out on each line end
   "gaps": {"default": 0.32, "after": {"6": 0.9, "7": 1.6}},        // pause after line n (seconds)
-  "lines": [{"text": "...", "tts": "optional pronunciation-safe text"}],
+  "lines": [{"text": "...", "tts": "optional pronunciation-safe text", "speaker": "optional: a name from voices"}],
+  "voices": {"老闆": {"ref_wav": "refs/keeper.wav", "ref_text": "refs/keeper.txt", "seed": 21}},   // optional: a second voice for dialogue
   "en": ["...", "..."],                                              // optional: one English subtitle per line, under the Chinese (Concat layer + subtitles_en.srt)
   "zh": ["...", "..."],                                              // optional, only with "lang": "en": one Chinese line per script line shown as the main subtitle (cut into screens, timed by character count within the line's span), the English narration goes underneath; do not set "en" as well
   "beats": [
@@ -137,6 +138,12 @@ shorter than its new window is slowed down (`max_stretch`, default 1.2×, at mos
   "shots": {"bench_apart": {"t2i": [scene, setting], "scene": "...", "ident": "...", "acts": [[0, 0.5, "..."]], "camera": "Static wide shot, locked-off, no camera movement.", "no_people": true}}   // no_people: drop the look's people clause (flat adds bystanders otherwise)
 }
 ```
+
+Dialogue: a line with `"speaker"` naming an entry of `"voices"` is cloned from that entry's reference (its `seed`,
+`tail_fade` and `post` too when it gives them; anything it leaves out comes from `"voice"`); every other line uses
+`"voice"`. `doc_voice.py` matches pitch within each speaker, `tts/lines.json` records who says each line, and the
+speaker is part of the approved script (changing who says a line needs approval again). `doc_lint.py` reports a speaker
+with no voice and a voice without `ref_wav` or `ref_text`. Design a voice that belongs to nobody with `tools/tts/design_voices.py`.
 
 `"theme"` is the palette of the whole film (code shots, subtitles, pills). `doc_code.py` and `doc_cut.py` take
 `--theme=<name>` to use another one for a run (cut with the name the code shots were drawn with: `doc_cut.py` reads

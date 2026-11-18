@@ -79,6 +79,7 @@ def _ids(doc, path):
 def lint(doc, rules=DEFAULT, base=None):
     """Every problem, one line each; base is the episode folder (facts.md is relative to it; default: the current folder)."""
     out = ["subtitle settings: " + m for m in doc_common.subs_problems(doc, doc_common.series_of(base or Path.cwd()))]
+    out += doc_common.speaker_problems(doc)   # the files are checked when they are read: voices are often designed after F1
     lines = [x["text"] for x in doc["lines"]]
     beats = doc["beats"]
     code_scenes = [b.get("scene") for b in beats if b["source"] == "code"]
