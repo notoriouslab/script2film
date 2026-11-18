@@ -315,7 +315,8 @@ def zh_screens(doc, screens, skip=()):
 def line_cues(P, doc):
     """One cue per script line, held for as long as that line's screens (voice.cleaned/screens.json from doc_align), with
     doc.json "en" as the text (one English line per script line, for a Chinese narration with Chinese and English subtitles); without "en"
-    (an English narration with "zh") the narration itself."""
+    (an English narration with "zh") the narration itself. An empty "en" entry gives no cue: a line already in English
+    (a code-switching host) is not shown twice."""
     en, n = doc.get("en") or [l["text"] for l in doc["lines"]], len(doc["lines"])   # "zh" episodes: the narration itself
     if len(en) != n:
         sys.exit(f"✗ doc.json en has {len(en)} lines, the script has {n}")
@@ -325,7 +326,8 @@ def line_cues(P, doc):
         mine = [o for o in screens if o["line"] == k]
         if not mine:
             sys.exit(f"✗ line {k} has no subtitle screen: run doc_align.py again")
-        cues.append({"start": mine[0]["at"], "end": mine[-1]["end"], "text": en[k - 1].strip()})
+        if en[k - 1].strip():
+            cues.append({"start": mine[0]["at"], "end": mine[-1]["end"], "text": en[k - 1].strip()})
     return cues
 
 

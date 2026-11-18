@@ -41,6 +41,14 @@ def test_en_line_spans_all_screens_of_its_chinese_line(tmp_path):
     assert (tmp_path / "cut/subtitles_zh.srt").exists()
 
 
+def test_an_empty_en_line_gives_no_cue(tmp_path):
+    """A line the host already says in English ("What?! Amazing~") is not shown twice: "" in "en" leaves it out."""
+    doc = _episode(tmp_path, ["Hi, I'm Sam", " "])
+    assert [c["text"] for c in en_subs(tmp_path, doc)["cues"]] == ["Hi, I'm Sam"]
+    write_caption_files(tmp_path, doc, "cut")
+    assert (tmp_path / "cut/subtitles_en.srt").read_text(encoding="utf-8").count("-->") == 1
+
+
 def test_en_line_count_must_match_the_script(tmp_path):
     with pytest.raises(SystemExit):
         en_subs(tmp_path, _episode(tmp_path, ["only one"]))
