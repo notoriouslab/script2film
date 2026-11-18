@@ -1,5 +1,23 @@
 # Changelog
 
+## 1.1.0 (2026-11-18)
+
+- **MiniMax H3 and MiniMax Music 3 on your own Google Colab GPU (optional).** `tools/h3/h3_film.py` plans, runs and
+  collects generated shots and a lip-synced host (the host keeps the narration as its voice); `tools/music3/music3_film.py`
+  makes a song or an instrumental for `bgm.src`. The H3 licence excludes the US, the EU, the UK and South Korea, so
+  the start checklist asks where you are and where the film is used (`h3-territory`).
+- **Dialogue voices.** `lines[].speaker` picks a voice from `doc.json` `"voices"`, each with its own pitch; the
+  speaker is part of the approved script.
+- **Subtitles.** `subs.burn: "en"` burns English subtitles only over Chinese narration; an empty `"en"` line gives no
+  English cue; `sub_highlight` colours chosen words in burned subtitles.
+- **The picture runs on after the last word.** `end_hold` (default 1 s) keeps the last picture on screen so a face
+  can settle; the host's last part ends in that silence too.
+- **Host takes.** `clip_in` keeps lip sync when the narration was retimed after the host was made; TalkingPhotos
+  segment names follow what TalkingPhotos shows (an underscore becomes a space).
+- **Website.** The opencode + DeepSeek V4.1 Flash trial on the homepage; share previews in Chinese and English.
+- **README.** Rewritten after the website: what is different, what it does with real frames, films made with it, the
+  agent trials and the first film in three steps.
+
 ## 1.0.0 (2026-11-17)
 
 The first public release of Script2Film: from a script to a finished, checked explainer film on your own Mac, with no

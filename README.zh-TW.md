@@ -2,49 +2,184 @@
 
 [English](./README.md) · **繁體中文**
 
-從一份稿做到一支成片，一個環節接一個環節：稿 → 聲音 → 對時 → 畫面 → 組裝 → 發佈。
-每個環節有一個預設工具和一份檔案約定，換工具不用動其他環節。
+[![Release](https://img.shields.io/github/v/release/notoriouslab/script2film)](https://github.com/notoriouslab/script2film/releases)
+[![授權：MIT](https://img.shields.io/badge/licence-MIT-blue)](./LICENSE)
+![已在 Apple Silicon Mac 驗證](https://img.shields.io/badge/verified-Apple%20Silicon%20Mac-lightgrey)
 
-> **現況。** 核心流程（配音、對時、程式畫面、組裝、檢查）在自己的電腦上跑，不用帳號，也不用 API 金鑰。
-> 2026-11-17 用空的家目錄與全新複本從頭裝過一次，並做出第一支範例片；步驟與實測時間在 [docs/INSTALL.md](./docs/INSTALL.md)（英文）。
-> 目前只在 Apple Silicon 的 Mac 上驗證過。
+**只要你有想法，剩下的交給 agent。**
 
-## 從這裡開始
+給 AI agent 用的影片／解說片工具組。一段想法、一份稿件，一支有旁白、字幕、圖表與主持人的成片就可以出來。每一步都有看得懂的說明，
+核心流程在你自己的電腦上跑，不用帳號，也不用 API 金鑰。
 
-- **在新機器上安裝**：[docs/INSTALL.md](./docs/INSTALL.md)（英文）。第一次約 30 分鐘、下載約 7 GB，大部分是配音那一步
-  （`bash tools/doctor/setup_voice.sh`，20 到 25 分鐘、約 6 GB）。`python3 tools/doctor/doctor.py` 會全部檢查一遍，
-  缺什麼就印出對應的修法。Python 套件裝在 `.venv`，腳本會自己換用它，所以照樣打 `python3` 就好。
-- **AI agent**：把這個資料夾本身開成工作區（agent 從工作區根目錄載入 `AGENTS.md` 與 skill）。
-  [AGENTS.md](./AGENTS.md) 是每一輪都生效的規則；`script2film` skill（[skills/script2film/SKILL.md](./skills/script2film/SKILL.md)）
-  用符號連結接到 `.agents/skills/` 與 `.claude/skills/`，Windows 要開 git 的 `core.symlinks`。
-- **步驟與命令**：[docs/FLOW.md](./docs/FLOW.md)（英文）。
-- **哪些 agent 只靠文件做出過片**（Claude Code、Google Antigravity、opencode 搭本機模型或 DeepSeek），以及卡住時怎麼排除：
-  [docs/AGENT-TRIALS.md](./docs/AGENT-TRIALS.md)（英文）。
+[![Script2Film](./docs/site/og-zh.jpg)](https://notoriouslab.github.io/script2film/)
 
-## 範例
+[網站](https://notoriouslab.github.io/script2film/) ·
+[看一支用它做的片（1 分 52 秒）](https://www.youtube.com/watch?v=qrFl_yrWPNk) ·
+[27 種場景與 10 套色版](https://notoriouslab.github.io/script2film/gallery.html) ·
+[每個環節用什麼工具](https://notoriouslab.github.io/script2film/tools.html) ·
+[更新紀錄](./CHANGELOG.md)（英文）
 
-- [examples/coffee/](./examples/coffee/)：第一支先做的片。四句英文旁白、約 25 秒、四個程式畫的場景，說明也是英文。
-  不用帳號，也不用金鑰。
-- [examples/brewing/](./examples/brewing/)：五句中文旁白、約 23 秒，有一個外部生成的鏡頭與對嘴的主持人（說明是中文）。
-  生成好的檔附在 `premade/`，所以同樣不用帳號。
+| 27 | 10 | 3 | 0 |
+|:---:|:---:|:---:|:---:|
+| 種程式畫的場景 | 套色版 | 家 AI agent 實際跑過 | 個必要的帳號或金鑰 |
 
-## 環節
+- **免費工具就能出片。** 配音、對時、畫面、組裝都可以在自己的電腦上跑。第一個範例從頭做到尾，免費工具就能跑。
+- **每個環節都能換工具。** 配音、生成鏡頭、主持人、剪輯軟體，換成你習慣順手的，照設定跟著做就能接得上。
+- **AI agent 照文件就能跑。** 基本測試三家不同的 agent 只讀專案裡的文件，都做出通過檢查的片，包含一個在筆電上跑的本機模型，
+  以及免費額度的 DeepSeek。
+
+## 它不是另一個剪輯軟體
+
+一般的 AI 剪輯工具幫你把拍好的素材剪短、上字幕。Script2Film 從想法出發：作品是照著你的想法做出來的。
+
+| 一般 AI 剪輯工具 | Script2Film |
+|---|---|
+| 從拍好的素材開始剪 | **從一個想法開始。** 旁白寫在稿裡，哪一句配哪個畫面也寫在稿裡。 |
+| 畫面是找來的，或整段生成的 | **27 種場景由程式畫。** 圖表、算式、清單的數字照稿，不會畫錯；改了稿，重跑一次就好。 |
+| 專案藏在軟體裡 | **每一步都留下看得懂的檔案。** 文稿、每句話的時間、剪輯計畫都是文字檔，可以比對、可以進版控。 |
+| 輸出就結束 | **出片後自己檢查。** 量響度、長度、字幕，排一張截圖表給人看；字太晚出現、畫面停太久會被列出來。 |
+| 綁在固定的服務上 | **每個環節都能換。** 配音、生成鏡頭、主持人、剪輯軟體各有預設，也各有換別家的做法。 |
+| 按月訂閱 | **核心流程不花錢。** 生成鏡頭與主持人是選用的，只有那幾步才需要外部服務。 |
+| 有操作介面，用滑鼠拉 | **告訴 AI agent 要做什麼。** 它照文件一步步做；花額度、挑主持人造型、上傳之前都會先問你。 |
+
+文稿裡的一拍（[examples/coffee/doc.json](./examples/coffee/doc.json)）和它畫出來的動作：唸到 beans，第一塊展開；
+唸到 biggest，那一塊被強調。
+
+```json
+{ "lines": [2], "scene": "pie", "params": {
+  "title": "Sample: where the costs go",
+  "items": [
+    { "label": "Beans", "value": 45, "at": "beans" },
+    { "label": "Rent",  "value": 30, "at": "rent" },
+    { "label": "Staff", "value": 25, "at": "staff" }
+  ],
+  "focus": [{ "i": 0, "at": "biggest" }]
+}}
+```
+
+<img src="./docs/site/beat-pie.jpg" alt="這一拍畫出來的圓餅圖" width="640">
+
+## 能做什麼
+
+下面的畫面都是實際做出來的成片與工具輸出。
+
+**01・在自己的電腦上配音。** 每句話錄幾條，轉成文字和稿比對，自動挑最接近的一條串接。十秒左右的參考聲音就能配整支片；
+沒有現成的聲音，可以用文字描述設計一個。對話可以分給好幾個角色的聲音。
+
+**02・27 種場景，說到哪個字，畫面動到哪裡。** 折線、圓餅、算式、拆解、對照、清單、時間軸、地圖路線、逐段標重點的文字。
+你在稿裡寫「說到這個詞的時候出現」，程式照配音的實際時間對上去。
+
+<img src="./docs/site/scene-prompt.jpg" alt="旁白唸到哪一段，那一段就被標出來" width="640">
+
+**03・需要實景的那幾拍，交給影片生成。** 工具先算出每個鏡頭要幾秒、寫好提示詞，排成一張跑單。預設接 VideoExpress，自動送出、收回；
+也可以在自己的 Google Colab 顯示卡上跑 MiniMax H3（授權排除部分地區，見 [tools/h3/README.md](./tools/h3/README.md)），
+或手動生成後照檔名放回來。
+
+<img src="./docs/site/shot-generated.jpg" alt="生成的咖啡吧台鏡頭，疊上主持人圓框與字幕" width="640">
+
+**04・對嘴的主持人，三種型態。** 旁白切段送去做對嘴，回來接回時間軸：角落圓框、右邊的框，或整個畫面。造型圖先給你挑，
+定了才送出。只用你自己的樣子，或你有權使用的人物。
+
+| 全版 | 圓框 | 右框 |
+|---|---|---|
+| ![全版主持人](./docs/site/host-full.jpg) | ![圓框主持人](./docs/site/host-circle.jpg) | ![右框主持人](./docs/site/host-side.jpg) |
+
+**05・字幕跟著聲音走，不用手動對。** 配音在本機轉出每個字的時間，字幕與畫面都照這份時間排。燒進畫面的字幕可以把關鍵字變色；
+中文旁白也可以只上英文字幕。
+
+<img src="./docs/site/subtitles.jpg" alt="圖表與下方的英文字幕" width="640">
+
+**06・做完不是結束，AI 會自己再確認一遍。** 量響度、峰值、成片長度與字幕時間軸，再把每一拍的開頭與結尾各截一格，排成一張表。
+agent 必須實際讀過這張表才能回報完成；看不清楚或無法確認的，直接回報，不亂猜。
+
+<img src="./docs/site/check-sheet.jpg" alt="截圖表：每拍兩格" width="640">
+
+**另外還有：** 照畫面事件作曲的配樂（或在自己的 Colab 上用 MiniMax Music 3 生成歌曲）、對準畫面出現那一刻的音效、
+授權與出處沒答完就停下的開工與出片清單，以及一次帶上排程、縮圖、合成內容標記的 YouTube 上傳。
+
+## 這些都是用它做的
+
+作者自己的兩個頻道每週在用。四種片型各一支，點了到 YouTube 看。
+
+| [![When You Meet a Love Negotiator ?!](./docs/site/work-1.jpg)](https://www.youtube.com/watch?v=qrFl_yrWPNk) | [![One Prompt, a 5-Shot Kung Fu Fight](./docs/site/work-4.jpg)](https://www.youtube.com/watch?v=1aTJSye-l38) |
+|---|---|
+| 反轉喜劇・英文・1 分 52 秒 | 教學片・英文・3 分 43 秒 |
+| [![你以為彼得是個窮漁夫？](./docs/site/work-2.jpg)](https://www.youtube.com/watch?v=LjCb9Le6Vps) | [![每日得力一分鐘](./docs/site/work-3.jpg)](https://www.youtube.com/watch?v=I51kD1EMYQ0) |
+| 知識長片・中文・6 分 39 秒 | 每日短片・直式・1 分 25 秒 |
+
+頻道：[NotoriousLab](https://www.youtube.com/channel/UCut6SxDwtJHblGQgX6LuTgA)（英文）・
+[Jacob Mei](https://www.youtube.com/channel/UC7uSiyB1XIv71SPaWEzF3pw)（中文）
+
+## 三步，做出第一支片
+
+目前在 Apple Silicon 的 Mac 上驗證過（實測機型為 MacBook Pro M3 Max）。第一個範例是四句話、約 25 秒的英文片，不用任何帳號。
+
+1. **把專案抓下來**（不懂怎麼做？問你的 AI）：
+
+   ```bash
+   git clone https://github.com/notoriouslab/script2film.git
+   ```
+
+2. **跑安裝檢查。** 它只檢查、不安裝，缺什麼會告訴你怎麼裝。新機器第一次安裝約 30 分鐘、下載約 7 GB，大部分是配音那一步
+   （[docs/INSTALL.md](./docs/INSTALL.md)，英文）。
+
+   ```bash
+   python3 tools/doctor/doctor.py
+   ```
+
+3. **在這個資料夾打開你的 agent**，然後跟它說：
+
+   > 照文件把 examples/coffee 做成一支片。
+
+agent 從工作區根目錄載入 [AGENTS.md](./AGENTS.md)（每一輪都生效的規則）與 `script2film` skill
+（[skills/script2film/SKILL.md](./skills/script2film/SKILL.md)）；skill 用符號連結接到 `.agents/skills/` 與 `.claude/skills/`，
+Windows 要開 git 的 `core.symlinks`。
+
+下一支：[examples/brewing/](./examples/brewing/)，五句中文旁白，有一個生成鏡頭與對嘴的主持人。生成好的檔附在 `premade/`，
+所以同樣不用帳號。
+
+## 七個環節，凡走過的必留下痕跡
+
+每一個環節讀上一環節留下的檔，做完寫下自己的。中間任何一個環節都可以停下來看、改、重跑。步驟與命令在
+[docs/FLOW.md](./docs/FLOW.md)（英文）。
+
+| F0 安裝檢查 | F1 稿 | F2 聲音 | F3 對時 | F4 畫面 | F5 組裝 | F6 檢查 |
+|---|---|---|---|---|---|---|
+| 缺什麼、怎麼裝，一次列出來 | 旁白、每一拍配什麼畫面，寫成一個檔 | 配音，每句挑最準的一條 | 量出每個字落在第幾秒 | 程式照時間把每一拍畫出來 | 聲音、畫面、字幕接成一支片 | 量數字、排截圖表、逐格看 |
+
+選用的環節接在旁邊：生成鏡頭、主持人、配樂與音效、進剪輯軟體加疊加層、清單、上傳。
 
 | 環節 | 輸入 → 輸出 | 預設 | 選用 |
 |---|---|---|---|
-| 稿 | 題目與素材 → `doc.json`（台詞與拍） | 照格式文件手寫 | AI 代理照 skill 寫 |
+| 稿 | 題目與素材 → `doc.json`（台詞與拍） | 照格式文件手寫 | AI agent 照 skill 寫 |
 | 聲音 | 台詞 → 每句音檔，再接成旁白 | Qwen3-TTS，在自己的電腦上跑 | 自己錄音 |
 | 對時 | 旁白 → `beats.json`、字幕 | mlx-whisper，在自己的電腦上跑 | Groq、ElevenLabs Scribe |
 | 畫面：程式畫面 | 拍與參數 → 每拍一支 mp4 | `skills/ve-director/doc/` 的場景引擎（27 個場景） | |
-| 畫面：素材 | 照片與影片 → 某一拍的畫面 | 附授權紀錄的照片 | VideoExpress，由 `tools/ve-runner/` 操作 |
-| 主持人 | 旁白 → 主持人影片 | 不放主持人 | TalkingPhotos |
-| 音效配樂 | 拍 → 音效標記、配樂 | 隨倉庫附帶的音效 `assets/sfx/`（CC0、自製、VideoExpress 生成）；`tools/score/` 程式作曲的配樂 | CC BY 曲（要署名）；用自己的 VideoExpress 帳號生成音效（`tools/assets/gen_sfx_ve.py`） |
-| 組裝 | 以上全部 → 成片 | `doc_cut.py --render` | Concat（推薦），用來加疊加層（側框主持人、關鍵字標籤、章節標示、照片出處） |
+| 畫面：素材 | 照片與影片 → 某一拍的畫面 | 附授權紀錄的照片 | VideoExpress（`tools/ve-runner/`）、自己 Colab 上的 MiniMax H3（`tools/h3/`） |
+| 主持人 | 旁白 → 主持人影片 | 不放主持人 | TalkingPhotos、MiniMax H3 |
+| 音效配樂 | 拍 → 音效標記、配樂 | `assets/sfx/` 附帶的音效；`tools/score/` 程式作曲 | CC BY 曲；自己的 VideoExpress 音效；自己 Colab 上的 MiniMax Music 3（`tools/music3/`） |
+| 組裝 | 以上全部 → 成片 | `doc_cut.py --render` | Concat，用來加疊加層 |
 | 發佈 | 成片 → 平台 | 手動上傳 | YouTube API |
 
 從配音到出片，預設路徑不需要其他剪輯軟體，也不需要任何 API 金鑰（`tools/check-standalone.sh` 在乾淨環境裡驗這件事）。
 
+## 三家 agent，只讀文件，都可以做得出來
+
+試跑在作者的 MacBook Pro（M3 Max，36 GB 記憶體）上。每一支都通過出片檢查，成片長度落在第一個範例預期的範圍內。
+
+| Agent | 模型 | 核心流程（不用帳號） | 生成鏡頭＋主持人 |
+|---|---|---|---|
+| Claude Code | Claude Opus | 可以 | 可以 |
+| Google Antigravity | Gemini 4 Argon, low | 可以 | 可以 |
+| opencode + Ollama | Qwen 27b (MLX)，本機 | 可以，約 13 分鐘 | 可以，約 35 分鐘 |
+| opencode | DeepSeek V4.1 Flash（免費額度） | 可以，兩支片約 20 分鐘 | 沒試 |
+
+每一家卡在哪、怎麼排除：[docs/AGENT-TRIALS.md](./docs/AGENT-TRIALS.md)（英文）。
+
 ## 東西在哪
+
+<details>
+<summary>資料夾一覽</summary>
 
 | 路徑 | 是什麼 |
 |---|---|
@@ -56,6 +191,7 @@
 | `tools/nightly/`、`tools/checklist/`、`tools/qa/` | 檢查：出片檢查（`check.py`）、開工與出片清單、逐格的動態檢查 |
 | `tools/ve-runner/` | 在瀏覽器裡把分鏡送到 VideoExpress 執行並收回片段 |
 | `tools/tp/` | 用 TalkingPhotos 做會說話的主持人 |
+| `tools/h3/`、`tools/music3/` | 在自己的 Google Colab 顯示卡上跑 MiniMax H3（鏡頭與主持人）和 MiniMax Music 3（歌曲） |
 | `tools/assemble/`、`tools/concat/` | 把片段排成時間軸；再依它建 Concat 專案 |
 | `tools/drama/` | 剪對嘴短劇（沒有旁白）：一份時間軸檔，有沒有 Concat 都能出片 |
 | `tools/score/` | 跟著畫面走的程式作曲配樂，用 SoundFont 離線渲染 |
@@ -65,7 +201,9 @@
 | `tools/agents/`、`tools/site/` | 把 skill 接到各家 agent 會找的位置；產生網站的英文頁與網站上的 Prompt Studio 複本 |
 | `examples/` | 兩支範例片 |
 | `assets/` | 隨倉庫附帶的音效（在 git 裡）與兩套字型（要下載，見 `assets/README.md`） |
-| `docs/` | 上面那些文件，以及專案網站：首頁、工具、場景與色版、Prompt Studio 介紹頁與線上版（`docs/studio.html`）；英文頁在 `docs/en/` |
+| `docs/` | 安裝、流程、agent 試跑紀錄，以及專案網站（英文頁在 `docs/en/`） |
+
+</details>
 
 ## 需求與帳號
 
@@ -73,8 +211,8 @@
 都沒有試過（見 [docs/INSTALL.md](./docs/INSTALL.md) 的「Not covered」）。
 
 核心流程不用任何帳號或金鑰：配音、對時、程式畫面、`doc_cut.py --render` 與檢查。選用的部分用你自己的帳號：VideoExpress
-（生成鏡頭、音效）、TalkingPhotos（主持人）、YouTube（上傳），雲端轉錄要 Groq 與 ElevenLabs 兩把金鑰。Concat 是另外安裝的軟體。
-每一項在 [docs/FLOW.md](./docs/FLOW.md) 用到的地方都有說明。
+（生成鏡頭、音效）、TalkingPhotos（主持人）、Google Colab（MiniMax H3 與 Music 3）、YouTube（上傳），雲端轉錄要 Groq 與
+ElevenLabs 兩把金鑰。Concat 是另外安裝的軟體。每一項在 [docs/FLOW.md](./docs/FLOW.md) 用到的地方都有說明。
 
 ## 參與貢獻
 
