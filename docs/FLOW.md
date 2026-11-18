@@ -248,7 +248,7 @@ The first needs `bgm.arc` in `doc.json`; afterwards point `bgm.src` at `score_bg
 
 ### MiniMax Music 3 on Colab (a song or an instrumental)
 
-`tools/music3/README.md`. A notebook the user runs in their own Colab (Google AI Pro); there is no adapter script yet. No territory limit. The lyrics must be the user's own, and a published film is labelled as AI-generated (`--synthetic`). Put the WAV in the project folder, point `bgm.src` at it and write `MiniMax Music 3 (AI generated)` in `bgm.credit`. Measured on an L4: a 60 s song takes about 5 minutes. **Ask the user before booting a GPU** if you run it for them.
+`tools/music3/README.md`. On the user's own Colab (Google AI Pro): `music3_film.py plan <project> --caption-file … [--lyrics-file …] [--seconds N]`, `run <project> --confirmed`, `collect <project>` (sets `bgm.src` and `bgm.credit`), or the notebook in the README. No territory limit. The lyrics must be the user's own, and a published film is labelled as AI-generated (`--synthetic`). Measured on an L4: a 60 s song takes about 5 minutes. **Ask the user before booting a GPU** if you run it for them.
 
 ## Optional D: final film in Concat
 

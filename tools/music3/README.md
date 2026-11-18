@@ -2,7 +2,7 @@
 
 選用。用 MiniMax Music 3 生成一首有歌詞的歌或一段純配樂，生成在你自己 Google 帳號的 Colab GPU 上跑。做好的 WAV 照 Optional C 的方式當成片的背景音樂（`doc.json` 的 `bgm.src`）。
 
-目前只有手動流程：在 Colab 開一份 notebook，貼下面的程式。還沒有像 `tools/h3` 那樣的轉接程式。
+兩種用法：agent 用 `music3_film.py` 從這台電腦遙控 Colab（和 `tools/h3` 用同一個 colab-cli 登入），或你自己在 Colab 開 notebook 貼程式。
 
 ## 先讀授權
 
@@ -22,7 +22,19 @@ MiniMax-Music3 Community License（MIT 式）**沒有地區限制**。要遵守�
 | 執行階段 | L4（24 GB，程式會自動開 CPU offload）或 A100 |
 | 這台電腦 | 不需要顯示卡。模型每次開機下載到 Colab 上 |
 
-## 用法
+## 用法（agent，從這台電腦）
+
+```
+python3 tools/music3/music3_film.py plan <集> --caption-file caption.txt [--lyrics-file lyrics.txt] [--seconds 240] [--seed 7]
+python3 tools/music3/music3_film.py run <集> --confirmed [--gpu L4]
+python3 tools/music3/music3_film.py collect <集>
+```
+
+- `plan` 寫 `music3/job.json`。不給 `--lyrics-file` 就是純配樂，長度預設等於旁白長度（`tts/lines.json` 最後一句結束再加 3 秒）；有歌詞要自己給 `--seconds`。`--seconds` 是**上限**：歌詞唱完，模型就會自己收尾（實測給 240 秒，整首唱完、淡出，只用了 168 秒）。曲風描述（caption）少於 25 個英文字不收。
+- `run` 開一台 Colab GPU、在機器上背景生成、下載 `music3/out/song.wav`（純配樂是 `bgm.wav`），不論成功失敗都會關機。沒加 `--confirmed` 不開機；同名的機器還開著也不開第二台。
+- `collect` 把 WAV 複製成 `<集>/music3_bgm.wav`（舊檔留成 `.bak.wav`），`doc.json` 的 `bgm.src`、`bgm.credit` 填好，其他 `bgm` 設定不動。
+
+## 用法（自己在 Colab notebook）
 
 在 Colab 新增 notebook，執行階段選 L4 或 A100，依序執行：
 
@@ -68,7 +80,7 @@ sf.write("/content/song.wav", wav, pipe.sampling_rate)
 |---|---|
 | 裝套件、下載並載入模型 | 約 4 分鐘（載入 103 秒） |
 | 60 秒的歌 | 約 5 分鐘（每秒音樂約 5 秒），顯示卡記憶體峰值 19.4 GB |
-| 4 分鐘的歌（推估） | 約 20 分鐘 |
+| 一首完整的歌（給 240 秒，實際 168 秒） | 生成約 12 分鐘；開機到關機約 17 分鐘，約 0.4 點 |
 | 一次開機、生成一首 60 秒 | 約 0.3–0.5 點 |
 
 輸出是 44.1 kHz 立體聲 WAV。
