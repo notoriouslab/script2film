@@ -51,10 +51,12 @@ def test_check_jobs_stops_drafts_short_prompts_and_bad_lengths():
 @pytest.fixture
 def brewing(tmp_path):
     P = tmp_path / "brewing"
-    for f in ("doc.json", "beats.json"):
-        shutil.copy2(BREWING / f, P / f) if P.exists() else (P.mkdir(), shutil.copy2(BREWING / f, P / f))
-    (P / "tts").mkdir()
+    (P / "tts").mkdir(parents=True)
+    shutil.copy2(BREWING / "doc.json", P / "doc.json")
     shutil.copy2(BREWING / "premade/tts/lines.json", P / "tts/lines.json")
+    # examples/*/beats.json is generated and gitignored, and doc_align needs a local transcriber: this is its output
+    # for the premade voice
+    shutil.copy2(Path(__file__).parent / "fixtures/brewing_beats.json", P / "beats.json")
     return P
 
 
