@@ -693,10 +693,22 @@ class VE:
                        img.click(); }""",
             src,
         )
-        for _ in range(10):
+        # 2026-11-19 (three times in one short film): the wait in create_image saw one candidate, but a second one
+        # landed after the pick and took the active slide, and the 5 s here ran out while it was still loading.
+        # Now a late candidate is waited out (up to 90 s), and the pick counts only once it holds for 1 s.
+        deadline, told = time.time() + 90, False
+        while time.time() < deadline:
             self.page.wait_for_timeout(500)
+            if any(self._is_gif(x) for x in self.modal_images()):   # never settle while a candidate is loading
+                if not told:
+                    self.log("a late candidate is still generating; waiting before selecting the picked frame")
+                    told = True
+                continue
             if self.active_frame() == src:
-                return
+                self.page.wait_for_timeout(1000)
+                if self.active_frame() == src and not any(self._is_gif(x) for x in self.modal_images()):
+                    return
+                continue
             self.page.evaluate(
                 """src => { const img=[...document.querySelectorAll('.swiper-slide img')].find(i=>i.src===src);
                            const sw=img && img.closest('.swiper'); if(!sw || !sw.swiper) return;
