@@ -2212,7 +2212,7 @@
                 if (state.language === "english-only")
                     return "Use English for all structural content and all dialogue.";
                 if (state.language === "zh-only")
-                    return 'Write the ENTIRE output in Traditional Chinese (Taiwan) — including every Text-To-Image and Image-To-Video prompt line (e.g. 「電影感寫實劇照，深夜便利商店內，……」), not only the narrative sections. Any English prompt patterns shown in the section schemas define STRUCTURE only; render their content in 繁體中文. Keep verbatim only: actor aliases (Actor 1), aspect ratios (16:9), timestamps, and camera/lens tokens (85mm f/1.4).';
+                    return 'Write the ENTIRE output in Traditional Chinese (Taiwan) — including every Text-To-Image and Image-To-Video prompt line (e.g. 「電影感寫實劇照，深夜便利商店內，……」), not only the narrative sections. Any English prompt patterns shown in the section schemas define STRUCTURE only; render their content in 繁體中文. Keep verbatim only: actor aliases (Actor 1), aspect ratios (16:9), timestamps, camera/lens tokens (85mm f/1.4), and the English speech-act wrap `says in a <tone>, <accent>:` around each spoken line (the line inside the quotes stays 繁體中文).';
                 return 'Structural sections, technical metadata, and all T2I / I2V prompt bodies in English. EVERY spoken dialogue line in Traditional Chinese (Taiwan) with `natural Mandarin accent` in the speech-act wrap — see the Output Language hard-constraint block at the top.';
             }
 
@@ -2385,10 +2385,12 @@
                 "PRODUCTION SOUND",
                 "NEGATIVES",
             ];
+            // No caption words (on-screen text / captions / subtitles / 畫面文字 / 字幕) even here, although VideoExpress's
+            // official examples list them: speaking shots with them burned captions in, re-rolls without were clean (2026-11-19)
             const I2V_COMMON_NEGATIVES =
-                "distorted faces, warped mouths, extra limbs, morphing, flicker, on-screen text, captions, watermarks, subtitles, logos, slow motion, frozen frames";
+                "distorted faces, warped mouths, extra limbs, morphing, flicker, watermarks, logos, slow motion, frozen frames";
             const I2V_COMMON_NEGATIVES_ZH =
-                "臉部扭曲、嘴型變形、多餘肢體、形變、閃爍、畫面文字、字幕、水印、標誌、慢動作、定格";
+                "臉部扭曲、嘴型變形、多餘肢體、形變、閃爍、水印、標誌、慢動作、定格";
 
             // zh-only mode swaps every prompt-body string (T2I opener, visualLock, I2V look,
             // negatives, faceLock) for its 繁體中文 twin. Instruction text stays English.
@@ -2415,7 +2417,7 @@
                 if (zh) {
                     const ref = reference || "以提供的圖片作為本鏡的精確開場畫面；它決定本鏡的構圖、世界、光線與精確取景，地點、色調與攝影機皆沿用該圖。";
                     const speechBeat = dialogue
-                        ? '<Actor Alias>，<外觀錨點>，以<語氣>的語氣、自然的台灣國語口音說："<台詞>"'
+                        ? '<Actor Alias>，<外觀錨點>，says in a <語氣>, natural Taiwanese Mandarin accent: "<台詞>"'
                         : "<下一個單一動作>";
                     const beats = action || `[ACTION 0-<a>s] <一個小幅度的主體動作>。[ACTION <a>-<b>s] ${speechBeat}。[ACTION <b>-<N>s] <收尾微動作，例如保持眼神接觸讓情緒沉澱>。`;
                     const sound = dialogue
@@ -2662,7 +2664,7 @@ Apply only when a shot is an intimate facial close-up; skip for wider shots.
                         const tagClause = state.outputMode === "runsheet" && state.mode === "storyboard"
                             ? ""
                             : "the eight uppercase Image-To-Video tags ([REFERENCE USE] … [NEGATIVES], including [ACTION 0-3s] time ranges — never translate a tag), ";
-                        const zhBlock = `\n## Output Language — HARD CONSTRAINT (overrides every English pattern below)\nWrite the ENTIRE output in Traditional Chinese (Taiwan). The Text-To-Image and Image-To-Video templates below are already written in 繁體中文: keep their fixed wording as given and fill every <slot> / [slot] in 繁體中文. Where a rule below still shows an English fragment or example, it defines structure and MEANING only — express it in 繁體中文 (e.g. "unretouched skin texture with visible pores" → 「未修飾的皮膚質感，毛孔清晰可見」); never copy an English sentence into a prompt. Keep verbatim only: actor aliases (Actor 1), aspect ratios (16:9), ${tagClause}and camera/lens tokens (85mm f/1.4). All Chinese must be Traditional Chinese (Taiwan) — Simplified Chinese characters are FORBIDDEN. Chinese dialogue budget: ~4 Chinese characters per second of clip time (a 5-second shot carries ≈ 20 characters); this per-shot budget overrides any generic character cap below — split longer lines across shots.\n`;
+                        const zhBlock = `\n## Output Language — HARD CONSTRAINT (overrides every English pattern below)\nWrite the ENTIRE output in Traditional Chinese (Taiwan). The Text-To-Image and Image-To-Video templates below are already written in 繁體中文: keep their fixed wording as given and fill every <slot> / [slot] in 繁體中文. Where a rule below still shows an English fragment or example, it defines structure and MEANING only — express it in 繁體中文 (e.g. "unretouched skin texture with visible pores" → 「未修飾的皮膚質感，毛孔清晰可見」); never copy an English sentence into a prompt. Keep verbatim only: actor aliases (Actor 1), aspect ratios (16:9), ${tagClause}camera/lens tokens (85mm f/1.4), and the English speech-act wrap "says in a <tone>, <accent>:" around each spoken line (the line inside the quotes stays 繁體中文; a 繁中 以…語氣說： wrap is not detected as speech). All Chinese must be Traditional Chinese (Taiwan) — Simplified Chinese characters are FORBIDDEN. Chinese dialogue budget: ~4 Chinese characters per second of clip time (a 5-second shot carries ≈ 20 characters); this per-shot budget overrides any generic character cap below — split longer lines across shots.\n`;
                         text = nl === -1 ? text + "\n" + zhBlock : text.slice(0, nl) + "\n" + zhBlock + text.slice(nl);
                     }
                     // engzh 混合模式同樣需要 Tier 1 硬區塊：只靠 Tier 2 一句
@@ -2942,7 +2944,7 @@ One short paragraph describing ONLY the change, then pinning the rest:
         ? "圖 1 是開場畫面、圖 2 是結尾畫面；鏡頭從前者過渡到後者，地點、色調與攝影機皆沿用圖 1。"
         : "Picture 1 is the opening frame and Picture 2 is the closing frame; the shot travels from the first to the second, taking location, palette and camera from Picture 1.",
     action: zh
-        ? `[ACTION 0-<a>s] <朝向結束狀態的第一個動作>。[ACTION <a>-<N>s] ${dialogue ? '<主體>，<簡短外觀錨點>，以<語氣>的語氣、自然的台灣國語口音說："<台詞，100 字元內>"，並恰好落在結尾畫面的狀態' : "<恰好落在結尾畫面狀態的最後一個動作，然後靜止>"}。`
+        ? `[ACTION 0-<a>s] <朝向結束狀態的第一個動作>。[ACTION <a>-<N>s] ${dialogue ? '<主體>，<簡短外觀錨點>，says in a <語氣>, natural Taiwanese Mandarin accent: "<台詞，100 字元內>"，並恰好落在結尾畫面的狀態' : "<恰好落在結尾畫面狀態的最後一個動作，然後靜止>"}。`
         : `[ACTION 0-<a>s] <first motion toward the end state>. [ACTION <a>-<N>s] ${dialogue ? '<subject>, <short visual anchor>, says in a <tone>, clear <language> accent: "<line ≤ 100 chars>", landing exactly on the Last Frame state' : "<final motion that lands exactly on the Last Frame state, then hold>"}.`,
 })}\`
 ${tagRule(zh)}${media.faceLock ? `\n\n${faceLockRule(media)}` : "" /* no closeUpToolkit here: FFLF Smart Edit fields must stay lean */}`,
