@@ -64,5 +64,7 @@ These come from [AGENTS.md](./AGENTS.md) and [docs/FLOW.md](./docs/FLOW.md). A c
   delete a video only when the user says so. Tell the user before sending audio to cloud transcription.
 - The user logs in to web platforms; the tools never type account names or passwords.
 - No news-agency or broadcaster photos or footage. Every asset in a film has its source and licence recorded.
-- A film that fails `tools/nightly/check.py` is not delivered, and the checklist (`tools/checklist`) is skipped only
-  with the user's agreement.
+- Every Concat export goes through `tools/concat/concat_export.py`, which checks the film
+  (`tools/nightly/film_check.py`); `tools/concat/test_single_export.py` fails if a script writes its own export loop.
+  A film that fails the check (or `tools/nightly/check.py` for explainers) is not delivered. `--no-check <item>:<reason>`
+  and the checklist's `--skip-checklist` are used only with the user's agreement, and both are logged.

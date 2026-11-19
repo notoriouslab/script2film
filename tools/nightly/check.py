@@ -1,8 +1,9 @@
-"""夜跑 S8 出片檢查：響度、峰值、長度＋逐拍截圖表。任一項 FAIL 就不上稿。
+"""夜跑 S8 出片檢查（解說片）：先跑 film_check.py 的基本層（響度、峰值、音畫長度、最後一格、黑格、音效到位、過期），
+再加字幕時間軸長度＋逐拍截圖表。任一項 FAIL 就不上稿。結果同時寫 <集>/nightly/check.json 與片旁 <片名>.check.json。
 
   python3 tools/nightly/check.py projects/<集>/doc.json <成片.mp4>
 
-門檻（-14 LUFS、容差 0.8 LU、峰值 -1 dBTP、長度差 0.05 秒）的意思與出處：tools/nightly/README.md「門檻」一節。
+門檻（-14 LUFS、容差 0.8 LU、峰值 -1 dBTP 在 film_check.py；長度差 0.05 秒）的意思與出處：tools/nightly/README.md「門檻」一節。
 長度比的是 beats.json 的 total（字幕時間軸終點）。
 截圖取每拍第一個字後 0.15 秒（ve-director doc 流程第 8 步）：畫面要已經對上那句話。
 程式畫的拍（source 是 code）多一格尾格（截圖表上標 tail），取拍尾前 0.4 秒（TAIL_BACK）：圖表跟著旁白一步步出現，第一格常常只有標題，
@@ -37,7 +38,7 @@ import s2f_config; s2f_config.load()
 import numpy as np
 from PIL import Image, ImageDraw, ImageFont
 
-TARGET_I, TOL_I, MAX_TP, MAX_DRIFT = -14.0, 0.8, -1.0, 0.05
+MAX_DRIFT = 0.05   # 響度、峰值的門檻在 film_check.py（系列可用 film_check.json 改）
 COLS, W, H = 4, 480, 270
 FREEZE_S, SUB_CROP = 4.0, 0.75
 HEAD_AFTER, TAIL_BACK = 0.15, 0.4   # 首格：第一個字之後；尾格：拍尾之前（依據見檔頭）
@@ -96,13 +97,6 @@ def blank_openings(mp4, beats, doc, tmp):
         if shares and max(shares) < BLANK:
             out.append({"beat": b["id"], "shares": [round(x, 3) for x in shares]})
     return out
-
-
-def loudness(mp4):
-    err = subprocess.run(["ffmpeg", "-hide_banner", "-nostats", "-i", mp4, "-af", "ebur128=peak=true", "-f", "null", "-"],
-                         capture_output=True, text=True).stderr
-    summ = err[err.rindex("Summary:"):]
-    return float(re.search(r"I:\s+(-?[\d.]+) LUFS", summ)[1]), float(re.search(r"Peak:\s+(-?[\d.]+) dBFS", summ)[1])
 
 
 def duration(mp4):
@@ -182,12 +176,17 @@ def main():
     out = P / "nightly"
     (out / "frames").mkdir(parents=True, exist_ok=True)
 
-    I, TP = loudness(mp4)
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    import film_check   # 基本層（響度、峰值、音畫長度、最後一格、黑格、音效到位、過期）：任何成片都跑的那一份
+    try:
+        std = film_check.load_standard(P)
+    except film_check.ConfigError as e:
+        print(f"✗ film_check settings: {e}")
+        sys.exit(2)
+    base = film_check.basic(mp4, standard=std, sfx_bed=P / "sfx/sfx_bed.wav")
     dur = duration(mp4)
-    items = [{"item": f"loudness {TARGET_I}±{TOL_I} LUFS", "ok": abs(I - TARGET_I) <= TOL_I, "value": I},
-             {"item": f"peak ≤ {MAX_TP} dBTP", "ok": TP <= MAX_TP, "value": TP},
-             {"item": f"length vs subtitle timeline ≤ {MAX_DRIFT}s", "ok": abs(dur - bj["total"]) <= MAX_DRIFT,
-              "value": f"{dur:.2f} vs {bj['total']:.2f}"}]
+    items = base["items"] + [{"code": "timeline_len", "item": f"length vs subtitle timeline ≤ {MAX_DRIFT}s",
+                              "ok": abs(dur - bj["total"]) <= MAX_DRIFT, "value": f"{dur:.2f} vs {bj['total']:.2f}"}]
     paced = "pace" in doc
     if paced:
         sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -201,13 +200,17 @@ def main():
     if short_item:
         items.append(short_item)
     ok = all(x["ok"] for x in items)
-    (out / "check.json").write_text(json.dumps({"ok": ok, "video": str(mp4), "items": items, "sheet": "sheet.jpg",
-                                                "frozen": frozen, "sparse": sparse, "blank_open": blank,
-                                                "short_subs": short_subs}, ensure_ascii=False, indent=1), encoding="utf-8")
+    rec = {"ok": ok, "video": str(mp4), "items": items, "listed": base["listed"], "skipped": base["skipped"],
+           "size": base["size"], "sha256": base["sha256"], "sheet": "sheet.jpg",
+           "frozen": frozen, "sparse": sparse, "blank_open": blank, "short_subs": short_subs}
+    (out / "check.json").write_text(json.dumps(rec, ensure_ascii=False, indent=1), encoding="utf-8")
+    film_check.write_record(mp4, {k: v for k, v in rec.items() if k != "video"})   # 片旁那份（D3）：上傳前確認先找它
     for x in items:
         print("✓" if x["ok"] else "✗", x["item"], x["value"])
         for n in x.get("notes", []):
             print("   ", n)
+    for x in base["listed"]:
+        print("·", x["item"], x["value"])
     if not paced:
         print("· pace check off (no pace in doc.json; turn it on for episodes made per FORMAT §4e)")
     print(f"· frozen picture ≥{FREEZE_S:g}s (nothing above the subtitle band changes; listed, not blocking): "

@@ -5,7 +5,8 @@ vox-host 系列（`skills/ve-director/doc/formats/vox-host/FORMAT.md`）一集�
 | 腳本 | 用途 | 用法 |
 |---|---|---|
 | `preflight.py` | 舊入口：已改到 `tools/checklist/checklist.py`（三層、兩段的開工清單，見 `tools/checklist/README.md`），這裡照跑開工段。結果寫到 `<集>/nightly/checklist_start.json` | `python3 tools/nightly/preflight.py <集>/doc.json` |
-| `check.py` | 出片檢查：響度、峰值、長度，加逐拍截圖表（`nightly/sheet.jpg`：每拍第一個字後 0.15 秒一格；程式畫的拍多一格「tail」，取拍尾前 0.4 秒，是畫完的樣子）；停住段與空卡只列不擋；燒在畫面上的字幕有任何一條短於 0.5 秒就不過（讀 `doc_cut.py` 寫的 `voice.cleaned/short_subs.json`，沒有那個檔就不列這一項）。`doc.json` 有 `"pace"` 時再加節奏五項（都擋）。結果寫到 `<集>/nightly/check.json` | `python3 tools/nightly/check.py <集>/doc.json <成片.mp4>` |
+| `film_check.py` | 成片基本體檢，任何 mp4 都能跑、不需要 `doc.json`：音畫長度、最後一格、片中黑格、響度、峰值、音效到位（有 `sfx/sfx_bed.wav` 才量）、成片過期（比對出片時記的剪接用檔指紋）；片尾黑只列。所有 Concat 出片都經 `tools/concat/concat_export.py` 自動跑它，結果寫在片旁 `<片名>.check.json`（含成片 SHA-256），上傳前的清單（`film-check`，所有片型）看這份。系列門檻放系列資料夾的 `film_check.json`。項目代號、量法、門檻依據在檔頭 | `python3 tools/nightly/film_check.py <片.mp4> [--ep <集>]` |
+| `check.py` | 解說片的完整出片檢查：先跑 `film_check.py` 的基本層，再加字幕時間軸長度，加逐拍截圖表（`nightly/sheet.jpg`：每拍第一個字後 0.15 秒一格；程式畫的拍多一格「tail」，取拍尾前 0.4 秒，是畫完的樣子）；停住段與空卡只列不擋；燒在畫面上的字幕有任何一條短於 0.5 秒就不過（讀 `doc_cut.py` 寫的 `voice.cleaned/short_subs.json`，沒有那個檔就不列這一項）。`doc.json` 有 `"pace"` 時再加節奏五項（都擋）。結果寫到 `<集>/nightly/check.json` | `python3 tools/nightly/check.py <集>/doc.json <成片.mp4>` |
 | `pace.py` | 節奏五項（FORMAT §4e）：前 30 秒換畫面間隔、最長靜止、畫面字、音效密度、旁白引用出處。`check.py` 會呼叫它；也可以單獨跑，不管有沒有開都照量 | `python3 tools/nightly/pace.py <集>/doc.json <成片.mp4> [<稿.md>]` |
 | `series.py` | 印 `series.json` 的單一欄位，或主清單加該集所屬分部清單（`playlists`） | `python3 tools/nightly/series.py <集> <欄位>`、`python3 tools/nightly/series.py <集> playlists` |
 | `state.py` | 夜跑進度紀錄（每步開始、結束），中斷後照它接續 | `python3 tools/nightly/state.py <集> start S1`、`… done\|warn\|fail S1 "說明"`、`… set <鍵> <值>`、`… show` |
@@ -16,7 +17,7 @@ vox-host 系列（`skills/ve-director/doc/formats/vox-host/FORMAT.md`）一集�
 
 ## 門檻
 
-`check.py` 第一行常數 `TARGET_I, TOL_I, MAX_TP, MAX_DRIFT` 的四個數字，加上字幕最短顯示。任何一項不過就不上稿。
+響度、峰值的預設在 `film_check.py` 的 `DEFAULT`（系列可用 `film_check.json` 改），長度差是 `check.py` 的 `MAX_DRIFT`，加上字幕最短顯示。任何一項不過就不上稿。基本層其他項目（音畫長度、最後一格、黑格、音效到位、過期）的門檻與實測依據寫在 `film_check.py` 檔頭。
 
 | 數值 | 意思 | 出處 |
 |---|---|---|

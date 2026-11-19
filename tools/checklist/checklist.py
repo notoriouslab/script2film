@@ -170,7 +170,7 @@ def na_reasons(series):
     return na
 
 
-def run(ep_dir, stage, environ=None, write=True):
+def run(ep_dir, stage, environ=None, write=True, video=None):
     """跑這一集、這一段的項目（release 含 start）。回傳 {"ok", "stage", "format", "items": [{"id", "item", "state", "ok", "detail"}]}。"""
     if stage not in STAGES:
         raise ConfigError(f"stage must be {' or '.join(STAGES)}: {stage!r}")
@@ -178,7 +178,7 @@ def run(ep_dir, stage, environ=None, write=True):
     series, series_dir = series_of(ep)
     na = na_reasons(series)
     ctx = {"ep": ep, "format": fmt, "doc": doc, "series": series, "series_dir": series_dir, "write": write,
-           "environ": os.environ if environ is None else environ}
+           "environ": os.environ if environ is None else environ, "video": video}
     want = STAGES[:STAGES.index(stage) + 1]
     res = []
     if series is None:
@@ -250,7 +250,8 @@ def gate(path, stage, skip_reason, step, environ=None, outside_ok=True):
     ep = found[0]
     print(f"checklist for: {ep}")
     try:
-        out = run(ep, stage, environ)
+        p = Path(path).resolve()
+        out = run(ep, stage, environ, video=p if p.is_file() and p.suffix.lower() == ".mp4" else None)
     except ConfigError as e:   # 設定寫錯不能用 --skip-checklist 帶過：先把 series.json 改對
         print(f"✗ checklist settings: {e}")
         sys.exit(2)

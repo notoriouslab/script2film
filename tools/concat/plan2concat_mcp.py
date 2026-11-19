@@ -19,6 +19,8 @@ import sys as _sys, pathlib as _pl   # 設定檔：tools/config/s2f_config.py
 _sys.path.insert(0, str(_pl.Path(__file__).resolve().parents[2] / "tools/config"))
 import s2f_config; s2f_config.load()
 import argparse, json, math, os, re, subprocess, sys
+_sys.path.insert(0, str(_pl.Path(__file__).resolve().parent))
+from concat_export import export as concat_export, add_no_check, parse_no_check, export_crf, FilmCheckFailed  # noqa: E402
 
 CONCAT = os.environ.get("S2F_CONCAT_BIN") or os.environ.get("CONCAT_BIN") or "/Applications/Concat.app/Contents/MacOS/concat"
 SUB_SIZE = 0.046   # 字幕字級（畫面高比例）
@@ -232,13 +234,6 @@ def add_punch(c, proj, lane, punches):
         c.tool("clip_transform", path=proj, clipId=mid[0]["id"], scale=pu["scale"])
 
 
-def export_crf():
-    """成片的壓縮程度（x264 crf）：預設 24，環境變數 S2F_EXPORT_CRF 可改（16–32 的整數，其他值照預設）。
-    2026-11-15 實測一集長片（6 分 38 秒、顆粒 3）：crf 20 是 214.6 MB，crf 24 是 135.7 MB，兩支互比 SSIM 0.990。"""
-    v = os.environ.get("S2F_EXPORT_CRF", "")
-    return int(v) if v.isdigit() and 16 <= int(v) <= 32 else 24
-
-
 def loudnorm(path, target="I=-14:TP=-2.5:LRA=11", grain=0):
     """兩段式 loudnorm（畫面 stream copy；grain > 0 時畫面重編碼並疊 ffmpeg 底片顆粒）。Enhance Voice 會讓人聲小約 0.7 dB，
     Concat 沒有母帶段，交付前在這裡補。TP：AAC 重編碼會讓峰值往上衝（2026-10-21：TP=-1 出來 -0.8；另一集
@@ -295,7 +290,11 @@ def main():
     ap.add_argument("--layers", default="", help="layers.json from PromptStudio doc_cut (side-frame host, keyword pills)")
     ap.add_argument("--photo-credits", default="", help="episode folder: small on-screen credits for photo beats (photo_credits.py)")
     ap.add_argument("--export", default="", help="after saving, export to this mp4 and run two-pass loudnorm to -14 LUFS / -2.5 dBTP")
+    ap.add_argument("--ep", default="", help="episode folder for the film check (fingerprint base, skip log, series thresholds); "
+                    "default: the folder above plan.json when it holds doc.json, else the folder of plan.json")
+    add_no_check(ap)
     a = ap.parse_args()
+    no_check = parse_no_check(ap, a.no_check)
     plan = json.load(open(a.plan, encoding="utf-8"))
     L = json.load(open(a.layers, encoding="utf-8")) if a.layers else {}
     n_layer = len(LAYER_LANES) if (L.get("side") or L.get("pills")) else 0
@@ -395,16 +394,25 @@ def main():
     if a.export:
         out = os.path.abspath(a.export)
         grain = int(L.get("grain", 0))
-        # 有顆粒的片在 loudnorm 那一步才重編碼（那裡帶 crf），Concat 這一步照預設匯出，免得壓兩次
-        job = c.tool("export_start", path=proj, output=out, **({} if grain else {"crf": export_crf()}))["job"]
-        while c.tool("export_wait", job=job, timeoutSeconds=600).get("state") not in ("done", "failed"):
-            pass
-        loudnorm(out, grain=grain)
-        cut, peak = trim_silent_tail(out)
-        if cut:
-            print(f"trimmed {cut}s of silent audio tail (tail peak {peak} dB)", file=sys.stderr)
-        elif peak is not None:
-            print(f"audio is longer than the video, but the tail is not silent (peak {peak} dB); not trimmed", file=sys.stderr)
+
+        def post(path):
+            loudnorm(path, grain=grain)
+            cut, peak = trim_silent_tail(path)
+            if cut:
+                print(f"trimmed {cut}s of silent audio tail (tail peak {peak} dB)", file=sys.stderr)
+            elif peak is not None:
+                print(f"audio is longer than the video, but the tail is not silent (peak {peak} dB); not trimmed", file=sys.stderr)
+            return path
+        plan_dir = os.path.dirname(os.path.abspath(a.plan))
+        ep = a.ep or (os.path.dirname(plan_dir) if os.path.exists(os.path.join(os.path.dirname(plan_dir), "doc.json")) else plan_dir)
+        inputs = [a.plan, *(m["path"] for m in plan["media"]), *(m["path"] for m in layer_media)] + \
+                 [os.path.join(ep, f) for f in ("beats.json", "tts/voice.wav", "sfx/sfx_bed.wav", "score_bgm.wav")] + \
+                 ([a.layers] if a.layers else []) + [os.path.abspath(fpath)]
+        try:   # 有顆粒的片在 loudnorm 那一步才重編碼（那裡帶 crf），Concat 這一步照預設匯出，免得壓兩次
+            concat_export(c, proj, out, crf=None if grain else "default", post=post, ep=ep, inputs=inputs, no_check=no_check)
+        except FilmCheckFailed:
+            c.p.stdin.close(); c.p.wait(timeout=30)
+            sys.exit(1)
     c.p.stdin.close(); c.p.wait(timeout=30)
     print(json.dumps({"project": proj, "clips": len(tl["timeline"]["clips"]), "duration": tl["timeline"]["duration"], "fixes": len(fix), "short": gaps},
                      ensure_ascii=False))

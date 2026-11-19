@@ -3,7 +3,7 @@
 用法（倉庫根目錄）：
   python3 tools/drama/drama_cut.py check  <cut.json>              # 收片後先跑：對白有沒有被截（語音辨識）、畫面燒字（macOS Vision）、缺檔
   python3 tools/drama/drama_cut.py render <cut.json>              # 不靠 Concat 直接出片：<cut 所在資料夾>/<name>.mp4＋.srt（已存在就加 _v2…）
-  python3 tools/drama/drama_cut.py concat <cut.json> [--export]   # Concat 專案（走 MCP 不開視窗）；--export 順便匯出成片
+  python3 tools/drama/drama_cut.py concat <cut.json> [--export] [--no-check <項目>:<原因>]   # Concat 專案（走 MCP 不開視窗）；--export 順便匯出成片並體檢
   python3 tools/drama/drama_cut.py pull   <cut.json> <Concat 專案資料夾>   # 讀回剪法 → <cut>_pulled.json＋改動報告
 
 格式見 dramalib.py 開頭與 README.md。對白語音辨識用本機 mlx-whisper（設定檔或環境變數 S2F_MLX_WHISPER_DIR）。
@@ -431,7 +431,7 @@ def track_order(t: str):
     return (not t.startswith("對白"), t.startswith("房間") or t.startswith("底噪"), t == "配樂", t)
 
 
-def concat(cut: Cut, export: bool):
+def concat(cut: Cut, export: bool, no_check=()):
     """Concat 專案（走 concat --mcp，不用開視窗）：主畫面一軌（片名與字卡已畫進畫面段）、字幕在最上層、
     對白／音效／各場底噪／配樂各自一軌。專案放 <cut 所在資料夾>/concat/<名稱>，同名已存在就加 _v2…；
     --export 時匯出、兩段式 loudnorm 到 -14 LUFS，設了 grade 再另出一版調色。"""
@@ -472,17 +472,24 @@ def concat(cut: Cut, export: bool):
     print(f"Concat project: {proj}\n{len(tl['timeline']['clips'])} clips, {tl['timeline']['duration']:.1f}s (set to {P['total']:.1f})")
     if export:
         out = cut.base / f"{name}_原色.mp4"  # 跟專案同版本號：_v2 專案不覆蓋 v1 的成片
-        job = c.tool("export_start", path=proj, output=str(out))["job"]
-        while c.tool("export_wait", job=job, timeoutSeconds=600).get("state") not in ("done", "failed"):
-            pass
-        pm.loudnorm(str(out))
-        pm.trim_silent_tail(str(out))
-        print(out)
-        if cut.cfg.get("grade"):
+
+        def post(path):   # 交付檔：設了 grade 是調色版，否則是原色版；體檢跑在交付檔上
+            pm.loudnorm(path)
+            pm.trim_silent_tail(path)
+            print(path)
+            if not cut.cfg.get("grade"):
+                return path
             g = cut.base / f"{name}_{GRADE_NAMES.get(cut.cfg['grade'], cut.cfg['grade'])}.mp4"
-            sh("ffmpeg", "-v", "error", "-y", "-i", out, "-vf", GRADES[cut.cfg["grade"]], "-c:v", "libx264", "-crf", "18",
+            sh("ffmpeg", "-v", "error", "-y", "-i", path, "-vf", GRADES[cut.cfg["grade"]], "-c:v", "libx264", "-crf", "18",
                "-c:a", "copy", g)
             print(g)
+            return str(g)
+        try:
+            pm.concat_export(c, proj, out, post=post, ep=cut.base, no_check=no_check,
+                             inputs=[cut.path, *P["clips"], *sorted({a["path"] for a in P["audios"]})])
+        except pm.FilmCheckFailed:
+            c.p.stdin.close()
+            sys.exit(1)
     c.p.stdin.close()
     c.p.wait(timeout=30)
 
@@ -613,7 +620,7 @@ it can also read back how you cut it in Concat.
 Usage (from the repository root):
   python3 tools/drama/drama_cut.py check  <cut.json>              # run first after the clips arrive: dialogue cut off (speech recognition), burned-in text (macOS Vision), missing files
   python3 tools/drama/drama_cut.py render <cut.json>              # film without Concat: <cut's folder>/<name>.mp4 + .srt (adds _v2… if it exists)
-  python3 tools/drama/drama_cut.py concat <cut.json> [--export]   # Concat project (over MCP, no window); --export also exports the film
+  python3 tools/drama/drama_cut.py concat <cut.json> [--export] [--no-check ITEM:REASON]   # Concat project (over MCP, no window); --export also exports and checks the film
   python3 tools/drama/drama_cut.py pull   <cut.json> <Concat project folder>   # read the cut back → <cut>_pulled.json + a report of the changes
 
 Format: the top of dramalib.py and README.md. Dialogue recognition uses local mlx-whisper (S2F_MLX_WHISPER_DIR, in the settings file or the environment)."""
@@ -624,7 +631,11 @@ def main():
         sys.exit(USAGE)
     cut = Cut(sys.argv[2])
     if sys.argv[1] == "concat":
-        return concat(cut, export="--export" in sys.argv)
+        import argparse
+        ap = argparse.ArgumentParser(prog="drama_cut.py concat")
+        concat_mcp().add_no_check(ap)
+        known, _ = ap.parse_known_args(sys.argv[3:])
+        return concat(cut, export="--export" in sys.argv, no_check=concat_mcp().parse_no_check(ap, known.no_check))
     if sys.argv[1] == "render":
         return render(cut)
     if sys.argv[1] == "pull":

@@ -152,6 +152,48 @@ def release_check(ep):
     return True, video.name
 
 
+def film_record(video):
+    """成片體檢紀錄（tools/nightly/film_check.py 寫在片旁的 <片名>.check.json）：ok 是 true、紀錄裡的 SHA-256 等於現在這支片、
+    出片時記的剪接用檔指紋（<片名>.inputs.json）沒有變。沒有指紋檔的片（這項檢查之前出的）不因此擋。"""
+    sys.path.insert(0, str(REPO / "tools/nightly"))
+    import film_check
+    video = Path(video)
+    if not video.is_file():
+        return False, f"film not found: {video}"
+    rec_f, inputs_f = film_check.record_paths(video)
+    if not rec_f.exists():
+        return False, f"no film check record {rec_f.name}: run tools/nightly/film_check.py {video.name} (Concat exports write it)"
+    rec = json.loads(rec_f.read_text(encoding="utf-8"))
+    if not rec.get("ok"):
+        return False, f"ok in {rec_f.name} is not true"
+    if rec.get("size") != video.stat().st_size or rec.get("sha256") != film_check.sha256(video):
+        return False, f"{video.name} changed after it was checked: run the film check again"
+    fresh, value, notes = film_check.stale(inputs_f)
+    if fresh is False:
+        return False, f"{video.name} is older than its inputs ({'; '.join(notes[:3])}): export it again"
+    return True, video.name + ("" if fresh else " (no inputs fingerprint)")
+
+
+def film_record_for(ep, video=None):
+    """要上傳的那支（video）；沒給就用 nightly/check.json 記的片，再沒有就用集資料夾裡最新一份片旁紀錄的片。
+    舊集數（片旁紀錄出現前）只有 nightly/check.json：照舊用 release_check 判。"""
+    ep = Path(ep)
+    if video is None:
+        chk = ep / "nightly/check.json"
+        if chk.exists():
+            v = Path(json.loads(chk.read_text(encoding="utf-8")).get("video", ""))
+            video = next((x for x in (v, ep / v.name) if v.name and x.exists()), None)
+        if video is None:
+            recs = sorted(ep.glob("*.check.json"), key=lambda f: f.stat().st_mtime)
+            if not recs:
+                return False, "no film check record in this folder: export through Concat (it checks the film) or run tools/nightly/film_check.py"
+            video = recs[-1].with_name(recs[-1].name[:-len(".check.json")] + ".mp4")
+    video = Path(video)
+    if not (video.with_name(video.stem + ".check.json")).exists() and (ep / "nightly/check.json").exists():
+        return release_check(ep)
+    return film_record(video)
+
+
 # ---- 每一項：ctx -> [(名稱, 通過, 說明)] ----
 
 def _lexicon(c):
@@ -397,6 +439,10 @@ def _release_check(c):
     return [("film check check.json", *release_check(c["ep"]))]
 
 
+def _film_record(c):
+    return [("film check record", *film_record_for(c["ep"], c.get("video")))]
+
+
 def _series(c):
     return [("series settings series.json", True, c["series"]["name"])]
 
@@ -433,6 +479,7 @@ ITEMS = [
     _item("font", "series", "start", _font),
     _item("yt-token", "base", "release", _yt_token),
     _item("credits", "base", "release", _credits),
+    _item("film-check", "base", "release", _film_record),
     _item("bgm-file", "format", "release", _bgm_file, "doc"),
     _item("bgm-credit", "format", "release", _bgm_credit, "doc"),
     _item("thumb", "format", "release", _thumb, "doc"),

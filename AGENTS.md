@@ -42,7 +42,7 @@ Use the `script2film` skill. If your agent has no skill mechanism, read `skills/
 - Type account names or passwords for the user. On a login page, stop and ask the user to log in.
 - Put keys in code, in `config.json` or in a project folder. They go in `~/.config/script2film/secrets.json` or the environment. Never print a key.
 - Send a real person's photo to a video model. Do not use news-agency or broadcaster photos or footage. Record the source and licence of every asset in the project's `assets/CREDITS.md`.
-- Deliver or upload a film that fails `tools/nightly/check.py`.
+- Deliver or upload a film that fails its film check (`tools/nightly/film_check.py`, run by every Concat export; `tools/nightly/check.py` for explainers). Do not write your own Concat export loop: call `tools/concat/concat_export.export()`.
 - Bypass `tools/checklist` when it stops a step. `--skip-checklist "<reason>"` needs the user's agreement, and the skip is logged.
 
 ## Changing the code
