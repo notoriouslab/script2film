@@ -54,6 +54,13 @@ STYLES = {
         programs={"motif": 11, "lead": 59, "harp": 26, "arp": 4, "pad": 4, "bass": 32},
         bpm=(100, 124), target=112, tonic=65, final="I", shaker_roles=(), mode="major",
         roles=LOUNGE_ROLE_TABLE, drum_kit=40),
+    # 史詩管弦 epic（2026-11-19，一支英文喜劇測試短片要 brass-heavy orchestral fanfare；試了五組配器與速度，這組最好）：
+    # 法國號主題、小號旋律、慢弦樂分解＋弦樂分解、合唱「啊」鋪底、低音號低音；管弦樂鼓組（bank 128 第 48 號，定音鼓與鈸）在
+    # verse／body／title 段；D 小調、128 BPM。試聽意見：大鼓太密（一直咚咚咚）、旋律偏單調，要更大氣就改用 tools/music3
+    "epic": dict(
+        programs={"motif": 60, "lead": 56, "harp": 49, "arp": 48, "pad": 52, "bass": 58},
+        bpm=(120, 136), target=128, tonic=62, final="i", shaker_roles=(), drum_roles=("verse", "body", "title"),
+        drum_kit=48),
     # 中東市集 bazaar（做給古代近東題材：story 風格用在另一個系列，兩個聽起來太像）：排笛主題（像蘆笛 ney）、單簧管旋律、西塔琴撥弦分解、
     # 弦樂鋪底、低音大提琴；D 和聲小調（V 大三和弦帶出增二度的中東味）；verse／body 有沙鈴
     "bazaar": dict(

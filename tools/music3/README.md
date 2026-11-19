@@ -89,3 +89,16 @@ sf.write("/content/song.wav", wav, pipe.sampling_rate)
 
 - 台語歌詞唱得出來，但要能用還得多試幾個 seed、改寫 `CAPTION`。第一次就能用的機率不高。
 - Mac 本機（MPS）還沒有成熟的跑法，2026-11-18 不建議。
+- **曲風描述寫了 choir（合唱）就會唱出人聲**，即使同時寫了 No vocals、歌詞全是 `[Instrumental]`（2026-11-19：62 秒的史詩配樂，第 23–51 秒變成人聲段）。純配樂不要寫 choir。
+- 那首實際只出 52.3 秒（給 62 秒）：純配樂也可能提早收尾，`--seconds` 要比片子需要的多留 10 秒以上。
+- 事後用 demucs 去人聲不划算：人聲段去掉後幾乎無聲（每秒響度 -40 到 -65），只能拿器樂段重排。
+
+### 曲風描述範例：史詩預告片配樂（2026-11-19，使用者評「比較好」；已拿掉會引出人聲的 choir）
+
+```
+Global Metadata: Epic orchestral trailer score, cinematic Hollywood action, 128 BPM, D minor, heroic, majestic and grandiose, building tension with triumphant brass climaxes, wide and powerful, driving momentum throughout.
+
+Vocal Details: No vocals at all, instrumental only, no lyrics, no singing, no spoken words.
+
+Arrangement: Opens with a bold low brass and string hit and a short heroic French horn call. Then fast driving staccato string ostinato with taiko and big orchestral percussion accents (not a constant kick drum), the horns playing a soaring heroic melody. Around twenty seconds a triumphant full brass fanfare with trumpets. A slightly lighter, confident, playful middle passage with pizzicato strings and woodwinds. Then the strings rebuild with rising tension, brass stabs and timpani rolls, growing into a massive final climax with trumpets carrying the main melody, crashing cymbals and huge drums, ending on a powerful sustained chord.
+```
