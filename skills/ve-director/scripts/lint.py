@@ -129,6 +129,15 @@ def main():
                 continue
             if not any("嘴" in x for x in mine):
                 fail(n, "L5", f"{h} face visible but no mouth-lock sentence")
+        # L9: a spoken line is found by ve-runner only through the English wrap `says in …: "…"` (02-modes §0.1);
+        # a 繁中 wrap (以…語氣說："…") renders silent. And no caption words anywhere in the I2V, not even negated (01-core §10)
+        for q in re.finditer(r'"[^"]+"|「[^」]+」', i2v):
+            if not re.search(r'says in [^:"]*:\s*$', i2v[max(0, q.start() - 160):q.start()]):
+                fail(n, "L9", f"quoted {q.group(0)[:24]}… not in a `says in <tone>, <accent>:` wrap (a spoken line "
+                          "renders silent; quoted on-screen lettering is allowed only when the user asked for text)")
+        cw = re.search(r"字幕|畫面文字|subtitle|caption|lower third|text overlay|title card", i2v, re.I)
+        if cw:
+            fail(n, "L9", f"caption word '{cw.group(0)}' in the I2V (it summons burned-in text even when negated)")
         if "無文字" not in t2i and "No text" not in t2i:
             fail(n, "L6", "T2I lacks the 無文字 cleanliness clause")
         lm = LETTERING.search(t2i)

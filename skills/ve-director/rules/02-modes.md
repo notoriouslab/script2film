@@ -20,7 +20,7 @@ Most templates in these sources, and every official VideoExpress example in `05-
 
 ### §0.1 繁中 I2V template (fill every `<…>`)
 
-[REFERENCE USE] 以提供的圖片作為本鏡的精確開場畫面；它決定本鏡的構圖、世界、光線與精確取景，地點、色調與攝影機皆沿用該圖。 [IDENTITY / CONTINUITY] 出場角色：<Actor Alias>，<外觀錨點>。畫面中恰好<一｜兩>人。整支為單一連續鏡頭，不剪接。全程保持每位角色的臉、髮型、膚色與服裝和開場畫面完全一致。<每個道具一開始在哪裡，用該 shot T2I 的原字>。開場畫面裡沒有的東西都不會出現：不會冒出新的物件、玩具、車輛、門、家具、動物或人，場景全程是同一個地方。 [SCENE] <取景>，<Actor Alias> 位於 <與開場畫面完全相同的場景佈置>，<光線方向與色調>。本鏡的戲劇重點：<一句話>。 [ACTION 0-<a>s] <一個小幅度的主體動作>。[ACTION <a>-<b>s] <Actor Alias>，<外觀錨點>，以<語氣>的語氣、<Shape A：自然的國語口音｜Shape B：自然的台灣國語口音>說："<台詞>"。[ACTION <b>-<N>s] <收尾微動作>。 [CAMERA] 只做一種運鏡：<一個有目標的緩慢運鏡>。主體動作與鏡頭運動分開；畫面其餘部分保持穩定。 [LIGHT AND IMAGE] 延續開場畫面的<風格質感>。 [PRODUCTION SOUND] 符合場景的自然環境音（不含任何音樂），持續存在並鋪在台詞之下；無音樂、無旁白，唯一的語音是引號內的台詞。 [NEGATIVES] 避免：<風格的材質失誤>、臉部扭曲、嘴型變形、多餘肢體、形變、閃爍、畫面文字、字幕、水印、標誌、慢動作、定格。
+[REFERENCE USE] 以提供的圖片作為本鏡的精確開場畫面；它決定本鏡的構圖、世界、光線與精確取景，地點、色調與攝影機皆沿用該圖。 [IDENTITY / CONTINUITY] 出場角色：<Actor Alias>，<外觀錨點>。畫面中恰好<一｜兩>人。整支為單一連續鏡頭，不剪接。全程保持每位角色的臉、髮型、膚色與服裝和開場畫面完全一致。<每個道具一開始在哪裡，用該 shot T2I 的原字>。開場畫面裡沒有的東西都不會出現：不會冒出新的物件、玩具、車輛、門、家具、動物或人，場景全程是同一個地方。 [SCENE] <取景>，<Actor Alias> 位於 <與開場畫面完全相同的場景佈置>，<光線方向與色調>。本鏡的戲劇重點：<一句話>。 [ACTION 0-<a>s] <一個小幅度的主體動作>。[ACTION <a>-<b>s] <Actor Alias>，<外觀錨點>，says in a <2-word tone>, <Shape A: natural Mandarin accent｜Shape B: natural Taiwanese Mandarin accent>: "<台詞>"。[ACTION <b>-<N>s] <收尾微動作>。 [CAMERA] 只做一種運鏡：<一個有目標的緩慢運鏡>。主體動作與鏡頭運動分開；畫面其餘部分保持穩定。 [LIGHT AND IMAGE] 延續開場畫面的<風格質感>。 [PRODUCTION SOUND] 符合場景的自然環境音（不含任何音樂），持續存在並鋪在台詞之下；無音樂、無旁白，唯一的語音是引號內的台詞。 [NEGATIVES] 避免：<風格的材質失誤>、臉部扭曲、嘴型變形、多餘肢體、形變、閃爍、水印、標誌、慢動作、定格。
 
 A shot with no quoted line drops the speech beat, ends [PRODUCTION SOUND] with 「無音樂、無旁白、不加任何語音」, and adds the mouth lock for every visible face (`01-core.md §11`).
 
@@ -30,11 +30,11 @@ This is a pattern reference, not content to copy: invent the characters and scen
 
 **Text-To-Image Prompt:** 電影感真人實拍劇照，16:9 寬螢幕，腰部以上。Actor 1，六十歲的台灣母親，圓臉，眼角有細紋，溫和的深棕色眼睛，灰白短髮往後梳，穿深藍色開襟毛衣、內搭米色棉質上衣，坐在舊公寓廚房的木餐桌後方偏畫面左側，腰部以上入鏡，身體微朝右，雙手捧著一只冒著熱氣的白瓷湯碗放在桌面上，視線望向畫面右側。未修飾的皮膚質感，毛孔清晰可見，臉部自然不對稱，不磨皮、不美顏。她身後左側是淡綠色磁磚牆與老式瓦斯爐，右側是半掩的木門，門外走廊一片昏暗。一盞暖黃色鎢絲燈泡從正上方打下，在桌面投下柔和的圓形光池，她的臉一側落入陰影。色彩如未調色的 RAW 原片，細微的感光元件顆粒，焦點落在她臉上、景深淺。安靜、等待的深夜氛圍。無文字、無水印。
 
-**Image-To-Video Prompt:** [REFERENCE USE] 以提供的圖片作為本鏡的精確開場畫面；它決定本鏡的構圖、世界、光線與精確取景，地點、色調與攝影機皆沿用該圖。 [IDENTITY / CONTINUITY] 出場角色：Actor 1，灰白短髮、深藍開襟毛衣的六十歲台灣母親。畫面中恰好一人。整支為單一連續鏡頭，不剪接。全程保持她的臉、髮型、膚色與服裝和開場畫面完全一致。白瓷湯碗一開始在她雙手之間的桌面上。開場畫面裡沒有的東西都不會出現：不會冒出新的物件、玩具、車輛、門、家具、動物或人，場景全程是同一個地方。 [SCENE] 腰部以上，Actor 1 坐在舊公寓廚房的木餐桌後，暖黃燈泡從正上方打光。本鏡的戲劇重點：她把熱湯推給剛進門的女兒。 [ACTION 0-2s] Actor 1 雙手把湯碗緩緩推向畫面右側。[ACTION 2-6s] Actor 1，灰白短髮的母親，以溫柔的語氣、自然的國語口音說："先喝口熱湯吧。"[ACTION 6-8s] 她收回雙手放在桌緣，眼神仍望向畫面右側，湯碗上的熱氣緩緩上升。 [CAMERA] 只做一種運鏡：極緩慢推向她的臉，嘴部全程完整在框內。主體動作與鏡頭運動分開；畫面其餘部分保持穩定。 [LIGHT AND IMAGE] 延續開場畫面的真人實拍攝影質感。真實材質紋理、自然動態模糊，無 CGI 光澤。 [PRODUCTION SOUND] 老冰箱低沉的運轉聲與遠處的夜間車聲，持續存在並鋪在台詞之下；無音樂、無旁白，唯一的語音是引號內的台詞。 [NEGATIVES] 避免：CGI 或 3D 渲染感、塑膠光澤、過度平滑的數位潔淨感、臉部扭曲、嘴型變形、多餘肢體、形變、閃爍、畫面文字、字幕、水印、標誌、慢動作、定格。
+**Image-To-Video Prompt:** [REFERENCE USE] 以提供的圖片作為本鏡的精確開場畫面；它決定本鏡的構圖、世界、光線與精確取景，地點、色調與攝影機皆沿用該圖。 [IDENTITY / CONTINUITY] 出場角色：Actor 1，灰白短髮、深藍開襟毛衣的六十歲台灣母親。畫面中恰好一人。整支為單一連續鏡頭，不剪接。全程保持她的臉、髮型、膚色與服裝和開場畫面完全一致。白瓷湯碗一開始在她雙手之間的桌面上。開場畫面裡沒有的東西都不會出現：不會冒出新的物件、玩具、車輛、門、家具、動物或人，場景全程是同一個地方。 [SCENE] 腰部以上，Actor 1 坐在舊公寓廚房的木餐桌後，暖黃燈泡從正上方打光。本鏡的戲劇重點：她把熱湯推給剛進門的女兒。 [ACTION 0-2s] Actor 1 雙手把湯碗緩緩推向畫面右側。[ACTION 2-6s] Actor 1，灰白短髮的母親，says in a warm, gentle natural Mandarin accent: "先喝口熱湯吧。"[ACTION 6-8s] 她收回雙手放在桌緣，眼神仍望向畫面右側，湯碗上的熱氣緩緩上升。 [CAMERA] 只做一種運鏡：極緩慢推向她的臉，嘴部全程完整在框內。主體動作與鏡頭運動分開；畫面其餘部分保持穩定。 [LIGHT AND IMAGE] 延續開場畫面的真人實拍攝影質感。真實材質紋理、自然動態模糊，無 CGI 光澤。 [PRODUCTION SOUND] 老冰箱低沉的運轉聲與遠處的夜間車聲，持續存在並鋪在台詞之下；無音樂、無旁白，唯一的語音是引號內的台詞。 [NEGATIVES] 避免：CGI 或 3D 渲染感、塑膠光澤、過度平滑的數位潔淨感、臉部扭曲、嘴型變形、多餘肢體、形變、閃爍、水印、標誌、慢動作、定格。
 
 ❌ `[ACTION 2-6s] Actor 1, the mother, says gently: "先喝口熱湯吧。"` — English body around a Chinese line.
 ❌ `[SCENE] Waist-up of Actor 1 at the kitchen table, warm overhead light.` — any English sentence in a prompt body.
-✅ The two prompts above: 繁中 everywhere except the tags, `Actor 1`, `16:9`.
+✅ The two prompts above: 繁中 everywhere except the tags, `Actor 1`, `16:9`, and the speech-act wrap `says in a <tone>, <accent>: "<line>"`, which stays English in every language: ve-runner finds spoken lines only by that wrap (a 繁中 `以…語氣說：` wrap made a 2026-11-19 film's speaking shots render silent), and the line inside the quotes keeps its own language.
 
 ---
 

@@ -23,7 +23,7 @@ Every official I2V prompt is **one line** made of eight literal uppercase bracke
 | `[CAMERA]` | ONE move only | "One move only: slow steady push in. Subject motion and camera motion are separate; hold the rest of the frame steady." |
 | `[LIGHT AND IMAGE]` | Continue the frame's lighting and grade, then the style's material lock (table below) | "Continue the exact lighting, colour grade and <style look> of the opening frame." |
 | `[PRODUCTION SOUND]` | Ambience only | "Natural scene ambience matched to the location, present and continuous, no music, no narration, no added speech." (speaking shots: "the only speech is the quoted line") |
-| `[NEGATIVES]` | Style-specific material failures first, then the common list | "Avoid: distorted faces, warped mouths, extra limbs, morphing, flicker, on-screen text, captions, watermarks, subtitles, logos, slow motion, frozen frames." |
+| `[NEGATIVES]` | Style-specific material failures first, then the common list | "Avoid: distorted faces, warped mouths, extra limbs, morphing, flicker, watermarks, logos, slow motion, frozen frames." (the official list also has on-screen text, captions, subtitles: dropped, see below) |
 
 Rules the examples imply:
 
@@ -34,7 +34,7 @@ Rules the examples imply:
 - Fill every slot. The emitted line contains no angle brackets, and the character reference is the literal Actor Alias (`Actor 1`), never a descriptive name.
   - Anti-pattern ❌: `[IDENTITY / CONTINUITY] Characters present: <Mole Gardener>, <continuity anchor>.`
   - Correct ✅: `[IDENTITY / CONTINUITY] Characters present: Actor 1, the stout charcoal-clay mole gardener with brass spectacles and a cream apron.`
-- **Open question for A/B (2026-09-19):** every official example lists `text, watermark, subtitles, logos` inside `[NEGATIVES]`, which contradicts `01-core.md §10` (naming those concepts in a prompt body summons them). Because the tag is the platform's own v3.5 grammar, this distribution follows it; if burned-in text rises in real runs, drop those four words from `[NEGATIVES]` first and keep the rest of the tag.
+- **Settled 2026-11-19 (open since 2026-09-19):** every official example lists `on-screen text, captions, subtitles` inside `[NEGATIVES]`, which contradicts `01-core.md §10`. On a 2026-11-19 film the speaking shots whose [NEGATIVES] listed 畫面文字、字幕 burned captions into the frame and the re-rolls without them came out clean, so those words are dropped; watermarks and logos stay. The official examples below keep their original wording; the 繁中 output never copies those words.
 - Every official example is a 3-second shot. This distribution keeps its 5-9s per-shot planning (`02-modes.md §1.2a`) until a real run shows otherwise.
 
 ## §2 Per-style table
@@ -163,7 +163,7 @@ Tested shot (cool-light flashback), Text-To-Image:
 
 Image-To-Video:
 
-> [REFERENCE USE] 以提供的圖片作為本鏡的精確開場畫面，保留原本的構圖與手工停格動畫的質感。 [IDENTITY / CONTINUITY] 出場角色：Actor 2，戴棕色瓜皮小帽、穿赭黃長袍棕紅馬褂的男子懸絲偶。畫面中恰好一人。整支為單一連續鏡頭，不剪接。保持同一尊木製懸絲偶的木雕臉、髮型、服裝、外露的關節與可見的懸絲；他一開始坐在矮凳上，手放在攤開冊子的右頁邊緣。場景、桌子與器物全程不變。 [SCENE] 中景，Actor 2 坐在微縮廚房的木桌旁，冷藍灰色的光從左上方打下。本鏡的戲劇重點：他在冊子裡翻找一個人。 [ACTION 0-5s] Actor 2 的手指沿著右頁移到老者人像旁邊。 [ACTION 5-9s] 手指停在人像旁，他的頭微微低向冊子，之後保持不動。 [CAMERA] 固定機位，攝影機完全不移動，木偶全程在畫面內。 [LIGHT AND IMAGE] 延續開場畫面固定的實景打光、淺的微縮景深與不完美的手工表面；木紋、布料織紋與懸絲全程清楚可見。溫和的停格節奏，不扭曲肢體結構。 [PRODUCTION SOUND] 手指輕擦紙面的聲響與安靜的室內環境音；無對白、無旁白、無音樂。 [NEGATIVES] 避免：亮面塑膠、吊線或關節消失、平滑的 CGI 運動、打光變化、鏡頭晃動、真實皮膚、臉部變形、多餘肢體、走動、新的手勢、畫面文字、字幕、水印、標誌。
+> [REFERENCE USE] 以提供的圖片作為本鏡的精確開場畫面，保留原本的構圖與手工停格動畫的質感。 [IDENTITY / CONTINUITY] 出場角色：Actor 2，戴棕色瓜皮小帽、穿赭黃長袍棕紅馬褂的男子懸絲偶。畫面中恰好一人。整支為單一連續鏡頭，不剪接。保持同一尊木製懸絲偶的木雕臉、髮型、服裝、外露的關節與可見的懸絲；他一開始坐在矮凳上，手放在攤開冊子的右頁邊緣。場景、桌子與器物全程不變。 [SCENE] 中景，Actor 2 坐在微縮廚房的木桌旁，冷藍灰色的光從左上方打下。本鏡的戲劇重點：他在冊子裡翻找一個人。 [ACTION 0-5s] Actor 2 的手指沿著右頁移到老者人像旁邊。 [ACTION 5-9s] 手指停在人像旁，他的頭微微低向冊子，之後保持不動。 [CAMERA] 固定機位，攝影機完全不移動，木偶全程在畫面內。 [LIGHT AND IMAGE] 延續開場畫面固定的實景打光、淺的微縮景深與不完美的手工表面；木紋、布料織紋與懸絲全程清楚可見。溫和的停格節奏，不扭曲肢體結構。 [PRODUCTION SOUND] 手指輕擦紙面的聲響與安靜的室內環境音；無對白、無旁白、無音樂。 [NEGATIVES] 避免：亮面塑膠、吊線或關節消失、平滑的 CGI 運動、打光變化、鏡頭晃動、真實皮膚、臉部變形、多餘肢體、走動、新的手勢、水印、標誌。
 
 ### Comic Book (`comic-book`)
 
@@ -276,4 +276,4 @@ Generator settings that the runs depended on:
 
 **Image-To-Video**
 
-> [REFERENCE USE] 以提供的圖片作為本鏡的精確開場畫面；它決定本鏡的構圖、世界、光線與精確取景，地點、色調與攝影機皆沿用該圖。 [IDENTITY / CONTINUITY] 出場角色：Actor 1，黑髮髻插綠色玉簪、穿靛藍鏤空回紋衫的主婦皮影偶。畫面中恰好一人。整支為單一連續鏡頭，不剪接。全程保持每位角色的臉、髮型、膚色與服裝和開場畫面完全一致；Actor 1 全程是貼著紗幕的平面染色牛皮偶，身體各片只繞著鉚釘關節轉動。Actor 1 一開始站在木桌左側，雙手垂在身側；瓷粥碗一開始在桌面中央偏左。只有一只瓷粥碗、一張木桌；零件不會重複、分裂、融合或變形。Actor 1 的嘴唇輕輕閉合成放鬆的閉口表情，全程維持不變；下巴、臉頰與下半臉保持靜止，不說話、不對嘴、不張嘴、不露齒。情緒只透過眼神、眉毛、眨眼、頭部、雙手與姿態表現。開場畫面裡沒有的東西都不會出現：不會冒出新的物件、玩具、車輛、門、家具、動物或人，場景全程是同一個地方。 [SCENE] 中景，Actor 1 站在素白紗幕前的木桌左側，暖黃燈光從紗幕後方透出。本鏡的戲劇重點：早飯桌上她準備開口。 [ACTION 0-5s] Actor 1 的頭繞著頸部鉚釘微微抬起，視線維持望向畫面右側的桌子，之後保持不動，碗口熱氣緩緩上升。 [CAMERA] 只做一種運鏡：固定機位，攝影機完全不移動。主體動作與鏡頭運動分開；畫面其餘部分保持穩定。 [LIGHT AND IMAGE] 延續開場畫面的暖黃背光、染色牛皮的半透明光澤與清晰的鏤空刻邊。牛皮片是硬的、平貼紗幕，只繞著鉚釘關節轉動，動作是逐格停頓、停一下再定住的頓挫節奏。 [PRODUCTION SOUND] 碗口細微的熱氣與清晨室內安靜的環境音，持續存在；無音樂、無旁白、不加任何語音。 [NEGATIVES] 避免：真實皮膚、立體圓潤的人偶、牛皮彎折或起伏、身體前彎或駝背、皮影轉向鏡頭、刻邊模糊、操縱桿斷裂或增生、臉部扭曲、嘴型變形、多餘肢體、形變、閃爍、畫面文字、字幕、水印、標誌、慢動作、定格。
+> [REFERENCE USE] 以提供的圖片作為本鏡的精確開場畫面；它決定本鏡的構圖、世界、光線與精確取景，地點、色調與攝影機皆沿用該圖。 [IDENTITY / CONTINUITY] 出場角色：Actor 1，黑髮髻插綠色玉簪、穿靛藍鏤空回紋衫的主婦皮影偶。畫面中恰好一人。整支為單一連續鏡頭，不剪接。全程保持每位角色的臉、髮型、膚色與服裝和開場畫面完全一致；Actor 1 全程是貼著紗幕的平面染色牛皮偶，身體各片只繞著鉚釘關節轉動。Actor 1 一開始站在木桌左側，雙手垂在身側；瓷粥碗一開始在桌面中央偏左。只有一只瓷粥碗、一張木桌；零件不會重複、分裂、融合或變形。Actor 1 的嘴唇輕輕閉合成放鬆的閉口表情，全程維持不變；下巴、臉頰與下半臉保持靜止，不說話、不對嘴、不張嘴、不露齒。情緒只透過眼神、眉毛、眨眼、頭部、雙手與姿態表現。開場畫面裡沒有的東西都不會出現：不會冒出新的物件、玩具、車輛、門、家具、動物或人，場景全程是同一個地方。 [SCENE] 中景，Actor 1 站在素白紗幕前的木桌左側，暖黃燈光從紗幕後方透出。本鏡的戲劇重點：早飯桌上她準備開口。 [ACTION 0-5s] Actor 1 的頭繞著頸部鉚釘微微抬起，視線維持望向畫面右側的桌子，之後保持不動，碗口熱氣緩緩上升。 [CAMERA] 只做一種運鏡：固定機位，攝影機完全不移動。主體動作與鏡頭運動分開；畫面其餘部分保持穩定。 [LIGHT AND IMAGE] 延續開場畫面的暖黃背光、染色牛皮的半透明光澤與清晰的鏤空刻邊。牛皮片是硬的、平貼紗幕，只繞著鉚釘關節轉動，動作是逐格停頓、停一下再定住的頓挫節奏。 [PRODUCTION SOUND] 碗口細微的熱氣與清晨室內安靜的環境音，持續存在；無音樂、無旁白、不加任何語音。 [NEGATIVES] 避免：真實皮膚、立體圓潤的人偶、牛皮彎折或起伏、身體前彎或駝背、皮影轉向鏡頭、刻邊模糊、操縱桿斷裂或增生、臉部扭曲、嘴型變形、多餘肢體、形變、閃爍、水印、標誌、慢動作、定格。

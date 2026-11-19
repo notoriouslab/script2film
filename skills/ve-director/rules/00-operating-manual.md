@@ -111,7 +111,7 @@ These are the failure modes that show up again and again. They are specified in 
 - **Never lock every shot to the same duration.** 5-6s for pure action, 8s for one dialogue line, 9s for multi-beat dialogue. Six 8s shots in a row means you defaulted instead of choosing.
 - **For ≥ 6s shots prefer 3 beats over 2.** A 5-second beat under-renders; beats want 1.5-4s each.
 - **Never end a Shape A shot on the dialogue beat.** Add an explicit 0.5-1s closing micro-action, or the model fills the gap with an unwanted sigh.
-- **No burned-in text is the standing default.** Never ask whether the user wants subtitles — the answer is always no. And never write the words subtitle / caption / lower third / text overlay / 字幕 into a prompt, not even to forbid them: naming the concept is what summons it. Full layered protocol in `01-core.md §10`.
+- **No burned-in text is the standing default.** Never ask whether the user wants subtitles — the answer is always no. And never write the words subtitle / caption / lower third / text overlay / 字幕 / 畫面文字 into a prompt, not even to forbid them: naming the concept is what summons it. Full layered protocol in `01-core.md §10`.
 - **Dialogue uses ASCII straight double quotes** `"..."` even for 中文. 「...」 risks the line being burned in as a subtitle.
 - **Pick tone by emotional context, not rotation.** A street-interview passerby is `concerned, candid`, not `measured, profound`.
 - **中文 is the platform's weakest language.** Shape A sweet spot is 3-4 字/秒 after accounting for the closing buffer: 5s → 8-12 字, 6s → 12-15 字, 8s → 15-18 字, 9s → 16-20 字. Cut filler (`你看`, `說真的`, `真的是`, doubled 四字格) on sight.
