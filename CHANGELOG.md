@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+- **Local transcription is whisper.cpp now, not mlx-whisper.** Same model (large-v3-turbo), so the same accuracy; it
+  runs on any system whisper.cpp builds on, gives the same text every run, and no longer repeats a phrase dozens of
+  times when many takes go in one run. Set `S2F_WHISPER_CPP_MODEL` to `ggml-large-v3-turbo.bin` (`setup_voice.sh` does
+  it); `S2F_MLX_WHISPER_DIR` is no longer read, and a machine with only that set is told what to change.
+
 ## 1.1.0 (2026-11-18)
 
 - **MiniMax H3 and MiniMax Music 3 on your own Google Colab GPU (optional).** `tools/h3/h3_film.py` plans, runs and

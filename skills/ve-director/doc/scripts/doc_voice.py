@@ -1,6 +1,6 @@
 """Pick one TTS candidate per line (each is transcribed, best overlap with the script wins), trim, join with gaps.
-doc.json "asr": "local" (default) transcribes with mlx-whisper on this machine (S2F_MLX_WHISPER_DIR) and never calls Groq;
-"cloud" uses Groq Whisper. In cloud mode, when Groq answers "rate limit" and S2F_MLX_WHISPER_DIR is set, the remaining candidates are transcribed locally (mlx-whisper)
+doc.json "asr": "local" (default) transcribes with whisper.cpp on this machine (S2F_WHISPER_CPP_MODEL) and never calls Groq;
+"cloud" uses Groq Whisper. In cloud mode, when Groq answers "rate limit" and S2F_WHISPER_CPP_MODEL is set, the remaining candidates are transcribed locally (whisper.cpp)
 instead of waiting for the limit to reset (2026-10-21: the free tier hit its limit on a 41-line film and every retry waited 15 s or more).
 
   python3 doc_voice.py <project>/doc.json
@@ -19,7 +19,7 @@ Inside a line, real pauses at punctuation are lengthened and lines over max_rate
 max_slow (doc_pauses.py has the why). Among takes with the same score, the one that pauses at more marks wins, then the
 one whose speed is nearest target_rate (5.1 characters a second); until 2026-11-06 a tie went to the shortest take, so the
 fastest reading was picked line after line.
-Word timings for this come from local Whisper (S2F_MLX_WHISPER_DIR), cached in tts/asr_words.json; without it only the
+Word timings for this come from local Whisper (S2F_WHISPER_CPP_MODEL), cached in tts/asr_words.json; without it only the
 slow-down and the slower-take rule apply.
 """
 import sys as _sys, pathlib as _pl   # 設定檔：tools/config/s2f_config.py
@@ -120,15 +120,15 @@ def pitch_targets(rows, speakers, tol):
 
 
 def word_timings(P, cands_by_line, lang):
-    """{take name: [[word, start, end], ...]} from local Whisper, cached in tts/asr_words.json; None without S2F_MLX_WHISPER_DIR."""
+    """{take name: [[word, start, end], ...]} from local Whisper, cached in tts/asr_words.json; None without S2F_WHISPER_CPP_MODEL."""
     if not doc_common.has_local_asr():
-        print("  S2F_MLX_WHISPER_DIR not set: no pauses at punctuation (slow-down and slower-take rule still apply)", flush=True)
+        print("  S2F_WHISPER_CPP_MODEL not set: no pauses at punctuation (slow-down and slower-take rule still apply)", flush=True)
         return None
     cp = P / "tts/asr_words.json"
     cache = json.loads(cp.read_text()) if cp.exists() else {}
     todo = [c for cands in cands_by_line for c in cands if c.name not in cache]
     if todo:
-        print(f"  word timings for {len(todo)} takes (mlx-whisper)", flush=True)
+        print(f"  word timings for {len(todo)} takes (whisper.cpp)", flush=True)
         for p, v in local_asr(todo, lang, words=True).items():
             cache[p.name] = [[w["word"], w["start"], w["end"]] for seg in v["segments"] for w in seg.get("words", [])]
         cp.write_text(json.dumps(cache, ensure_ascii=False))
@@ -159,7 +159,7 @@ def candidates(folder, key, n):
 
 def transcribe_takes(doc, P, cands_by_line):
     """Transcripts of every take, cached in tts/asr_cache.json. Returns (cache, Groq key or None).
-    "asr" local: mlx-whisper only, never Groq; an empty transcript is cached too (a take counts as done when its name is in
+    "asr" local: whisper.cpp only, never Groq; an empty transcript is cached too (a take counts as done when its name is in
     the cache). "asr" cloud: Groq, the rest locally when rate-limited; an empty transcript is tried again."""
     lang, mode = doc["lang"], asr_mode(doc)
     (P / "tts").mkdir(exist_ok=True)
@@ -169,7 +169,7 @@ def transcribe_takes(doc, P, cands_by_line):
         todo = [c for cands in cands_by_line for c in cands if c.name not in cache]   # takes of edited-away text are skipped
         if todo:
             need_local_asr()
-            print(f"  transcribing {len(todo)} candidates locally (mlx-whisper)", flush=True)
+            print(f"  transcribing {len(todo)} candidates locally (whisper.cpp)", flush=True)
             for p, t in local_asr(todo, lang).items():
                 cache[p.name] = t
             cache_p.write_text(json.dumps(cache, ensure_ascii=False, indent=1))
@@ -180,7 +180,7 @@ def transcribe_takes(doc, P, cands_by_line):
     for i, c in enumerate(todo):
         text = groq(c, key, lang, give_up_on_limit=local_ok)
         if text is None:
-            print(f"  Groq rate-limited: transcribing the other {len(todo) - i} candidates locally (mlx-whisper)", flush=True)
+            print(f"  Groq rate-limited: transcribing the other {len(todo) - i} candidates locally (whisper.cpp)", flush=True)
             for p, t in local_asr(todo[i:], lang).items():
                 cache[p.name] = t
             cache_p.write_text(json.dumps(cache, ensure_ascii=False, indent=1))

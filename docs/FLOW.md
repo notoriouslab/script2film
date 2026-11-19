@@ -41,7 +41,7 @@ Paths live in `~/.config/script2film/config.json` (one per machine, described in
 **Running inside an agent with a sandbox.** Some agents run commands in a sandbox that blocks network access, files outside the workspace and local connections by default. This project needs all three allowed:
 
 1. **Network access**, while installing (the fonts, the npm and Python packages, HyperFrames' browser and the voice model are downloaded) and the first time F2 transcribes (the transcription model, about 1.5 GB, is downloaded then).
-2. **Reading and writing the voice and transcription environments**, which live outside the repository (`~/s2f-voice/` by default). Their folders are the two keys `S2F_QWEN_TTS_DIR` and `S2F_MLX_WHISPER_DIR` in `~/.config/script2film/config.json`; the voice and timing steps (F2, F3) run those environments' own Python.
+2. **Reading and writing the voice and transcription environments**, which live outside the repository (`~/s2f-voice/` by default). Their paths are the two keys `S2F_QWEN_TTS_DIR` (a folder) and `S2F_WHISPER_CPP_MODEL` (the transcription model file) in `~/.config/script2film/config.json`; the voice step (F2) runs the voice environment's own Python, the timing step (F3) runs `whisper-cli`.
 3. **Connections to this machine (127.0.0.1)**: HyperFrames renders each scene by serving the page from a small web server on this machine to its headless browser.
 
 When one is blocked: the font and package downloads fail (1); the voice or transcription step stops because that environment's Python cannot read its own `pyvenv.cfg` (2); the scene render stops with `connect EPERM 127.0.0.1` (3). Allow these three for this workspace and run the step again; nothing else needs to change.

@@ -1,4 +1,4 @@
-"""doc.json "asr" (s2f-1a D3): "local" (the default) transcribes with mlx-whisper only, never asks for a Groq key and never
+"""doc.json "asr" (s2f-1a D3): "local" (the default) transcribes with whisper.cpp only, never asks for a Groq key and never
 runs Scribe; an empty local transcript is cached instead of falling back to Groq; "cloud" keeps the Groq + Scribe path.
 local_asr is faked: no model runs and no online service is called."""
 import json
@@ -26,10 +26,8 @@ def no_groq_key():
 
 @pytest.fixture
 def env(monkeypatch, tmp_path):
-    """Local mode setup: MLX_WHISPER_DIR set (the old name; S2F_MLX_WHISPER_DIR cleared), groq_key raises, local_asr is
-    fake, every subprocess.run is recorded."""
-    monkeypatch.delenv("S2F_MLX_WHISPER_DIR", raising=False)
-    monkeypatch.setenv("MLX_WHISPER_DIR", str(tmp_path))
+    """Local mode setup: S2F_WHISPER_CPP_MODEL set, groq_key raises, local_asr is fake, every subprocess.run is recorded."""
+    monkeypatch.setenv("S2F_WHISPER_CPP_MODEL", str(tmp_path / "model.bin"))
     monkeypatch.setattr(doc_common, "groq_key", no_groq_key)
     calls, asr_calls = [], []
 
@@ -51,9 +49,9 @@ def env(monkeypatch, tmp_path):
 
 
 def no_local(mp):
-    """No local transcription folder under either name (a shell that exports S2F_MLX_WHISPER_DIR must not leak in)."""
-    mp.delenv("S2F_MLX_WHISPER_DIR", raising=False)
-    mp.delenv("MLX_WHISPER_DIR", raising=False)
+    """No local transcription model (a shell that exports it, or the retired mlx folder, must not leak in)."""
+    for name in ("S2F_WHISPER_CPP_MODEL", "S2F_MLX_WHISPER_DIR", "MLX_WHISPER_DIR"):
+        mp.delenv(name, raising=False)
 
 
 def takes(P):
@@ -111,17 +109,17 @@ def test_local_never_calls_groq_or_scribe(env):
     assert not any("api.groq.com" in c for c in env["calls"])
 
 
-def test_local_without_mlx_whisper_dir_stops(env):
+def test_local_without_a_model_stops(env):
     no_local(env["mp"])
     P = env["P"]
     cands = takes(P)
     with pytest.raises(SystemExit) as e:
         doc_voice.transcribe_takes(doc(), P, cands)
-    assert "MLX_WHISPER_DIR" in str(e.value)
+    assert "S2F_WHISPER_CPP_MODEL" in str(e.value)
     aligned_project(P)
     with pytest.raises(SystemExit) as e:
         doc_align.word_times(doc(), P)
-    assert "MLX_WHISPER_DIR" in str(e.value)
+    assert "S2F_WHISPER_CPP_MODEL" in str(e.value)
 
 
 def test_cloud_asks_for_the_groq_key(env):
@@ -139,11 +137,11 @@ def test_cloud_asks_for_the_groq_key(env):
     assert set(cache) == set(TAKES)
 
 
-def test_local_word_times_marked_mlx_whisper(env):
+def test_local_word_times_marked_whisper_cpp(env):
     P = env["P"]
     aligned_project(P)
     sj = doc_align.word_times(doc(), P)
-    assert json.loads(sj.read_text())["source"] == "mlx-whisper"
+    assert json.loads(sj.read_text())["source"] == "whisper.cpp"
 
 
 # ElevenLabs Scribe called directly (s2f-naming D1). No test reaches the network: subprocess.run, scribe_words or
@@ -175,7 +173,7 @@ def counting_local_words(env):
 
     def fake(audio, lang, sj):
         n.append(1)
-        sj.write_text(json.dumps({**WORDS, "source": "mlx-whisper"}), encoding="utf-8")
+        sj.write_text(json.dumps({**WORDS, "source": "whisper.cpp"}), encoding="utf-8")
     env["mp"].setattr(doc_align, "local_words", fake)
     return n
 
@@ -236,7 +234,7 @@ def test_cloud_scribe_error_without_local_stops(env, tmp_path):
     with pytest.raises(SystemExit) as e:
         doc_align.word_times(doc(asr="cloud"), P)
     msg = str(e.value)
-    assert e.value.code != 0 and "ELEVENLABS_API_KEY" in msg and "MLX_WHISPER_DIR" in msg and n == []
+    assert e.value.code != 0 and "ELEVENLABS_API_KEY" in msg and "S2F_WHISPER_CPP_MODEL" in msg and n == []
 
 
 def test_cloud_no_key_with_local_skips_scribe(env, tmp_path):
@@ -311,24 +309,21 @@ def test_cloud_no_key_no_local_stops(env, tmp_path):
     with pytest.raises(SystemExit) as e:
         doc_align.word_times(doc(asr="cloud"), P)
     msg = str(e.value)
-    assert e.value.code != 0 and "ELEVENLABS_API_KEY" in msg and "MLX_WHISPER_DIR" in msg
+    assert e.value.code != 0 and "ELEVENLABS_API_KEY" in msg and "S2F_WHISPER_CPP_MODEL" in msg
 
 
 def test_need_local_asr_message_has_no_cloud(monkeypatch):
     no_local(monkeypatch)
     with pytest.raises(SystemExit) as e:
         doc_common.need_local_asr()
-    assert "MLX_WHISPER_DIR" in str(e.value) and "cloud" not in str(e.value)
+    assert "S2F_WHISPER_CPP_MODEL" in str(e.value) and "cloud" not in str(e.value)
 
 
-def test_cloud_scribe_error_falls_back_with_only_the_new_name(env, tmp_path):
-    """Only S2F_MLX_WHISPER_DIR set (the old name cleared): it still counts as a local transcription folder."""
-    with_key(env["mp"], tmp_path)
-    env["mp"].delenv("MLX_WHISPER_DIR")
-    env["mp"].setenv("S2F_MLX_WHISPER_DIR", str(tmp_path))
-    n = counting_local_words(env)
-    env["mp"].setattr(doc_align, "scribe_words", failing_scribe)
-    P = env["P"]
-    aligned_project(P)
-    doc_align.word_times(doc(asr="cloud"), P)
-    assert len(n) == 1
+def test_only_the_retired_mlx_folder_set_says_how_to_move(monkeypatch, tmp_path):
+    """Only the retired S2F_MLX_WHISPER_DIR set: not a local transcriber any more; the stop says it was replaced."""
+    no_local(monkeypatch)
+    monkeypatch.setenv("S2F_MLX_WHISPER_DIR", str(tmp_path))
+    assert doc_common.has_local_asr() is False
+    with pytest.raises(SystemExit) as e:
+        doc_common.need_local_asr()
+    assert "replaced by whisper.cpp" in str(e.value) and "S2F_WHISPER_CPP_MODEL" in str(e.value)

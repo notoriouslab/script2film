@@ -4,9 +4,9 @@
 1. tts/voice.wav + 0.45 s lead silence, loudnorm → voice.cleaned/audio.m4a
 2. word timing → voice.cleaned/aligned/audio.words.json (cached; --retime after the audio changes; a project made before
    2026-11-13 has audio.scribe.json instead, read as the cache while it is still fresh, never renamed). doc.json "asr":
-   "local" (default) is mlx-whisper on this machine (S2F_MLX_WHISPER_DIR), marked "source": "mlx-whisper"; "cloud" sends the
+   "local" (default) is whisper.cpp on this machine (S2F_WHISPER_CPP_MODEL), marked "source": "whisper.cpp"; "cloud" sends the
    audio to ElevenLabs Scribe (ELEVENLABS_API_KEY; model scribe_v2, or S2F_SCRIBE_MODEL), marked "source": "elevenlabs
-   <model>", and without a key or when Scribe fails, local mlx-whisper word timing instead (stops when neither works)
+   <model>", and without a key or when Scribe fails, local whisper.cpp word timing instead (stops when neither works)
 3. script tokens × transcript tokens (difflib) → voice.cleaned/final.srt: the script's own text, one screen per chunk
    (zh ≤ 18 characters; en ≤ two lines of 42 characters; cut at punctuation)
 4. beats.json: a beat starts up to 0.25 s before its first word (not before the previous line ends), or right after the
@@ -21,7 +21,7 @@ import s2f_config; s2f_config.load()
 import difflib, json, math, os, re, subprocess, sys
 from pathlib import Path
 
-from doc_common import (asr_mode, duration, eleven_key, has_local_asr, load, local_asr, need_local_asr, sh,
+from doc_common import (LOCAL_SETUP, asr_mode, duration, eleven_key, has_local_asr, load, local_asr, need_local_asr, sh,
                         tokens)
 
 LEAD, PRE = 0.45, 0.25
@@ -70,9 +70,9 @@ def two_lines(c, width=42):
 
 
 def local_words(audio, lang, sj):
-    """mlx-whisper word timing written to sj, marked "source": "mlx-whisper"."""
+    """whisper.cpp word timing written to sj, marked "source": "whisper.cpp"."""
     res = local_asr([audio], lang, words=True)
-    sj.write_text(json.dumps({**next(iter(res.values())), "source": "mlx-whisper"}, ensure_ascii=False), encoding="utf-8")
+    sj.write_text(json.dumps({**next(iter(res.values())), "source": "whisper.cpp"}, ensure_ascii=False), encoding="utf-8")
 
 
 SCRIBE_URL = "https://api.elevenlabs.io/v1/speech-to-text"
@@ -129,8 +129,8 @@ def word_times(doc, P, retime=False):
     """Word timing of voice.cleaned/audio.m4a → voice.cleaned/aligned/audio.words.json. Cache: audio.words.json, else the
     old name audio.scribe.json (read as it is, not copied or renamed), each only while it is not older than tts/voice.wav
     (audio.m4a is rewritten by every run, so it is not the reference); retime, or no fresh cache, transcribes again into
-    audio.words.json. "asr" local: mlx-whisper; cloud: ElevenLabs Scribe, mlx-whisper without a key or when
-    Scribe fails (only if S2F_MLX_WHISPER_DIR or the old MLX_WHISPER_DIR is set; otherwise it stops with both ways out)."""
+    audio.words.json. "asr" local: whisper.cpp; cloud: ElevenLabs Scribe, whisper.cpp without a key or when
+    Scribe fails (only if S2F_WHISPER_CPP_MODEL is set; otherwise it stops with both ways out)."""
     lang, C = doc["lang"], P / "voice.cleaned"
     sj = C / "aligned/audio.words.json"
     # the transcript is of the old voice once tts/voice.wav changes (2026-10-29: two lines re-voiced, beats kept the old times)
@@ -152,9 +152,8 @@ def word_times(doc, P, retime=False):
     else:
         why = "no ElevenLabs key (ELEVENLABS_API_KEY)"
     if not has_local_asr():
-        sys.exit(f"✗ {why}: set ELEVENLABS_API_KEY (or ELEVEN_API_KEY), or set S2F_MLX_WHISPER_DIR (the old name MLX_WHISPER_DIR also works) "
-                 "to a folder whose .venv has mlx-whisper for local word timing")
-    print(f"  {why}: word timing from local mlx-whisper instead", flush=True)
+        sys.exit(f"✗ {why}: set ELEVENLABS_API_KEY (or ELEVEN_API_KEY), or for local word timing {LOCAL_SETUP}")
+    print(f"  {why}: word timing from local whisper.cpp instead", flush=True)
     local_words(C / "audio.m4a", lang, sj)
     return sj
 

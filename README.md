@@ -167,7 +167,7 @@ and upload.
 |---|---|---|---|
 | Script | topic and material → `doc.json` (lines and beats) | written by hand from the format guide | an AI agent following the skill |
 | Voice | lines → one audio file per line, then the joined narration | Qwen3-TTS, on your machine | your own recording |
-| Timing | narration → `beats.json`, subtitles | mlx-whisper, on your machine | Groq, ElevenLabs Scribe |
+| Timing | narration → `beats.json`, subtitles | whisper.cpp, on your machine | Groq, ElevenLabs Scribe |
 | Pictures: drawn | beats and parameters → one mp4 per beat | the scene engine in `skills/ve-director/doc/` (27 scenes) | |
 | Pictures: footage | photos and clips → the picture of a beat | photos with a licence record | VideoExpress (`tools/ve-runner/`), MiniMax H3 on your own Colab (`tools/h3/`) |
 | Host | narration → a presenter video | no host | TalkingPhotos, MiniMax H3 |
@@ -223,8 +223,8 @@ Where each one got stuck and how to get past it: [docs/AGENT-TRIALS.md](./docs/A
 
 ## Requirements and accounts
 
-It has only been verified on Apple Silicon Macs. The default transcription (mlx-whisper) runs only on Apple Silicon;
-Windows, Linux and Intel Macs have not been tried (see "Not covered" in [docs/INSTALL.md](./docs/INSTALL.md)).
+It has only been verified on Apple Silicon Macs. The default transcription (whisper.cpp) also builds on Windows and Linux,
+but Windows, Linux and Intel Macs have not been tried (see "Not covered" in [docs/INSTALL.md](./docs/INSTALL.md)).
 
 No account or key is needed for the core flow: voice, timing, drawn scenes, `doc_cut.py --render` and the check. The
 optional parts use your own accounts: VideoExpress (generated shots, sound effects), TalkingPhotos (host), Google

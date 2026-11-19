@@ -107,7 +107,7 @@ def test_show_names_the_source(tmp_path):
     rows = {line.split()[0]: line for line in out.splitlines()[1:]}
     assert rows["S2F_QWEN_TTS_DIR"].split()[1] == "env" and "/tmp" in rows["S2F_QWEN_TTS_DIR"]
     assert rows["S2F_EXPORT_CRF"].split()[1] == "config" and "26" in rows["S2F_EXPORT_CRF"]
-    assert rows["S2F_MLX_WHISPER_DIR"].split()[1] == "unset"
+    assert rows["S2F_WHISPER_CPP_MODEL"].split()[1] == "unset"
 
 
 def test_broken_config_stops_the_command(tmp_path):

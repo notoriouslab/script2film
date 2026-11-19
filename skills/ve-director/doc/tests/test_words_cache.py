@@ -11,15 +11,14 @@ import pytest
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 import doc_align  # noqa: E402
 
-WORDS = {"segments": [{"words": [{"word": "第一句", "start": 0.4, "end": 1.2}]}], "source": "mlx-whisper"}
+WORDS = {"segments": [{"words": [{"word": "第一句", "start": 0.4, "end": 1.2}]}], "source": "whisper.cpp"}
 DOC = {"lang": "zh", "lines": [{"text": "第一句"}]}
 
 
 @pytest.fixture
 def proj(monkeypatch, tmp_path):
     """A project with tts/voice.wav at t=1000 and voice.cleaned/audio.m4a; local mode with a fake local_words."""
-    monkeypatch.delenv("S2F_MLX_WHISPER_DIR", raising=False)
-    monkeypatch.setenv("MLX_WHISPER_DIR", str(tmp_path))
+    monkeypatch.setenv("S2F_WHISPER_CPP_MODEL", str(tmp_path / "model.bin"))
     P = tmp_path / "proj"
     (P / "voice.cleaned/aligned").mkdir(parents=True)
     (P / "tts").mkdir()

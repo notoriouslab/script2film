@@ -6,7 +6,7 @@
   python3 tools/drama/drama_cut.py concat <cut.json> [--export] [--no-check <項目>:<原因>]   # Concat 專案（走 MCP 不開視窗）；--export 順便匯出成片並體檢
   python3 tools/drama/drama_cut.py pull   <cut.json> <Concat 專案資料夾>   # 讀回剪法 → <cut>_pulled.json＋改動報告
 
-格式見 dramalib.py 開頭與 README.md。對白語音辨識用本機 mlx-whisper（設定檔或環境變數 S2F_MLX_WHISPER_DIR）。
+格式見 dramalib.py 開頭與 README.md。對白語音辨識用本機 whisper.cpp（設定檔或環境變數 S2F_WHISPER_CPP_MODEL）。
 """
 from __future__ import annotations
 
@@ -520,7 +520,7 @@ def asr_words(paths: list[Path], lang: str) -> dict:
     from doc_common import local_asr
     r = local_asr(paths, lang, words=True)
     if r is None:
-        sys.exit("✗ no local speech recognition: set S2F_MLX_WHISPER_DIR (python3 tools/config/s2f_config.py --show shows the current values)")
+        sys.exit("✗ no local speech recognition: set S2F_WHISPER_CPP_MODEL (python3 tools/config/s2f_config.py --show shows the current values)")
     return {Path(k): [w for seg in v["segments"] for w in seg.get("words", [])] for k, v in r.items()}
 
 
@@ -623,7 +623,7 @@ Usage (from the repository root):
   python3 tools/drama/drama_cut.py concat <cut.json> [--export] [--no-check ITEM:REASON]   # Concat project (over MCP, no window); --export also exports and checks the film
   python3 tools/drama/drama_cut.py pull   <cut.json> <Concat project folder>   # read the cut back → <cut>_pulled.json + a report of the changes
 
-Format: the top of dramalib.py and README.md. Dialogue recognition uses local mlx-whisper (S2F_MLX_WHISPER_DIR, in the settings file or the environment)."""
+Format: the top of dramalib.py and README.md. Dialogue recognition uses local whisper.cpp (S2F_WHISPER_CPP_MODEL, in the settings file or the environment)."""
 
 
 def main():

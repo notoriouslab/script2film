@@ -12,7 +12,7 @@ python3 tools/drama/drama_cut.py pull   <cut.json> <Concat project folder>   # r
 python3 tools/drama/splice_voices.py <original.mp4> <voiced-1.mp4> <voiced-2.mp4> … -o <out.mp4>
 ```
 
-- **check** transcribes each dialogue shot with local mlx-whisper (`S2F_MLX_WHISPER_DIR`, see `tools/config`) and
+- **check** transcribes each dialogue shot with local whisper.cpp (`S2F_WHISPER_CPP_MODEL`, see `tools/config`) and
   compares the word count with the subtitles (CJK characters for Chinese, words for English); a line is flagged only when
   words are missing *and* speech runs into the end of the clip. It also samples three frames per picture segment for
   burned-in text (macOS Vision, optional) and checks that every source is long enough.
@@ -125,7 +125,7 @@ each picture file.
   filters, subtitles, `pull`); tested in `tests/test_dramalib.py`.
 - `drama_audio.py` — numpy sound processing (gain, fades, voice gaps, stitching, looping, mixing); tested in
   `tests/test_drama_audio.py`.
-- `drama_cut.py` — the command line (ffmpeg, demucs, Concat MCP, mlx-whisper).
+- `drama_cut.py` — the command line (ffmpeg, demucs, Concat MCP, whisper.cpp).
 - `splice_voices.py` — joins voice-changed versions of a two-person clip (uses `tools/assemble/velib.py`).
 
 Run the tests from the repository root: `python3 -m pytest -q tools/drama`.

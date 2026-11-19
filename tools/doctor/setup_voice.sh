@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # Sets up the two local speech environments the core flow needs, then writes their paths to the config file:
 #   - Qwen3-TTS (narration): the official code, its own Python 3.11 environment, and the Base model (about 4.2 GB)
-#   - mlx-whisper (transcription and word timing): its own Python 3.11 environment
-#     (its model, about 1.5 GB, downloads by itself the first time a film is transcribed)
+#   - whisper.cpp (transcription and word timing): the whisper-cli program (macOS: Homebrew) and the turbo model
+#     ggml-large-v3-turbo.bin (about 1.6 GB)
 # doctor.py only checks; this script is the one that installs. It is safe to run again: finished parts are skipped.
 #
 #   bash tools/doctor/setup_voice.sh [<folder>] [--design]
@@ -20,6 +20,7 @@ QWEN_REPO="https://github.com/QwenLM/Qwen3-TTS.git"
 QWEN_REF="${S2F_QWEN_REF:-022e286}"
 BASE_MODEL="Qwen3-TTS-12Hz-1.7B-Base"
 DESIGN_MODEL="Qwen3-TTS-12Hz-1.7B-VoiceDesign"
+WHISPER_MODEL="ggml-large-v3-turbo.bin"
 
 DEST="$HOME/s2f-voice"; DESIGN=0
 for a in "$@"; do
@@ -55,10 +56,13 @@ if ! qwen3-tts/.venv/bin/python -c "import qwen_tts" 2>/dev/null; then
   qwen3-tts/.venv/bin/python -m pip install -q -e qwen3-tts/src || fail "installing the Qwen3-TTS packages failed; run this script again to retry"
 fi
 
-step "3/5 mlx-whisper Python environment (about 4 minutes)"
-[ -x mlx-whisper/.venv/bin/python ] || "$PY" -m venv mlx-whisper/.venv || fail "cannot create mlx-whisper/.venv"
-if ! mlx-whisper/.venv/bin/python -c "import mlx_whisper" 2>/dev/null; then
-  mlx-whisper/.venv/bin/python -m pip install -q mlx-whisper || fail "installing mlx-whisper failed; run this script again to retry"
+step "3/5 whisper.cpp (whisper-cli)"
+if ! command -v whisper-cli >/dev/null && [ -z "${S2F_WHISPER_CLI:-}" ]; then
+  if command -v brew >/dev/null; then
+    brew install whisper.cpp || fail "brew install whisper.cpp failed; run this script again to retry"
+  else
+    fail "whisper-cli not found: build it from github.com/ggml-org/whisper.cpp and put it on PATH (or set S2F_WHISPER_CLI), then run this script again"
+  fi
 fi
 
 fetch() {   # fetch <model name>: download into _models/<name> unless its weights are already there
@@ -69,10 +73,17 @@ fetch() {   # fetch <model name>: download into _models/<name> unless its weight
     || fail "downloading Qwen/$1 failed (see $DEST/_models_$1.log); run this script again to resume"
   rm -f "_models_$1.log"
 }
-step "4/5 voice model $BASE_MODEL (about 4.2 GB)"
+step "4/5 voice model $BASE_MODEL (about 4.2 GB) and transcription model $WHISPER_MODEL (about 1.6 GB)"
 mkdir -p _models && fetch "$BASE_MODEL"
 if [ "$DESIGN" = 1 ]; then
   echo "also: $DESIGN_MODEL (about 4.2 GB)"; fetch "$DESIGN_MODEL"
+fi
+if [ -s "_models/whisper-cpp/$WHISPER_MODEL" ]; then
+  echo "already here: _models/whisper-cpp/$WHISPER_MODEL"
+else
+  qwen3-tts/.venv/bin/hf download ggerganov/whisper.cpp "$WHISPER_MODEL" --local-dir _models/whisper-cpp > _models_whisper.log 2>&1 \
+    || fail "downloading $WHISPER_MODEL failed (see $DEST/_models_whisper.log); run this script again to resume"
+  rm -f _models_whisper.log
 fi
 
 step "5/5 config file"
@@ -82,7 +93,7 @@ from pathlib import Path
 dest = Path(sys.argv[1])
 v = os.environ.get("S2F_CONFIG")
 path = Path(v).expanduser() if v and v != "none" else Path.home() / ".config/script2film/config.json"
-want = {"S2F_QWEN_TTS_DIR": str(dest / "qwen3-tts"), "S2F_MLX_WHISPER_DIR": str(dest / "mlx-whisper")}
+want = {"S2F_QWEN_TTS_DIR": str(dest / "qwen3-tts"), "S2F_WHISPER_CPP_MODEL": str(dest / "_models/whisper-cpp/ggml-large-v3-turbo.bin")}
 cfg = json.loads(path.read_text(encoding="utf-8")) if path.exists() and path.read_text(encoding="utf-8").strip() else {}
 for k, val in want.items():
     if cfg.get(k) not in (None, val):

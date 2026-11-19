@@ -4,7 +4,7 @@ Why (2026-11-06, found in several episodes): Qwen takes often run a comma or eve
 (0.0–0.1 s), so a line sounds rushed even though the gaps between lines are 0.5 s or more.
 
 What it does, per picked take:
-  1. Word timings come from local Whisper (mlx). They are often 0.1–0.2 s early, so they only say roughly where a mark is.
+  1. Word timings come from local Whisper (whisper.cpp). They can be 0.1–0.2 s off, so they only say roughly where a mark is.
   2. Near each mark (±0.3 s) look for a real pause the voice already made: a run quieter than -38 dB lasting ≥ 0.12 s,
      not touching the start or end of the take. Take the deepest one and lengthen it from its middle
      (comma-type marks to 0.4 s, sentence-final marks and closing quotes to 0.65 s).

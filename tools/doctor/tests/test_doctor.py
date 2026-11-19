@@ -95,17 +95,21 @@ def test_tts_states(tmp_path):
 
 
 def test_asr_states(tmp_path):
-    assert doctor.check_asr({}, tmp_path)["status"] == "fail"
-    d = tool(tmp_path, "mlx")
-    # 模型第一次轉錄時自己下載：還沒有不擋，只在這一列說明（s2f-4a-install）
-    first = doctor.check_asr({"S2F_MLX_WHISPER_DIR": str(d)}, tmp_path)
-    assert first["status"] == "ok" and "downloads automatically" in first["detail"]
-    (tmp_path / ".cache/huggingface" / doctor.WHISPER_CACHE).mkdir(parents=True)
-    have = doctor.check_asr({"S2F_MLX_WHISPER_DIR": str(d)}, tmp_path)
-    assert have["status"] == "ok" and "downloads automatically" not in have["detail"]
-    other = doctor.check_asr({"S2F_MLX_WHISPER_DIR": str(d), "HF_HOME": str(tmp_path / "empty")}, tmp_path)
-    assert other["status"] == "ok" and "downloads automatically" in other["detail"]
-    assert "setup_voice.sh" in doctor.check_asr({}, tmp_path)["fix"] and "setup_voice.sh" in doctor.check_tts({})["fix"]
+    none = lambda name: None
+    found = lambda name: str(tmp_path / "whisper-cli")
+    (tmp_path / "whisper-cli").write_text("")
+    model = tmp_path / "ggml-large-v3-turbo.bin"
+    assert doctor.check_asr({}, found)["status"] == "fail"
+    assert "setup_voice.sh" in doctor.check_asr({}, found)["fix"] and "setup_voice.sh" in doctor.check_tts({})["fix"]
+    old = doctor.check_asr({"S2F_MLX_WHISPER_DIR": str(tool(tmp_path, "mlx"))}, found)   # 只設了舊的 mlx 資料夾
+    assert old["status"] == "fail" and "replaced by whisper.cpp" in old["detail"]
+    assert "does not exist" in doctor.check_asr({"S2F_WHISPER_CPP_MODEL": str(model)}, found)["detail"]
+    model.write_bytes(b"")
+    no_cli = doctor.check_asr({"S2F_WHISPER_CPP_MODEL": str(model)}, none)
+    assert no_cli["status"] == "fail" and "brew install whisper.cpp" in no_cli["fix"]
+    assert doctor.check_asr({"S2F_WHISPER_CPP_MODEL": str(model)}, found)["status"] == "ok"
+    via_env = doctor.check_asr({"S2F_WHISPER_CPP_MODEL": str(model), "S2F_WHISPER_CLI": str(tmp_path / "whisper-cli")}, none)
+    assert via_env["status"] == "ok"
 
 
 def test_requirements_file_matches_the_package_list():
@@ -270,7 +274,7 @@ def test_gsap_is_a_required_item(tmp_path):
 def test_skip_voice_turns_only_those_two_failures_into_skipped(tmp_path):
     """--skip voice（CI 不裝配音模型）：配音、轉錄缺了是 skipped、不算失敗；其他必要項目缺了照樣是 1。"""
     base = [doctor.row("voice (TTS)", "required", False, "S2F_QWEN_TTS_DIR is not set", "fix"),
-            doctor.row("transcription", "required", False, "S2F_MLX_WHISPER_DIR is not set", "fix"),
+            doctor.row("transcription", "required", False, "S2F_WHISPER_CPP_MODEL is not set", "fix"),
             doctor.row("ffmpeg", "required", True, "d")]
     out = doctor.apply_skip(base, ["voice"])
     assert [r["status"] for r in out] == ["skipped", "skipped", "ok"] and out[0]["fix"] == ""

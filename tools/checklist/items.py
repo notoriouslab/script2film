@@ -62,14 +62,14 @@ def facts_problems(doc, P):
     return doc_facts.check(doc, P)
 
 
-REQUIRED_ENV = ("S2F_QWEN_TTS_DIR", "S2F_MLX_WHISPER_DIR")
+REQUIRED_ENV = ("S2F_QWEN_TTS_DIR", "S2F_WHISPER_CPP_MODEL")
 OPTIONAL_ENV = ("S2F_ASSETS_LOCAL",)   # 使用者素材層：音效已隨倉庫附帶（assets/sfx），這層只是選用的覆蓋層
-OLD_ENV = {"S2F_QWEN_TTS_DIR": "QWEN_TTS_DIR", "S2F_MLX_WHISPER_DIR": "MLX_WHISPER_DIR"}   # 舊名，相容讀法
+OLD_ENV = {"S2F_QWEN_TTS_DIR": "QWEN_TTS_DIR"}   # 舊名，相容讀法
 SECRET_FILES = ("~/.config/script2film/secrets.json",)
 
 
 def env_items(environ):
-    """環境變數那幾列 (名稱, 通過, 說明)。必要的兩個要設且資料夾存在；和執行期同一條規則：新名有設就只驗新名的路徑，
+    """環境變數那幾列 (名稱, 通過, 說明)。必要的兩個要設且路徑存在（配音是資料夾、轉錄模型是檔）；和執行期同一條規則：新名有設就只驗新名的路徑，
     新名沒設才看去掉 S2F_ 的舊名；列名一律顯示新名。選用的 S2F_ASSETS_LOCAL（沒有舊名）沒設照樣通過，
     只用內附素材；有設就要資料夾存在，設錯路徑要擋。"""
     out = []
@@ -410,10 +410,10 @@ def _asr_keys(c):
     """只提示不擋：沒有金鑰時 doc_align 退回本機轉錄。"""
     env = c["environ"]
     out = [("Groq key (needed only when the script says \"asr\": \"cloud\"; not blocking)", True,
-            "present" if env.get("GROQ_API_KEY") or has_secret("GROQ_API_KEY") else "none → local mlx")]
+            "present" if env.get("GROQ_API_KEY") or has_secret("GROQ_API_KEY") else "none → local whisper.cpp")]
     if c["doc"].get("asr") == "cloud":
         has = any(env.get(k) or has_secret(k) for k in ("ELEVENLABS_API_KEY", "ELEVEN_API_KEY"))
-        out.append(("ElevenLabs Scribe key (the script says \"asr\": \"cloud\"; not blocking)", True, "present" if has else "none → local mlx"))
+        out.append(("ElevenLabs Scribe key (the script says \"asr\": \"cloud\"; not blocking)", True, "present" if has else "none → local whisper.cpp"))
     return out
 
 

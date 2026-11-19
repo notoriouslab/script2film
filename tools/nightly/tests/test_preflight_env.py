@@ -1,5 +1,5 @@
-"""preflight 環境變數列：必要的兩個（S2F_QWEN_TTS_DIR、S2F_MLX_WHISPER_DIR）缺了就擋，照
-新舊名規則（新名有設就只驗新名，沒設才看舊名 QWEN_TTS_DIR、MLX_WHISPER_DIR），列名一律是新名。選用的 S2F_ASSETS_LOCAL：沒設通過、
+"""preflight 環境變數列：必要的兩個（S2F_QWEN_TTS_DIR、S2F_WHISPER_CPP_MODEL）缺了就擋；配音照
+新舊名規則（新名有設就只驗新名，沒設才看舊名 QWEN_TTS_DIR），轉錄模型沒有舊名，列名一律是新名。選用的 S2F_ASSETS_LOCAL：沒設通過、
 有設但資料夾不在擋、有設且在通過。另測 concat_bin、yt_python、font_item。"""
 import sys
 from pathlib import Path
@@ -27,12 +27,18 @@ def test_required_missing_fails(tmp_path):
     del env["S2F_QWEN_TTS_DIR"]
     r = rows(env)
     assert r["env S2F_QWEN_TTS_DIR"] == (False, "not set")
-    assert r["env S2F_MLX_WHISPER_DIR"][0] is True
+    assert r["env S2F_WHISPER_CPP_MODEL"][0] is True
 
 
 def test_required_nonexistent_fails(tmp_path):
-    env = full_env(tmp_path) | {"S2F_MLX_WHISPER_DIR": str(tmp_path / "nope")}
-    assert rows(env)["env S2F_MLX_WHISPER_DIR"][0] is False
+    env = full_env(tmp_path) | {"S2F_WHISPER_CPP_MODEL": str(tmp_path / "nope.bin")}
+    assert rows(env)["env S2F_WHISPER_CPP_MODEL"][0] is False
+
+
+def test_retired_mlx_folder_does_not_count(tmp_path):
+    env = full_env(tmp_path) | {"S2F_MLX_WHISPER_DIR": str(tmp_path), "MLX_WHISPER_DIR": str(tmp_path)}
+    del env["S2F_WHISPER_CPP_MODEL"]
+    assert rows(env)["env S2F_WHISPER_CPP_MODEL"] == (False, "not set")
 
 
 def test_assets_local_unset_passes(tmp_path):
@@ -53,14 +59,14 @@ def test_assets_local_set_and_present_passes(tmp_path):
 
 
 def test_old_names_only_pass(tmp_path):
-    env = {"QWEN_TTS_DIR": str(tmp_path), "MLX_WHISPER_DIR": str(tmp_path), "S2F_ASSETS_LOCAL": str(tmp_path)}
+    env = {"QWEN_TTS_DIR": str(tmp_path), "S2F_WHISPER_CPP_MODEL": str(tmp_path), "S2F_ASSETS_LOCAL": str(tmp_path)}
     r = rows(env)
     assert all(r[f"env {k}"][0] is True for k in REQUIRED_ENV + OPTIONAL_ENV)
     assert "QWEN_TTS_DIR" in r["env S2F_QWEN_TTS_DIR"][1]
 
 
 def test_new_names_only_pass(tmp_path):
-    env = {"S2F_QWEN_TTS_DIR": str(tmp_path), "S2F_MLX_WHISPER_DIR": str(tmp_path), "S2F_ASSETS_LOCAL": str(tmp_path)}
+    env = {"S2F_QWEN_TTS_DIR": str(tmp_path), "S2F_WHISPER_CPP_MODEL": str(tmp_path), "S2F_ASSETS_LOCAL": str(tmp_path)}
     r = rows(env)
     assert all(r[f"env {k}"] == (True, str(tmp_path)) for k in REQUIRED_ENV + OPTIONAL_ENV)
 
@@ -75,7 +81,7 @@ def test_none_set_fails_with_new_names(tmp_path):
     assert [name for name, _, _ in items] == [f"env {k}" for k in REQUIRED_ENV + OPTIONAL_ENV]
     assert all(ok is False and detail == "not set" for _, ok, detail in items[:len(REQUIRED_ENV)])
     assert items[-1][1:] == (True, "not set: bundled assets only")
-    assert REQUIRED_ENV == ("S2F_QWEN_TTS_DIR", "S2F_MLX_WHISPER_DIR")
+    assert REQUIRED_ENV == ("S2F_QWEN_TTS_DIR", "S2F_WHISPER_CPP_MODEL")
     assert OPTIONAL_ENV == ("S2F_ASSETS_LOCAL",)
 
 

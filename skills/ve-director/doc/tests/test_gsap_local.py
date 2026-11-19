@@ -1,5 +1,4 @@
 """GSAP 本機載入、失敗時印原因。"""
-import os
 import stat
 import subprocess
 import sys
@@ -60,34 +59,69 @@ def test_render_failures_print_the_end_of_the_log():
     assert "log_tail(o / 'render.log')" in (DOC / "scripts/doc_cut.py").read_text(encoding="utf-8")
 
 
-def fake_python(tmp_path, body):
-    py = tmp_path / ".venv/bin/python"
-    py.parent.mkdir(parents=True)
-    py.write_text("#!/bin/sh\n" + body, encoding="utf-8")
-    py.chmod(py.stat().st_mode | stat.S_IXUSR)
-    return py
+def fake_cli(tmp_path, monkeypatch, body):
+    """A fake whisper-cli (shell script) plus a model file and a silent input; returns the input path."""
+    cli = tmp_path / "whisper-cli"
+    cli.write_text("#!/bin/sh\n" + body, encoding="utf-8")
+    cli.chmod(cli.stat().st_mode | stat.S_IXUSR)
+    (tmp_path / "model.bin").write_bytes(b"")
+    monkeypatch.setenv("S2F_WHISPER_CLI", str(cli))
+    monkeypatch.setenv("S2F_WHISPER_CPP_MODEL", str(tmp_path / "model.bin"))
+    wav = tmp_path / "a.wav"
+    subprocess.run(["ffmpeg", "-v", "error", "-y", "-f", "lavfi", "-i", "anullsrc=r=16000:cl=mono", "-t", "0.2", str(wav)], check=True)
+    return wav
+
+
+# 假 whisper-cli：每個 -f 檔旁寫一份 -ojf JSON（含特殊 token、空白 token、英文 BPE 片段、一個沒有 DTW 時間的 token）
+FAKE_JSON = r"""for a; do case "$prev" in -f) cat > "$a.json" <<'J'
+{"transcription": [{"text": " Hello world", "offsets": {"from": 0, "to": 2000}, "tokens": [
+ {"text": "[_BEG_]", "offsets": {"from": 0, "to": 0}, "t_dtw": -1},
+ {"text": " Hel", "offsets": {"from": 0, "to": 300}, "t_dtw": 50},
+ {"text": "lo", "offsets": {"from": 300, "to": 600}, "t_dtw": 80},
+ {"text": " ", "offsets": {"from": 600, "to": 700}, "t_dtw": 100},
+ {"text": " world", "offsets": {"from": 700, "to": 1500}, "t_dtw": -1}]}]}
+J
+printf ' Hello\n world\n' > "$a.txt";; esac; prev="$a"; done
+"""
 
 
 def test_local_asr_failure_shows_the_transcribers_stderr(tmp_path, monkeypatch):
-    fake_python(tmp_path, "echo 'boom: model missing' >&2\nexit 3\n")
-    monkeypatch.setenv("S2F_MLX_WHISPER_DIR", str(tmp_path))
+    wav = fake_cli(tmp_path, monkeypatch, "echo 'boom: model missing' >&2\nexit 3\n")
     with pytest.raises(SystemExit) as e:
-        doc_common.local_asr([tmp_path / "a.wav"], "zh")
+        doc_common.local_asr([wav], "zh")
     assert "exit 3" in str(e.value) and "boom: model missing" in str(e.value)
 
 
-def test_local_asr_output_that_is_not_json_is_a_failure_too(tmp_path, monkeypatch):
-    fake_python(tmp_path, "echo 'warming up'\necho 'cache broken' >&2\nexit 0\n")
-    monkeypatch.setenv("S2F_MLX_WHISPER_DIR", str(tmp_path))
+def test_local_asr_missing_model_file_stops(tmp_path, monkeypatch):
+    wav = fake_cli(tmp_path, monkeypatch, "exit 0\n")
+    monkeypatch.setenv("S2F_WHISPER_CPP_MODEL", str(tmp_path / "nope.bin"))
     with pytest.raises(SystemExit) as e:
-        doc_common.local_asr([tmp_path / "a.wav"], "zh")
-    assert "cache broken" in str(e.value)
+        doc_common.local_asr([wav], "en")
+    assert "does not exist" in str(e.value)
 
 
-def test_local_asr_still_returns_the_last_json_line(tmp_path, monkeypatch):
-    fake_python(tmp_path, "echo 'noise'\necho '{\"a.wav\": \"hello\"}'\n")
-    monkeypatch.setenv("S2F_MLX_WHISPER_DIR", str(tmp_path))
-    assert doc_common.local_asr([tmp_path / "a.wav"], "en") == {Path("a.wav"): "hello"}
+def test_local_asr_text(tmp_path, monkeypatch):
+    wav = fake_cli(tmp_path, monkeypatch, FAKE_JSON)
+    assert doc_common.local_asr([wav], "en") == {wav: "Hello world"}
+
+
+def test_local_asr_words_from_dtw(tmp_path, monkeypatch, capsys):
+    """Special tokens dropped, a bare space only ends a word, BPE pieces joined; start = t_dtw / 100, end = next start;
+    a token without DTW (-1) falls back to its offsets with one warning."""
+    wav = fake_cli(tmp_path, monkeypatch, FAKE_JSON)
+    seg = doc_common.local_asr([wav], "en", words=True)[wav]["segments"][0]
+    assert (seg["start"], seg["end"]) == (0.0, 2.0)
+    assert seg["words"] == [{"word": " Hello", "start": 0.5, "end": 1.0}, {"word": " world", "start": 0.7, "end": 2.0}]
+    assert "no DTW word times" in capsys.readouterr().err
+
+
+def test_local_asr_runs_with_dtw_and_no_flash_attention(tmp_path, monkeypatch):
+    """DTW is off whenever flash attention is on, so word mode must pass -dtw with -nfa; one run for every file."""
+    log = tmp_path / "args.txt"
+    wav = fake_cli(tmp_path, monkeypatch, f'echo "$@" >> {log}\n' + FAKE_JSON)
+    doc_common.local_asr([wav, wav], "zh", words=True)
+    args = log.read_text().splitlines()
+    assert len(args) == 1 and "-dtw large.v3.turbo" in args[0] and "-nfa" in args[0] and args[0].count("-f ") == 2
 
 
 def test_a_failed_render_prints_what_the_renderer_said(tmp_path, monkeypatch):

@@ -153,7 +153,7 @@ Windows 要開 git 的 `core.symlinks`。
 |---|---|---|---|
 | 稿 | 題目與素材 → `doc.json`（台詞與拍） | 照格式文件手寫 | AI agent 照 skill 寫 |
 | 聲音 | 台詞 → 每句音檔，再接成旁白 | Qwen3-TTS，在自己的電腦上跑 | 自己錄音 |
-| 對時 | 旁白 → `beats.json`、字幕 | mlx-whisper，在自己的電腦上跑 | Groq、ElevenLabs Scribe |
+| 對時 | 旁白 → `beats.json`、字幕 | whisper.cpp，在自己的電腦上跑 | Groq、ElevenLabs Scribe |
 | 畫面：程式畫面 | 拍與參數 → 每拍一支 mp4 | `skills/ve-director/doc/` 的場景引擎（27 個場景） | |
 | 畫面：素材 | 照片與影片 → 某一拍的畫面 | 附授權紀錄的照片 | VideoExpress（`tools/ve-runner/`）、自己 Colab 上的 MiniMax H3（`tools/h3/`） |
 | 主持人 | 旁白 → 主持人影片 | 不放主持人 | TalkingPhotos、MiniMax H3 |
@@ -207,7 +207,7 @@ Windows 要開 git 的 `core.symlinks`。
 
 ## 需求與帳號
 
-目前只在 Apple Silicon 的 Mac 上驗證過。預設的轉錄（mlx-whisper）只能在 Apple Silicon 上跑；Windows、Linux 與 Intel Mac
+目前只在 Apple Silicon 的 Mac 上驗證過。預設的轉錄（whisper.cpp）在 Windows、Linux 也能編譯，但 Windows、Linux 與 Intel Mac
 都沒有試過（見 [docs/INSTALL.md](./docs/INSTALL.md) 的「Not covered」）。
 
 核心流程不用任何帳號或金鑰：配音、對時、程式畫面、`doc_cut.py --render` 與檢查。選用的部分用你自己的帳號：VideoExpress

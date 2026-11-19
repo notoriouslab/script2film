@@ -29,7 +29,7 @@ SKIPS = {"voice": ("voice (TTS)", "transcription")}   # --skip 的名字 → 跳
 PACKAGES = {"pytest": "pytest", "opencc": "opencc-python-reimplemented", "PIL": "pillow", "numpy": "numpy",
             "fontTools": "fonttools", "playwright": "playwright", "soundfile": "soundfile"}   # 匯入名 → pip 套件名；和 requirements.txt 同一份
 QWEN_MODEL = "Qwen3-TTS-12Hz-1.7B-Base"
-WHISPER_CACHE = "hub/models--mlx-community--whisper-large-v3-turbo"
+WHISPER_MODEL = "ggml-large-v3-turbo.bin"
 CONFIG_HINT = "~/.config/script2film/config.json"
 
 
@@ -143,14 +143,23 @@ def check_tts(environ):
                f"Download Qwen/{QWEN_MODEL} from Hugging Face (about 4.2 GB, Apache-2.0) to {models}/{QWEN_MODEL}")
 
 
-def check_asr(environ, home):
-    d, bad = _tool_dir(environ, "S2F_MLX_WHISPER_DIR", "transcription")
-    if bad:
-        return bad
-    hf = Path(environ["HF_HOME"]).expanduser() if environ.get("HF_HOME") else Path(home) / ".cache/huggingface"
-    # 模型第一次轉錄時自己下載，還沒有不算缺：只在這一列說明，不擋（s2f-4a-install）
-    note = "" if (hf / WHISPER_CACHE).is_dir() else " (model not downloaded yet: it downloads automatically on the first transcription, about 1.5 GB, needs the network)"
-    return row("transcription", "required", True, f"{d}{note}")
+def check_asr(environ, which=shutil.which):
+    """轉錄（whisper.cpp）：模型檔要在、whisper-cli 要找得到（S2F_WHISPER_CLI 或 PATH）。只設了舊的 mlx 資料夾就說換掉了。"""
+    setup = (f"Not installed yet: run bash tools/doctor/setup_voice.sh (installs whisper.cpp and downloads {WHISPER_MODEL}, "
+             f"about 1.6 GB). Already have it: add \"S2F_WHISPER_CPP_MODEL\": \"<the .bin file>\" to {CONFIG_HINT}")
+    v = environ.get("S2F_WHISPER_CPP_MODEL")
+    if not v:
+        old = environ.get("S2F_MLX_WHISPER_DIR") or environ.get("MLX_WHISPER_DIR")
+        why = "S2F_WHISPER_CPP_MODEL is not set" + (" (S2F_MLX_WHISPER_DIR is no longer used: mlx-whisper was replaced by whisper.cpp)" if old else "")
+        return row("transcription", "required", False, why, setup)
+    m = Path(v).expanduser()
+    if not m.is_file():
+        return row("transcription", "required", False, f"S2F_WHISPER_CPP_MODEL={m} does not exist", setup)
+    cli = environ.get("S2F_WHISPER_CLI") or which("whisper-cli")
+    if not cli or not Path(cli).expanduser().is_file():
+        return row("transcription", "required", False, f"whisper-cli not found ({cli or 'not on PATH'})",
+                   "macOS: brew install whisper.cpp; other systems: build github.com/ggml-org/whisper.cpp and set S2F_WHISPER_CLI")
+    return row("transcription", "required", True, f"{m} ({cli})")
 
 
 FONT_URL = "https://github.com/google/fonts/raw/main/ofl"
@@ -299,7 +308,7 @@ def collect(environ, home):
         check_render_browser(environ, home),
         check_playwright_browser(*_pw_locations()),
         check_tts(environ),
-        check_asr(environ, home),
+        check_asr(environ),
         check_assets(environ, REPO),
         check_disk(_free_gb(home), items.MIN_FREE_GB),
         check_config(path, cfg),

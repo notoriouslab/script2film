@@ -59,7 +59,7 @@ vox-host 系列（`skills/ve-director/doc/formats/vox-host/FORMAT.md`）一集�
 |---|---|---|
 | `S2F_YT_PYTHON` | 清單（出片段）跑 `tools/youtube/yt_upload.py scopes` 用的直譯器（要裝了 YouTube 套件的那個） | `tools/youtube/.venv/bin/python` |
 
-清單另外檢查 `S2F_QWEN_TTS_DIR`、`S2F_MLX_WHISPER_DIR` 兩個資料夾（新名沒設才看舊名 `QWEN_TTS_DIR`、`MLX_WHISPER_DIR`）、選用的 `S2F_ASSETS_LOCAL`（沒設照樣通過，有設就要資料夾在），以及 `S2F_CONCAT_BIN`（舊名 `CONCAT_BIN`）。
+清單另外檢查 `S2F_QWEN_TTS_DIR` 資料夾（新名沒設才看舊名 `QWEN_TTS_DIR`）與 `S2F_WHISPER_CPP_MODEL` 轉錄模型檔、選用的 `S2F_ASSETS_LOCAL`（沒設照樣通過，有設就要資料夾在），以及 `S2F_CONCAT_BIN`（舊名 `CONCAT_BIN`）。
 
 ## 測試
 

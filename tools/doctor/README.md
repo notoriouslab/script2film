@@ -23,7 +23,7 @@ python3 tools/doctor/doctor.py --skip voice                 # 配音、轉錄兩
 | 必要 | render browser | `HYPERFRAMES_BROWSER_PATH`，或 `~/.cache/hyperframes/chrome` 底下的 `chrome-headless-shell` |
 | 必要 | playwright browser | Playwright 自己的無頭瀏覽器與錄影用的 ffmpeg 裝好了（問 `playwright install --dry-run --only-shell chromium` 它們該在哪，看每個位置有沒有裝完的標記 `INSTALLATION_COMPLETE`；跟著 `PLAYWRIGHT_BROWSERS_PATH` 走，不下載、不開瀏覽器）。測試、`doc_code.py` 的音效標記與螢幕錄製拍用它；送 VE、TP 用系統的 Chrome，不在這一項。修法：`.venv/bin/python -m playwright install --only-shell chromium`（`docs/INSTALL.md` 第 3 步） |
 | 必要 | voice (TTS) | `S2F_QWEN_TTS_DIR`、它的 `.venv/bin/python`、模型資料夾裡的 `Qwen3-TTS-12Hz-1.7B-Base`（還沒裝：`bash tools/doctor/setup_voice.sh`） |
-| 必要 | transcription | `S2F_MLX_WHISPER_DIR`、它的 `.venv/bin/python`。模型 `whisper-large-v3-turbo` 第一次轉錄時自己下載，還沒有只在這一列說明、不算缺 |
+| 必要 | transcription | `S2F_WHISPER_CPP_MODEL` 指的模型檔（`ggml-large-v3-turbo.bin`）在、`whisper-cli` 找得到（`S2F_WHISPER_CLI` 或 PATH）。只設了舊的 `S2F_MLX_WHISPER_DIR` 會說它已換成 whisper.cpp |
 | 必要 | bundled assets | `assets/fonts/manifest.json` 與 `assets/sfx/manifest.json` 列的檔都在（字型檔不在 git 裡，修法會印兩條下載命令；音效隨倉庫附帶，缺了修法是 `git checkout -- assets/sfx`） |
 | 必要 | disk | 家目錄所在磁碟剩 5 GB 以上 |
 | 必要 | config file | 沒有設定檔算通過；有的話每個鍵都認得、值的型別對、路徑存在（程式自己會建的資料夾不查） |
@@ -47,7 +47,7 @@ python3 tools/doctor/doctor.py --skip voice                 # 配音、轉錄兩
 ```json
 {
  "S2F_QWEN_TTS_DIR": "~/voice/qwen3-tts",
- "S2F_MLX_WHISPER_DIR": "~/voice/mlx-whisper",
+ "S2F_WHISPER_CPP_MODEL": "~/voice/_models/whisper-cpp/ggml-large-v3-turbo.bin",
  "S2F_ASSETS_LOCAL": "~/films/_assets"
 }
 ```

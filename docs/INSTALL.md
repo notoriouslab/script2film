@@ -57,8 +57,9 @@ drawing, cutting and the check together. The film is 24.8 seconds long.
   it. If it fails or you stop it, run the same command again: finished parts are skipped and the model download
   resumes.
 - **Where step 7 puts things.** `~/s2f-voice/` by default (`bash tools/doctor/setup_voice.sh <folder>` for another
-  place): `qwen3-tts/` (the official code and its environment), `mlx-whisper/` (its environment) and `_models/` (the
-  voice model). The two paths are written to `~/.config/script2film/config.json`. Qwen3-TTS is pinned to the commit
+  place): `qwen3-tts/` (the official code and its environment) and `_models/` (the voice model and the transcription model
+  `whisper-cpp/ggml-large-v3-turbo.bin`, about 1.6 GB). The transcription program `whisper-cli` comes from
+  `brew install whisper.cpp`, which the script runs if it is missing. The two paths are written to `~/.config/script2film/config.json`. Qwen3-TTS is pinned to the commit
   this project was tested with.
 - **Designing a new voice needs one more model.** The examples ship their reference voices. To design your own
   synthetic voice (`tools/tts/design_voices.py`), run `bash tools/doctor/setup_voice.sh --design` for the VoiceDesign
@@ -72,7 +73,7 @@ drawing, cutting and the check together. The film is 24.8 seconds long.
 - **The optional parts are separate.** Concat, VideoExpress, TalkingPhotos, composed music and YouTube upload each have
   their own setup, described where they are used in `docs/FLOW.md`. `python3 tools/doctor/doctor.py --need concat,ve,tp,youtube`
   checks them.
-- **Agents with a sandbox** need three things allowed: network access (installing, and the first transcription), the
+- **Agents with a sandbox** need three things allowed: network access (installing), the
   voice and transcription folders outside the repository, and connections to 127.0.0.1 (HyperFrames' renderer). What
   each is for and what a blocked one looks like: `docs/FLOW.md` F0.
 - **Checking without the voice models.** `python3 tools/doctor/doctor.py --skip voice` reports the voice and
@@ -81,6 +82,7 @@ drawing, cutting and the check together. The film is 24.8 seconds long.
 
 ## Not covered
 
-Windows, Linux and Intel Macs have not been tried. The tools are ordinary ones (Python, Node, ffmpeg), but the default
-transcription (mlx-whisper) is Apple Silicon only; on another system use the cloud transcription described in
-`docs/FLOW.md` or point `S2F_MLX_WHISPER_DIR` at a replacement you provide.
+Windows, Linux and Intel Macs have not been tried. The tools are ordinary ones (Python, Node, ffmpeg), and the default
+transcription (whisper.cpp) builds on other systems too: build `whisper-cli` from <https://github.com/ggml-org/whisper.cpp>,
+download `ggml-large-v3-turbo.bin` from <https://huggingface.co/ggerganov/whisper.cpp>, and set `S2F_WHISPER_CPP_MODEL`
+(and `S2F_WHISPER_CLI` if it is not on PATH). The cloud transcription in `docs/FLOW.md` is the other way.

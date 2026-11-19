@@ -27,7 +27,7 @@ python3 tools/checklist/checklist.py answer <集資料夾> <題目代號> "<這�
 | 代號 | 內容 | 層 | 段 | 可宣告不適用 |
 |---|---|---|---|---|
 | `disk` `node` `power` `concat` | 磁碟剩餘、node 版本、接電源、Concat 執行檔 | 通則 | start | 否 |
-| `env-dirs` | `S2F_QWEN_TTS_DIR`、`S2F_MLX_WHISPER_DIR` 兩個資料夾要設而且在；`S2F_ASSETS_LOCAL`（使用者素材層）選用，沒設照樣通過、只用內附素材，有設就要資料夾在。值可以寫在 `~/.config/script2film/config.json`（不必每次 export）；`python3 tools/config/s2f_config.py --show` 看現在的值與來源 | 通則 | start | 否 |
+| `env-dirs` | `S2F_QWEN_TTS_DIR`（資料夾）、`S2F_WHISPER_CPP_MODEL`（轉錄模型檔）要設而且在；`S2F_ASSETS_LOCAL`（使用者素材層）選用，沒設照樣通過、只用內附素材，有設就要資料夾在。值可以寫在 `~/.config/script2film/config.json`（不必每次 export）；`python3 tools/config/s2f_config.py --show` 看現在的值與來源 | 通則 | start | 否 |
 | `lexicon` | 讀音表（`tools/tts/lexicon.json`）載得進來、規則沒有重複或空的 | 通則 | start | 否 |
 | `voice-ref` `triggers` `facts` `no-dash` | 參考音、稿面觸發字、事實清單、旁白沒有破折號 | 格式（解說長片） | start | 否 |
 | `inventory` | 素材盤點（`tools/qa/inventory.py`）：連續純字卡秒數、同一支背景秒數、照片／VE／字卡比例。**只印不擋** | 格式（解說長片） | start | 否 |

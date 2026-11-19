@@ -75,15 +75,15 @@ fail() { echo "✗ $*"; return 1; }
 # the new names (S2F_*) are worked out before the old ones are cleared, so a shell with only the old names still runs;
 # with neither set, the two voice folders come from the settings file (tools/config/s2f_config.py --export, read with
 # the real home); with none of the three there is no guess: the script says so and stops
-S2F_MLX_WHISPER_DIR="${S2F_MLX_WHISPER_DIR:-${MLX_WHISPER_DIR:-}}"
 S2F_QWEN_TTS_DIR="${S2F_QWEN_TTS_DIR:-${QWEN_TTS_DIR:-}}"
-if [ -z "$S2F_MLX_WHISPER_DIR" ] || [ -z "$S2F_QWEN_TTS_DIR" ]; then
+if [ -z "${S2F_WHISPER_CPP_MODEL:-}" ] || [ -z "$S2F_QWEN_TTS_DIR" ]; then
   CFG_EXPORT="$(HOME="$REAL_HOME" python3 "$SRC/tools/config/s2f_config.py" --export 2>/dev/null)"
   cfg_val() { (eval "$CFG_EXPORT"; printf '%s' "${!1:-}"); }
-  S2F_MLX_WHISPER_DIR="${S2F_MLX_WHISPER_DIR:-$(cfg_val S2F_MLX_WHISPER_DIR)}"
+  S2F_WHISPER_CPP_MODEL="${S2F_WHISPER_CPP_MODEL:-$(cfg_val S2F_WHISPER_CPP_MODEL)}"
+  S2F_WHISPER_CLI="${S2F_WHISPER_CLI:-$(cfg_val S2F_WHISPER_CLI)}"
   S2F_QWEN_TTS_DIR="${S2F_QWEN_TTS_DIR:-$(cfg_val S2F_QWEN_TTS_DIR)}"
 fi
-for v in S2F_MLX_WHISPER_DIR S2F_QWEN_TTS_DIR; do
+for v in S2F_WHISPER_CPP_MODEL S2F_QWEN_TTS_DIR; do
   if [ -z "${!v}" ]; then
     echo "✗ ${v} not found: set this environment variable or put it in the config file (python3 tools/config/s2f_config.py --show shows the current values; tools/doctor/setup_voice.sh installs the voice and transcription environments); stopping"
     exit 1
@@ -91,11 +91,12 @@ for v in S2F_MLX_WHISPER_DIR S2F_QWEN_TTS_DIR; do
 done
 S2F_QWEN_TTS_MODELS="${S2F_QWEN_TTS_MODELS:-${QWEN_TTS_MODELS:-$S2F_QWEN_TTS_DIR/../_models}}"
 for v in CUTLINE_DIR GROQ_API_KEY ELEVENLABS_API_KEY ELEVEN_API_KEY GEMINI_API_KEY S2F_ASSETS_LOCAL PROMPTSTUDIO_DIR S2F_DIR S2F_HF_BIN \
-         QWEN_TTS_DIR QWEN_TTS_MODELS MLX_WHISPER_DIR CONCAT_BIN VE_HEADED; do
+         QWEN_TTS_DIR QWEN_TTS_MODELS MLX_WHISPER_DIR S2F_MLX_WHISPER_DIR CONCAT_BIN VE_HEADED; do
   unset "$v"
 done
 export HOME="$TMPHOME"
-export S2F_MLX_WHISPER_DIR S2F_QWEN_TTS_DIR S2F_QWEN_TTS_MODELS
+export S2F_WHISPER_CPP_MODEL S2F_QWEN_TTS_DIR S2F_QWEN_TTS_MODELS
+[ -n "${S2F_WHISPER_CLI:-}" ] && export S2F_WHISPER_CLI
 # The font files are not in git, so the clone has none: read the source checkout's assets/. Its sfx/ (sounds and
 # manifest) ships with the repository, the same as the clone's; with S2F_ASSETS_LOCAL unset only those sounds are used.
 export S2F_ASSETS="$SRC/assets"
@@ -116,7 +117,7 @@ check_env() {
   [ -z "$leak" ] || fail "still in the environment: ${leak}"
   [ ! -e "$HOME/.config/script2film/secrets.json" ] || fail "the temp HOME has .config/script2film/secrets.json"
   local d
-  for d in "$S2F_MLX_WHISPER_DIR/.venv/bin/python" "$S2F_QWEN_TTS_DIR/.venv/bin/python" "$S2F_QWEN_TTS_MODELS" "$S2F_ASSETS/fonts" \
+  for d in "$S2F_WHISPER_CPP_MODEL" "$S2F_QWEN_TTS_DIR/.venv/bin/python" "$S2F_QWEN_TTS_MODELS" "$S2F_ASSETS/fonts" \
            "$S2F_ASSETS/sfx/manifest.json" "$HF_HOME" "$PLAYWRIGHT_BROWSERS_PATH" "$EP/doc.json" "$EP/refs"; do
     [ -e "$d" ] || fail "does not exist: ${d}" || return 1
   done

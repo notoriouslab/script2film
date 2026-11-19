@@ -59,8 +59,8 @@ China, Japan) or `"green"` (US stocks) in doc.json picks which colour means up (
 |---|---|---|
 | 1 Topic | One dilemma, one science point, one quote; an anchor word (2–4 characters / 1–2 words) that opens as the viewer's trouble and closes redefined; a second-person hook; end on a question the viewer can answer | |
 | 2 Plan | Write `doc.json` (lines + beats + shots, below). Hook beats 3–5 s; the climax line gets long gaps around it; keep facts checkable; write `facts.md` beside doc.json and set `"facts": "facts.md"` (table and rules: "facts.md" below) | **stop: show the script and the beat table; go on only when the user approves this script** (`doc_tts.py` will not run without it) |
-| 3 Voice (S1–S2) | `doc_tts.py --script-approved` after the user approved the script (recorded in `script_approval.json`; the same narration needs no flag again; without approval it voices nothing and exits 4) (Qwen clone, 3 candidates a line; any `python3` works, it re-runs itself with `$S2F_QWEN_TTS_DIR/.venv/bin/python`) → `doc_voice.py` (ASR picks, joins with gaps; doc.json `"asr"`: `"local"` mlx-whisper by default, `"cloud"` Groq) | |
-| 4 Align (S3) | `doc_align.py` → `final.srt`, `beats.json` (timing authority from here on; `"asr": "local"` mlx-whisper word timing into `voice.cleaned/aligned/audio.words.json`, `"cloud"` ElevenLabs Scribe, which sends the whole narration audio to ElevenLabs and falls back to mlx-whisper) | |
+| 3 Voice (S1–S2) | `doc_tts.py --script-approved` after the user approved the script (recorded in `script_approval.json`; the same narration needs no flag again; without approval it voices nothing and exits 4) (Qwen clone, 3 candidates a line; any `python3` works, it re-runs itself with `$S2F_QWEN_TTS_DIR/.venv/bin/python`) → `doc_voice.py` (ASR picks, joins with gaps; doc.json `"asr"`: `"local"` whisper.cpp by default, `"cloud"` Groq) | |
+| 4 Align (S3) | `doc_align.py` → `final.srt`, `beats.json` (timing authority from here on; `"asr": "local"` whisper.cpp word timing into `voice.cleaned/aligned/audio.words.json`, `"cloud"` ElevenLabs Scribe, which sends the whole narration audio to ElevenLabs and falls back to whisper.cpp) | |
 | 5 VE shots (S4a) | **with step 3**: `doc_runsheet.py --estimate` (after alignment: without `--estimate`) → ve-runner `--auto-pick` → `ve_collect.py --out <project>/ve_<look>` (look: doc.json `ve_look`, else `flat` for lecture-*, else the theme) → `ve_clipcheck.py` | |
 | 5b Host (S5) | after step 3, alongside step 5: `doc_host.py split` → `tools/tp/tp_host.py` (several episodes: `tp_multi.py`) → `doc_host.py join`; details in `tools/tp/README.md` | |
 | 6 Code shots (S4b) | `doc_code.py --render` (checks every trigger phrase first; renders with HyperFrames from the repo root: `npm ci` once) | |
@@ -76,13 +76,13 @@ checked in a clean clone by `tools/check-standalone.sh`):
 - `npm ci` once in the repo root installs HyperFrames (pinned in `package.json`) into `node_modules/`; it runs with a
   Node 22+ `node` from PATH. `S2F_HF_BIN` (optional) points at another HyperFrames package folder or entry script.
 - `S2F_QWEN_TTS_DIR` (qwen3-tts with its `.venv`; models in `S2F_QWEN_TTS_MODELS`, default `$S2F_QWEN_TTS_DIR/../_models`).
-- `S2F_MLX_WHISPER_DIR` (a folder whose `.venv` has mlx-whisper): with doc.json `"asr": "local"` (the default) `doc_voice`
+- `S2F_WHISPER_CPP_MODEL` (the whisper.cpp model `ggml-large-v3-turbo.bin`; `whisper-cli` from PATH or `S2F_WHISPER_CLI`): with doc.json `"asr": "local"` (the default) `doc_voice`
   picks takes and `doc_align` takes word timing with it, no keys, no audio sent out.
 - `"asr": "cloud"` uses two online services: Groq Whisper to pick takes (`GROQ_API_KEY`; every candidate take is sent to
   Groq) and ElevenLabs Scribe for word timing (`ELEVENLABS_API_KEY`; the whole joined narration is sent to ElevenLabs;
   model `scribe_v2`, or `S2F_SCRIBE_MODEL`). Groq needs its key (it stops without one) and hands the remaining takes to
-  mlx-whisper when it is rate-limited; Scribe falls back to mlx-whisper when it fails or has no key (both fallbacks need
-  `S2F_MLX_WHISPER_DIR`). Keys come from
+  whisper.cpp when it is rate-limited; Scribe falls back to whisper.cpp when it fails or has no key (both fallbacks need
+  `S2F_WHISPER_CPP_MODEL`). Keys come from
   the environment or `~/.config/script2film/secrets.json` (JSON, the key names as above). ElevenLabs' free plan has a
   usage cap, and its terms restrict commercial use of what the free plan produces: check the current numbers and terms
   on ElevenLabs' official pricing page before using it for a published film.
@@ -358,5 +358,5 @@ rendered shot with `tests/screen_step_check.py <project> <beat>`.
 `doc_thumb.py`: the episode's 1280×720 YouTube thumbnail from doc.json `thumb`, credit line from `assets/CREDITS.md`, FORMAT §8),
 `scripts/doc_themes.py` (CODE_THEMES for code shots, VE_THEMES for prompt style blocks), `tests/` (`python3 -m pytest -q tests` from this folder; no API key needed; the fonts must be in the asset layers, and `npm ci` done: `test_hyperframes.py` checks the installed package).
 In this repo: `tools/assemble/assemble.py` (cuts the clips into one picture track, called by `doc_cut.py`), `tools/assemble/cut2plan.py` (writes `plan.json`), `tools/concat/plan2concat_mcp.py` (Concat assembly and export), `assets/` (fonts, sounds).
-External: qwen3-tts, mlx-whisper, ve-runner, ElevenLabs Scribe and Groq (optional, `"asr": "cloud"`),
+External: qwen3-tts, whisper.cpp, ve-runner, ElevenLabs Scribe and Groq (optional, `"asr": "cloud"`),
 and in this repository `tools/tp/` (TalkingPhoto host), `tools/nightly/` (checks, upload metadata) and `tools/drama/` (lip-synced drama cut).

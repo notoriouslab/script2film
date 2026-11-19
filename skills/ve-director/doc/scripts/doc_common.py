@@ -2,8 +2,8 @@
 
 Every script takes the project's doc.json; all paths inside it are relative to the project folder.
 External tools are found through environment variables (no machine paths in this repo). The tool variables also work
-under their old names without the S2F_ prefix (QWEN_TTS_DIR, QWEN_TTS_MODELS, MLX_WHISPER_DIR); when both are set, the
-S2F_ name wins (s2f_env).
+under their old names without the S2F_ prefix (QWEN_TTS_DIR, QWEN_TTS_MODELS); when both are set, the S2F_ name wins
+(s2f_env).
 
 Any of these can be written once in ~/.config/script2film/config.json instead of exported (same names as the keys;
 tools/config/s2f_config.py, loaded at the top of every script that reads them). Order: environment, then the config file,
@@ -14,9 +14,9 @@ S2F_DIR from the config file does not reach that one step.
 
 Required:
   S2F_QWEN_TTS_DIR     qwen3-tts folder with its .venv (doc_tts.py runs inside it)
-  S2F_MLX_WHISPER_DIR  a folder whose .venv has mlx-whisper (Apple Silicon). doc.json "asr": "local" (the default)
-                       transcribes with it: picking TTS candidates (doc_voice) and word timing (doc_align); no keys, no
-                       audio sent out
+  S2F_WHISPER_CPP_MODEL  the whisper.cpp model file (ggml-large-v3-turbo.bin). doc.json "asr": "local" (the default)
+                       transcribes with it through whisper-cli: picking TTS candidates (doc_voice) and word timing
+                       (doc_align); no keys, no audio sent out; any platform whisper.cpp runs on
 Optional:
   S2F_QWEN_TTS_MODELS  the Qwen3-TTS models folder; default: $S2F_QWEN_TTS_DIR/../_models (qwen_models_dir)
   S2F_ASSETS           the bundled asset layer (fonts/, sfx/ with manifest.json); default: the repo root's assets/
@@ -24,11 +24,12 @@ Optional:
   S2F_HF_BIN           a HyperFrames package folder or entry script; default: the repo root's node_modules/hyperframes
                        (`npm ci`), run with a Node 22+ `node` from PATH
   S2F_SCRIBE_MODEL     the ElevenLabs Scribe model for "asr": "cloud"; default: scribe_v2
+  S2F_WHISPER_CLI      the whisper-cli program; default: whisper-cli on PATH (brew install whisper.cpp)
 Only with doc.json "asr": "cloud":
-  GROQ_API_KEY         picking TTS candidates with Groq; when Groq is rate-limited and S2F_MLX_WHISPER_DIR is set, the
+  GROQ_API_KEY         picking TTS candidates with Groq; when Groq is rate-limited and S2F_WHISPER_CPP_MODEL is set, the
                        rest are transcribed locally
   ELEVENLABS_API_KEY   word timing with ElevenLabs Scribe (ELEVEN_API_KEY also works); without a key, or when Scribe
-                       fails, mlx-whisper times the words if S2F_MLX_WHISPER_DIR is set. The whole narration audio is
+                       fails, whisper.cpp times the words if S2F_WHISPER_CPP_MODEL is set. The whole narration audio is
                        sent to ElevenLabs
   Keys come from the environment first, then from ~/.config/script2film/secrets.json (JSON, the key names as above).
 """
@@ -223,7 +224,7 @@ def line_key(doc, P, line):
 
 def s2f_env(name):
     """S2F_<name> when it is set (non-empty), otherwise the old name <name>; None when neither is set. name is given
-    without the prefix (s2f_env("MLX_WHISPER_DIR"))."""
+    without the prefix (s2f_env("QWEN_TTS_DIR"))."""
     return os.environ.get(f"S2F_{name}") or os.environ.get(name) or None
 
 
@@ -240,8 +241,8 @@ def env_dir(name, default=None):
 
 
 def has_local_asr():
-    """True when the local transcription folder (S2F_MLX_WHISPER_DIR, or the old name MLX_WHISPER_DIR) is set."""
-    return bool(s2f_env("MLX_WHISPER_DIR"))
+    """True when the local transcription model (S2F_WHISPER_CPP_MODEL) is set."""
+    return bool(os.environ.get("S2F_WHISPER_CPP_MODEL"))
 
 
 def qwen_models_dir():
@@ -287,7 +288,7 @@ def groq_key():
 
 
 def asr_mode(doc):
-    """doc.json "asr": "local" (default: mlx-whisper on this machine, no keys, no audio sent out) or "cloud" (Groq picks
+    """doc.json "asr": "local" (default: whisper.cpp on this machine, no keys, no audio sent out) or "cloud" (Groq picks
     takes, ElevenLabs Scribe times the words; each falls back to local when it fails or has no key)."""
     mode = doc.get("asr", "local")
     if mode not in ("local", "cloud"):
@@ -295,43 +296,86 @@ def asr_mode(doc):
     return mode
 
 
+LOCAL_SETUP = ("install whisper.cpp (macOS: brew install whisper.cpp; other systems: github.com/ggml-org/whisper.cpp), "
+               "download ggml-large-v3-turbo.bin (huggingface.co/ggerganov/whisper.cpp) and set S2F_WHISPER_CPP_MODEL to that file")
+DTW_PRESET = "large.v3.turbo"   # 逐字時間（DTW）要的模型代號；換模型時一起換
+
+
 def need_local_asr():
-    """Stop with how to set it up when "asr" is local and S2F_MLX_WHISPER_DIR (or the old MLX_WHISPER_DIR) is not set."""
+    """Stop with how to set it up when "asr" is local and S2F_WHISPER_CPP_MODEL is not set."""
     if not has_local_asr():
-        sys.exit('✗ "asr": "local" transcribes on this machine: set S2F_MLX_WHISPER_DIR (the old name MLX_WHISPER_DIR also works) to a '
-                 'folder whose .venv has mlx-whisper (python3 -m venv .venv && .venv/bin/pip install mlx-whisper)')
+        old = " (mlx-whisper was replaced by whisper.cpp on 2026-11-20; S2F_MLX_WHISPER_DIR is no longer used)" \
+            if s2f_env("MLX_WHISPER_DIR") else ""
+        sys.exit(f'✗ "asr": "local" transcribes on this machine: {LOCAL_SETUP}{old}')
 
 
-LOCAL_MODEL = "mlx-community/whisper-large-v3-turbo"
-LOCAL_ASR = """import json, sys, mlx_whisper
-lang, words, paths = sys.argv[1], sys.argv[2] == "1", sys.argv[3:]
-out = {}
-for p in paths:
-    r = mlx_whisper.transcribe(p, path_or_hf_repo=%r, language=lang, word_timestamps=words)
-    out[p] = {"segments": [{"text": s["text"], "start": float(s["start"]), "end": float(s["end"]),
-                            "words": [{"word": w["word"], "start": float(w["start"]), "end": float(w["end"])}
-                                      for w in s.get("words", [])]} for s in r["segments"]]} if words else r["text"]
-print(json.dumps(out, ensure_ascii=False))
-""" % LOCAL_MODEL
+def _cpp_words(seg_json):
+    """One whisper-cli -ojf file → {"segments": [{"text", "start", "end", "words": [{"word", "start", "end"}]}]}.
+    word start = DTW time (t_dtw, centiseconds); end = the next token's start in the same segment, the segment end for
+    the last one. A token without DTW time (-1) falls back to its offsets."""
+    segs, fallback = [], False
+    for s in json.loads(Path(seg_json).read_text(encoding="utf-8")).get("transcription", []):
+        a, b = s["offsets"]["from"] / 1000, s["offsets"]["to"] / 1000
+        toks = [t for t in s.get("tokens", []) if not t["text"].startswith("[_")]
+        starts = []
+        for t in toks:
+            if t.get("t_dtw", -1) >= 0:
+                starts.append(t["t_dtw"] / 100)
+            else:
+                starts.append(t["offsets"]["from"] / 1000)
+                fallback = True
+        words = []
+        for k, t in enumerate(toks):
+            end = round(starts[k + 1] if k + 1 < len(toks) else max(b, starts[k]), 3)
+            if not t["text"].strip():                      # a bare space token: it only marks where a word ends
+                continue
+            prev = words[-1]["word"] if words else ""
+            if prev and not t["text"][0].isspace() and re.match(r"[A-Za-z0-9']", t["text"]) and re.search(r"[A-Za-z0-9']$", prev):
+                words[-1].update(word=prev + t["text"], end=end)   # BPE piece of an English word: join it to the word
+            else:
+                words.append({"word": t["text"], "start": round(starts[k], 3), "end": end})
+        segs.append({"text": s["text"], "start": a, "end": b, "words": words})
+    return {"segments": segs}, fallback
 
 
 def local_asr(paths, lang, words=False):
-    """Transcribe on this machine with mlx-whisper (one process, the model loads once). Returns {path: text}, or with
-    words=True {path: {"segments": [{"words": [{"word", "start", "end"}]}], ...}}. zh text comes back Traditional.
-    None when S2F_MLX_WHISPER_DIR (or the old MLX_WHISPER_DIR) is not set (the caller keeps its old behaviour)."""
+    """Transcribe on this machine with whisper.cpp (one whisper-cli run, the model loads once). Returns {path: text}, or
+    with words=True {path: {"segments": [{"words": [{"word", "start", "end"}]}], ...}}. zh text comes back Traditional.
+    None when S2F_WHISPER_CPP_MODEL is not set (the caller keeps its old behaviour).
+    Word times use DTW (-dtw, needs -nfa: whisper.cpp turns DTW off when flash attention is on). Inputs are converted to
+    16 kHz mono WAV first, as whisper.cpp expects. 2026-11-20 test (21 files, 22 min): same accuracy as mlx-whisper with
+    the same turbo model, no repetition loops, word starts closer to the truth."""
     if not has_local_asr():
         return None
-    py = env_dir("MLX_WHISPER_DIR") / ".venv/bin/python"
-    r = subprocess.run([str(py), "-c", LOCAL_ASR, lang, "1" if words else "0", *map(str, paths)],
-                       capture_output=True, text=True)
-    last = (r.stdout.strip().splitlines() or [""])[-1]
-    try:
-        out = json.loads(last) if r.returncode == 0 else None
-    except ValueError:
-        out = None
-    if out is None:   # say why: the transcriber's own stderr (a missing model, out of memory) was swallowed before
-        why = "\n".join((r.stderr or "").strip().splitlines()[-15:])
-        sys.exit(f"✗ local transcription failed (exit {r.returncode}, {py}):\n{why}")
+    import tempfile
+    model = Path(os.environ["S2F_WHISPER_CPP_MODEL"]).expanduser()
+    if not model.is_file():
+        sys.exit(f"✗ S2F_WHISPER_CPP_MODEL={model} does not exist: {LOCAL_SETUP}")
+    cli = os.environ.get("S2F_WHISPER_CLI") or shutil.which("whisper-cli")
+    if not cli:
+        sys.exit(f"✗ whisper-cli not found (set S2F_WHISPER_CLI, or put it on PATH): {LOCAL_SETUP}")
+    out = {}
+    with tempfile.TemporaryDirectory() as tmp:
+        args = [cli, "-m", str(model), "-l", lang, "-np"] + (["-ojf", "-dtw", DTW_PRESET, "-nfa"] if words else ["-otxt"])
+        wavs = []
+        for k, p in enumerate(paths):
+            w = Path(tmp) / f"{k}.wav"
+            subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", str(p), "-ac", "1", "-ar", "16000", str(w)], check=True)
+            wavs.append(w)
+            args += ["-f", str(w)]
+        r = subprocess.run(args, capture_output=True, text=True)
+        if r.returncode != 0:
+            why = "\n".join((r.stderr or "").strip().splitlines()[-15:])
+            sys.exit(f"✗ local transcription failed (exit {r.returncode}, {cli}):\n{why}")
+        warned = False
+        for p, w in zip(paths, wavs):
+            if words:
+                out[str(p)], fb = _cpp_words(Path(str(w) + ".json"))
+                if fb and not warned:
+                    print("  ! whisper.cpp gave no DTW word times for some words: used its coarser segment offsets", file=sys.stderr)
+                    warned = True
+            else:
+                out[str(p)] = " ".join(Path(str(w) + ".txt").read_text(encoding="utf-8").split())
     if lang == "zh":
         from opencc import OpenCC
         s2t = OpenCC("s2twp").convert

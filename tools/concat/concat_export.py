@@ -11,6 +11,9 @@ export_start／export_wait 迴圈；tools/concat/test_single_export.py 守著這
 <集>/nightly/checklist_skips.jsonl（step 是 export），和 --skip-checklist 同一本；整個不檢的片沒有體檢紀錄，上傳時會被擋。
 <片名>.inputs.json（指紋）只在這裡寫：檢查程式只讀，過期的片重跑檢查照樣不過。
 """
+import sys as _sys, pathlib as _pl   # 設定檔：tools/config/s2f_config.py（S2F_EXPORT_CRF 可寫在設定檔）
+_sys.path.insert(0, str(_pl.Path(__file__).resolve().parents[2] / 'tools/config'))
+import s2f_config; s2f_config.load()
 import datetime, json, os, sys
 from pathlib import Path
 

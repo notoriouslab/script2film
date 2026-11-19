@@ -185,7 +185,7 @@ GALLERY = [
   + [(f"<code>{k}</code>{z}</figcaption>", f"<code>{k}</code>{e}</figcaption>") for k,z,e in PAL]
 TOOLS = [
 ("<title>每個環節用什麼工具｜Script2Film</title>", "<title>Which tool each stage uses | Script2Film</title>"),
-("Script2Film 每個環節的預設工具、在哪裡跑、要不要錢、能換成什麼：Qwen3-TTS、mlx-whisper、HyperFrames、VideoExpress、TalkingPhotos、MiniMax H3、MiniMax Music 3、Concat、YouTube。", "The default tool for each stage of Script2Film, where it runs, what it costs and what can replace it: Qwen3-TTS, mlx-whisper, HyperFrames, VideoExpress, TalkingPhotos, MiniMax H3, MiniMax Music 3, Concat, YouTube."),
+("Script2Film 每個環節的預設工具、在哪裡跑、要不要錢、能換成什麼：Qwen3-TTS、whisper.cpp、HyperFrames、VideoExpress、TalkingPhotos、MiniMax H3、MiniMax Music 3、Concat、YouTube。", "The default tool for each stage of Script2Film, where it runs, what it costs and what can replace it: Qwen3-TTS, whisper.cpp, HyperFrames, VideoExpress, TalkingPhotos, MiniMax H3, MiniMax Music 3, Concat, YouTube."),
 ('<div class="eyebrow">工具</div>', '<div class="eyebrow">Tools</div>'),
 ("每個環節，一個預設工具", "One default tool for each stage"),
 ("Script2Film 自己不配音、不生成影片、不剪輯。它把一支片拆成幾個環節，每個環節接一個現成的工具，環節之間只靠資料夾裡的檔案交接。所以任何一個環節都能換成你習慣的工具。", "Script2Film does not synthesize voices, generate video or edit by itself. It splits a film into stages, connects an existing tool to each, and passes work between stages only as files in a folder. That is why any stage can be swapped for the tool you prefer."),
@@ -200,7 +200,6 @@ TOOLS = [
 ('<dd>其他聲音製作工具，例如 <a href="https://paykstrt.com/56038/180754" target="_blank" rel="noopener sponsored">CloneVoice.ai</a></dd>', '<dd>Any other voice tool, such as <a href="https://paykstrt.com/56038/180754" target="_blank" rel="noopener sponsored">CloneVoice.ai</a></dd>'),
 ('<div class="stage">對時與字幕</div>', '<div class="stage">Timing and subtitles</div>'),
 ("把配好的旁白轉回文字，量出每個字落在第幾秒。挑候選、字幕、畫面出現的時間都靠它。", "Transcribes the finished narration back to text and measures when every word is spoken. Take picking, subtitles and the timing of visuals all depend on it."),
-("<dd>你的電腦（Apple Silicon）</dd>", "<dd>Your computer (Apple Silicon)</dd>"),
 ("<dd>免費，開源</dd>", "<dd>Free, open source</dd>"),
 ("<dd>Groq、ElevenLabs Scribe（雲端，要金鑰，旁白會送出去）</dd>", "<dd>Groq or ElevenLabs Scribe (cloud, needs a key, and the narration audio is sent out)</dd>"),
 ('<div class="stage">程式畫的畫面</div>', '<div class="stage">Code-drawn visuals</div>'),
