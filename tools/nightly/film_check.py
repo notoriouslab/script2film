@@ -25,6 +25,10 @@
                  SFX_MIN 取 0.031 與 0.022 的中點（D5 規則；0.024 是之後重量多出的一組，仍在門檻下，且位移條件另外擋得住）。
   stale      擋  <片名>.inputs.json 記的剪接用檔，SHA-256 有任何一個對不上。檔不見只列在說明裡、不擋（交片後清中間檔是常態，
                  例：疊加層的外框 PNG；缺檔證明不了片子過期）。沒有 .inputs.json 的舊片列「無紀錄」、不擋。
+  quiet      列  成片最安靜 5% 的音量（16 kHz 單聲道、每 0.1 秒算 RMS dBFS，取第 5 百分位）高於 quiet_max（預設 -28）就提醒：句子之間
+                 配樂沒讓開，可能蓋過人聲。依據（2026-11-20 量 57 支已上架片）：唯一被聽出配樂蓋人聲的一集（-20、沒 duck）
+                 -26.4；刻意熱鬧的時事解說 11 支（-20＋duck 6）-29.8～-31.7；其他系列 -34～-46。正例只有一支、和時事只差
+                 3.4 dB，所以只列不擋，門檻取兩者中點。
 系列門檻：系列資料夾（集資料夾的上一層）放 film_check.json，例
   {"lufs": -14, "lufs_tol": 0.8, "max_tp": -1.0, "skip": [{"item": "black_mid", "why": "刻意用黑場轉場"}]}
   缺鍵用預設；skip 的 item 不在代號表或 why 空白：設定錯誤（exit 2）。
@@ -32,8 +36,8 @@
 import argparse, hashlib, json, re, subprocess, sys
 from pathlib import Path
 
-DEFAULT = {"lufs": -14.0, "lufs_tol": 0.8, "max_tp": -1.0, "skip": []}
-ITEMS = ("av_len", "last_frame", "black_mid", "loudness", "peak", "sfx", "stale")
+DEFAULT = {"lufs": -14.0, "lufs_tol": 0.8, "max_tp": -1.0, "quiet_max": -28.0, "skip": []}
+ITEMS = ("av_len", "last_frame", "black_mid", "loudness", "peak", "sfx", "stale", "quiet")
 SLACK_FRAMES = 3       # 音畫差、最後一格的容許格數
 TAIL_GAP, TAIL_MAX = 0.1, 2.0   # 片尾黑：結束點離檔尾 < 0.1 秒，長度 ≤ 2 秒
 SFX_SR, SFX_MAXLAG, SFX_MIN, SFX_LAG = 8000, 1.0, 0.026, 0.02
@@ -162,6 +166,20 @@ def sfx_match(bed_wav, mp4):
     return float(abs(lags[j]) / denom), float(idx[j] / SFX_SR)
 
 
+def quiet_level(mp4):
+    """成片最安靜 5% 的音量（dBFS）：每 0.1 秒一塊算 RMS，取第 5 百分位。沒有聲音：None。"""
+    import numpy as np
+    raw = subprocess.run(["ffmpeg", "-v", "error", "-i", str(mp4), "-vn", "-ac", "1", "-ar", "16000", "-f", "s16le", "-"],
+                         capture_output=True).stdout
+    a = np.frombuffer(raw, np.int16).astype(float) / 32768    # 16 kHz：門檻是用這個取樣率量的，8 kHz 會高約 2.5 dB
+    blk = 1600
+    k = len(a) // blk
+    if k == 0:
+        return None
+    rms = np.sqrt((a[:k * blk].reshape(k, blk) ** 2).mean(1))
+    return float(np.percentile(20 * np.log10(rms + 1e-9), 5))
+
+
 def stale(inputs_file):
     """(ok, value, notes)。沒有指紋檔：(None, "no record", [])。"""
     if not inputs_file.exists():
@@ -220,6 +238,12 @@ def basic(mp4, *, standard=None, skip=(), sfx_bed=None):
             listed.append({"code": "stale", "item": "inputs fingerprint (listed, not blocking)", "value": value})
         else:
             add("stale", "film made from the current inputs", ok, value, notes)
+    if "quiet" not in skipped and p["a"] is not None:
+        q, qmax = quiet_level(mp4), std.get("quiet_max", DEFAULT["quiet_max"])
+        if q is not None:
+            listed.append({"code": "quiet", "item": "quietest 5% of the sound (listed, not blocking)",
+                           "value": f"{q:.1f} dB" + (f"; louder than {qmax}: music may be covering the voice between lines"
+                                                      if q > qmax else "")})
     return {"ok": all(x["ok"] for x in items), "items": items, "listed": listed,
             "size": Path(mp4).stat().st_size, "sha256": sha256(mp4), "skipped": sorted(skipped)}
 

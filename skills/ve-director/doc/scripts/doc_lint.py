@@ -6,7 +6,8 @@
 When the script passes and the user has not approved this narration yet (doc_approval.py), a `Next:` line follows
 `doc_lint: ok`: show the user the narration and the beat table, then doc_tts.py --script-approved once they say yes.
 
-Four reports never fail the doc (FORMAT §9): ai_phrasing (AI-sounding narration, FORMAT §4), read_time and late_reveal (both need beats.json) and vs_prev (this episode against the last three
+Five reports never fail the doc (FORMAT §9): ai_phrasing (AI-sounding narration, FORMAT §4), peak_weight (generated shots so
+many that the high points cannot stand out), read_time and late_reveal (both need beats.json) and vs_prev (this episode against the last three
 episodes, found as the sibling folders numbered one, two and three less).
 
 make_doc.py ends with `doc_lint.check(doc)`. Rules and their numbers come from the author's series spec (SERIES.md「時代配色與畫面多樣性」)
@@ -166,6 +167,28 @@ def host_layout(doc):
     for b in doc["beats"]:
         n["full" if b.get("source") == "clip" else "side" if b["id"] in side else "pip" if b["id"] in pip else "none"] += 1
     return n
+
+
+# peak_weight (2026-11-20, 3 films read line by line, 43 films counted): the last 20 episodes of a 120-episode series put
+# generated shots on 16–34% of the lines, current-affairs films 0–25%; the one film where they hid the high point had 43%.
+GEN_SHARE_MAX = 0.40
+
+
+def _generated(b):
+    """A generated shot: a VE beat, or a clip that is not the host."""
+    return b.get("source") == "ve" or (b.get("source") == "clip" and "host" not in str(b.get("clip", "")))
+
+
+def peak_weight(doc):
+    """Generated shots on more than GEN_SHARE_MAX of the lines read as the background and the high points cannot stand out
+    (a report, never a failure). Tried and dropped: "a card main-line beat between two heavier beats", which fired on 6 of
+    the last 20 episodes of a series the user had accepted."""
+    gen = {n for b in doc["beats"] if _generated(b) for n in b["lines"]}
+    share = len(gen) / max(len(doc["lines"]), 1)
+    if share <= GEN_SHARE_MAX:
+        return []
+    return [f"peak_weight: generated shots on {len(gen)} of {len(doc['lines'])} lines ({share:.0%}, over "
+            f"{GEN_SHARE_MAX:.0%}): they read as the background; keep them for the high points"]
 
 
 # Reading time: after text finishes coming in, hold it (characters / 4.5 + 1.5) s in Chinese,
@@ -397,7 +420,7 @@ def check(doc, rules=DEFAULT, prev=None, base=None):
     report_prev(doc, prev, base)
     if rules.get("facts") and (note := doc_facts.scripture_note(doc)):
         print(note)
-    for w in ai_phrasing(doc):
+    for w in ai_phrasing(doc) + peak_weight(doc):
         print("⚠ " + w + AI_NOTE)
     problems = lint(doc, rules, base)
     if problems:
@@ -427,6 +450,7 @@ def main():
         late = late_reveal(doc, beats)
         print("\n".join(late) if late else "late_reveal: ok")
     print("\n".join(f"⚠ {w}{AI_NOTE}" for w in ai_phrasing(doc)) or "ai_phrasing: ok")
+    print("\n".join(f"⚠ {w}{AI_NOTE}" for w in peak_weight(doc)) or "peak_weight: ok")
     print("\n".join(problems) if problems else "doc_lint: ok")
     if not problems and (nxt := doc_approval.next_step(doc, Path(a.doc).resolve().parent)):
         print(nxt)   # a script the user has not approved yet: doc_tts.py will not voice it (doc_approval.py)

@@ -164,3 +164,23 @@ def test_tail_black_up_to_two_seconds_is_listed(tmp_path):
     assert "black_mid" in codes(r, True) and [x for x in r["listed"] if x["code"] == "black_tail"]
     r = run(film(tmp_path, name="w.mp4", vdur=5.0, adur=5.0, black=(2.5, 2.5)))   # 超過 2 秒：算片中黑
     assert "black_mid" in codes(r, False)
+
+
+def test_quiet_is_listed_and_flags_sound_with_no_pauses(tmp_path):
+    """噪音一路沒停：最安靜 5% 也很大聲，列出提醒；中間有一半靜音的片不提醒。都不擋。"""
+    loud = fc.basic(str(film(tmp_path)), skip=("loudness", "peak"))
+    q = [x for x in loud["listed"] if x["code"] == "quiet"][0]
+    assert loud["ok"] and "music may be covering" in q["value"]
+    gaps = tmp_path / "gaps.mp4"
+    ff("-i", film(tmp_path, name="src.mp4"), "-af", "volume=enable='between(mod(t,1),0.5,1)':volume=0", "-c:v", "copy", gaps)
+    q = [x for x in fc.basic(str(gaps), skip=("loudness", "peak"))["listed"] if x["code"] == "quiet"][0]
+    assert "music may be covering" not in q["value"]
+
+
+def test_series_quiet_max(tmp_path):
+    ep = tmp_path / "s" / "001"
+    ep.mkdir(parents=True)
+    (ep.parent / "film_check.json").write_text(json.dumps({"quiet_max": 0}))
+    q = [x for x in fc.basic(str(film(tmp_path)), standard=fc.load_standard(ep), skip=("loudness", "peak"))["listed"]
+         if x["code"] == "quiet"][0]
+    assert "music may be covering" not in q["value"]
