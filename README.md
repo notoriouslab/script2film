@@ -73,7 +73,14 @@ hand, design one from a text description. Lines can be split between several spe
 
 **02 · 27 scenes that move on the word you say.** Line charts, pies, formulas, breakdowns, comparisons, lists,
 timelines, map routes, text highlighted passage by passage. You write "appear when this word is spoken", and the
-program lines it up with the real timing of the voice.
+program lines it up with the real timing of the voice. A quotation can come out of a blur word by word as it is read,
+a word can be struck out and rewritten ("not A, but B"), a long timeline slides from one stretch to the next, and a
+relation chart can become a clue board with red string.
+
+**15 looks, and three of them tried on your own script first.** Each look changes the colours, the shapes and the
+ground together: flat teaching panels, paper collage, documentary, dark gold, newsroom, vintage poster, editorial
+serif, cinematic dark. Before anything is voiced, `doc_theme_preview.py` plays three looks side by side on three of
+this episode's own beats (about 45 seconds), so you pick with the script in front of you.
 
 <img src="./docs/site/scene-prompt.jpg" alt="Text highlighted as it is read" width="640">
 
@@ -119,7 +126,8 @@ yours to decide.
 
 **Also:** music composed by code from the on-screen events (or songs from MiniMax Music 3 on your own Colab), sound
 effects on the moment each element appears, start and release checklists that stop the run until rights and sources
-are answered, and YouTube upload with schedule, thumbnail and the altered-content label.
+are answered, YouTube upload with schedule, thumbnail and the altered-content label, and optional fonts (LXGW WenKai,
+jf open-huninn) listed with their original download links.
 
 ## Made with it
 

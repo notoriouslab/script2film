@@ -151,13 +151,13 @@ run_pytest() {
   (cd "$DOC" && python3 -m pytest -q tests -rs) 2>&1 | tee "$WORK/pytest.log"
   local rc=${PIPESTATUS[0]}
   [ "$rc" -eq 0 ] || return "$rc"
-  local tail_line skipped n_skip_lines n_121
+  local tail_line skipped n_skip_lines n_122
   tail_line="$(grep -E '[0-9]+ passed' "$WORK/pytest.log" | tail -1)"
   skipped="$(echo "$tail_line" | grep -oE '[0-9]+ skipped' | grep -oE '[0-9]+')"
   n_skip_lines=$(grep -c '^SKIPPED' "$WORK/pytest.log")
-  n_121=$(grep '^SKIPPED' "$WORK/pytest.log" | grep -c 'test_lecture.py:121')
-  echo "pytest result: ${tail_line}; SKIPPED lines ${n_skip_lines}, of them at test_lecture.py:121: ${n_121}"
-  [ "${skipped:-0}" = 3 ] && [ "$n_skip_lines" = 3 ] && [ "$n_121" = 3 ] || fail "skips are not exactly 3 at test_lecture.py:121"
+  n_122=$(grep '^SKIPPED' "$WORK/pytest.log" | grep -c 'test_lecture.py:122')
+  echo "pytest result: ${tail_line}; SKIPPED lines ${n_skip_lines}, of them at test_lecture.py:122: ${n_122}"
+  [ "${skipped:-0}" = 3 ] && [ "$n_skip_lines" = 3 ] && [ "$n_122" = 3 ] || fail "skips are not exactly 3 at test_lecture.py:122"
 }
 
 prep_p1() {

@@ -76,7 +76,7 @@ INDEX = [
 ("第一個範例挑候選的實際輸出（節錄）：四句、十二條候選，每句的分數。", "Real output from take picking in the first example (excerpt): four lines, twelve takes, and each line's score."),
 ("02　程式畫的畫面", "02 · Code-drawn visuals"),
 ("27 種場景，說到哪個字，畫面動到哪裡", "27 scenes that move on the word you say"),
-("折線、圓餅、算式、拆解、對照、清單、時間軸、地圖路線、逐段標重點的文字。你在稿裡寫「說到這個詞的時候出現」，程式照配音的實際時間對上去。", "Line charts, pies, formulas, breakdowns, comparisons, lists, timelines, map routes, text highlighted passage by passage. In the script you write \"appear when this word is spoken\", and the program lines it up with the real timing of the voice."),
+("折線、圓餅、算式、拆解、對照、清單、時間軸、地圖路線、逐段標重點的文字。你在稿裡寫「說到這個詞的時候出現」，程式照配音的實際時間對上去。引言隨旁白逐字從模糊浮現、劃掉改寫、時間軸從這一段滑到下一段、拉紅線的線索板。15 套長相，還沒配音就能用這一集自己的三拍並排試看。", "Line charts, pies, formulas, breakdowns, comparisons, lists, timelines, map routes, text highlighted passage by passage. In the script you write \"appear when this word is spoken\", and the program lines it up with the real timing of the voice. A quotation comes out of a blur word by word as it is read, a word is struck out and rewritten, a timeline slides from one stretch to the next, a clue board strings ideas together with red thread. 15 looks, and three of them can be tried side by side on this episode's own beats before anything is voiced."),
 ("一段提示詞，說到的那幾個字被標成黃色", "A prompt with the words being spoken highlighted in yellow"),
 ("旁白唸到哪一段，那一段就被標出來。", "The passage being narrated is highlighted as it is read."),
 ("03　生成鏡頭", "03 · Generated shots"),
@@ -153,19 +153,19 @@ INDEX = [
 ]
 SC = {"seed_dot":"Opening hook: a dot drops in, breathes, and jumps on the key word","split_duel":"Two dots in a split screen, trading moves","cover":"Episode title card, with room for a host in the corner","burst_title":"Climax: the screen dims, then big type bursts on the word","exchange":"Two sides trading blows on one board","photo":"A photo as the visual, with a push-in and a caption","object_draw":"Closing: an object drawn stroke by stroke","stat_count":"One key number that counts up when it is spoken","timeline":"A timeline whose markers appear as each date is spoken","compare":"Two columns side by side, with the verdict marked at the end","countdown":"A clock runs to how long it took, with a progress bar","grid_hot":"Cells appear one by one, then one lights up","credits":"End credits scrolling up group by group","bars":"Bar chart: each bar grows when its label is spoken","line_chart":"Line chart drawn as far as the narration has reached","pie":"Pie chart opening slice by slice, legend on the right","formula":"One line of large type for a formula or a causal chain","breakdown":"One quantity split into parts, with a second level if needed","list_reveal":"A list revealed one item at a time","map_route":"A route drawn stop by stop on a simple map","flow":"How something flows: nodes and links appear in order","relation":"Who is connected to whom: name tags appear, lines are drawn","web_evidence":"A screenshot of a real page with the key passage highlighted","ve_annotate":"A generated shot freezes midway and gets circles and arrows","quote_card":"A full-screen quotation with its source, and an optional photo","merge_bubble":"One bubble swallowing another","screen_step":"Steps marked one at a time on a screen capture"}
 ZH = {"seed_dot":"開場的鉤子：一個點落下、輕輕呼吸，在關鍵字上跳一下","split_duel":"分割畫面裡兩個點，一來一往","cover":"一集的標題卡，留位置給角落的主持人","burst_title":"高潮：先暗下來，在那個字上爆開大字","exchange":"兩方在同一塊板上交手","photo":"一張照片當畫面，推近、加說明","object_draw":"收尾：一筆一筆畫出一個物件","stat_count":"一個重要的數字，唸到時跳上去","timeline":"時間軸，說到哪個日期，標記出現","compare":"左右兩欄對照，最後標出結論","countdown":"時鐘跑到那件事花的時間，進度條跟著走","grid_hot":"一格一格出現，最後其中一格亮起","credits":"片尾字幕，一組一組往上捲","bars":"長條圖，唸到哪個標籤哪一根長出來","line_chart":"折線圖，旁白說到哪裡線畫到哪裡","pie":"圓餅圖，一塊一塊展開，圖例在右邊","formula":"一行大字的算式或因果鏈","breakdown":"一個量拆成幾個部分，可以再拆一層","list_reveal":"清單一項一項出現","map_route":"簡圖上一站一站畫出路線","flow":"東西怎麼流動：節點與線依序出現","relation":"誰和誰有關：名牌出現，連線畫上","web_evidence":"一張真實頁面的截圖，重點處畫螢光筆","ve_annotate":"生成的鏡頭播到一半定格，加圈與箭頭","quote_card":"整頁的引言，附出處，可以配照片","merge_bubble":"一個泡泡把另一個吞進去","screen_step":"螢幕畫面上一步一步標出操作"}
-PAL = [("lecture-light","淺色","Light"),("lecture-dark","深色","Dark"),("lecture-story","故事","Story"),("lecture-finance","財經","Finance"),("lecture-food","飲食","Food"),("lecture-tech","科技","Tech"),("lecture-history","歷史","History"),("lecture-faith","信仰","Faith"),("collage","拼貼紙感","Paper collage"),("live","實景底","Live footage")]
+PAL = [("lecture-light","淺色","Light"),("lecture-dark","深色","Dark"),("lecture-story","故事","Story"),("lecture-finance","財經","Finance"),("lecture-food","飲食","Food"),("lecture-tech","科技","Tech"),("lecture-history","歷史","History"),("lecture-faith","信仰","Faith"),("collage","拼貼紙感","Paper collage"),("live","實景底","Live footage"),("dark-gold","深底金字","Dark gold"),("newsroom","新聞台","Newsroom"),("vintage-poster","舊海報","Vintage poster"),("editorial-serif","雜誌明體","Editorial serif"),("cinematic-dark","電影暗場","Cinematic dark")]
 GALLERY = [
-("<title>27 種場景與 10 套色版｜Script2Film</title>", "<title>27 scenes and 10 palettes | Script2Film</title>"),
-("Script2Film 程式畫的 27 種場景（會動的示範）、10 套色版，以及用它做過的幾種片型。", "The 27 code-drawn scenes of Script2Film as moving demos, its 10 palettes, and the kinds of film made with it."),
+("<title>27 種場景與 15 套色版｜Script2Film</title>", "<title>27 scenes and 15 palettes | Script2Film</title>"),
+("Script2Film 程式畫的 27 種場景（會動的示範）、15 套色版，以及用它做過的幾種片型。", "The 27 code-drawn scenes of Script2Film as moving demos, its 15 palettes, and the kinds of film made with it."),
 ('<div class="eyebrow">場景與色版</div>', '<div class="eyebrow">Scenes &amp; palettes</div>'),
-("<h1>27 種場景，10 套色版</h1>", "<h1>27 scenes, 10 palettes</h1>"),
+("<h1>27 種場景，15 套色版</h1>", "<h1>27 scenes, 15 palettes</h1>"),
 ("每一格都是程式照一小段參數畫出來的，內容是虛構的示範。在稿裡寫場景的名字、給它幾個字與數字，再指定「說到哪個字的時候出現」，畫面就照配音的時間動起來。滑到的那一格會自己播放。", "Each tile is drawn by code from a few parameters, and the content is made up for the demo. In the script you name a scene, give it some words and numbers, and say which spoken word each element appears on; the visual then moves to the timing of the voice. Tiles play as you scroll to them."),
 ('<div class="kicker">場景</div>', '<div class="kicker">Scenes</div>'),
 ("27 種，從開場到片尾。", "27 of them, from the opening to the credits"),
 ("這裡都用同一套色版（<code>lecture-light</code>）畫，方便比較。每種場景只示範最基本的用法。", "All are drawn here in one palette (<code>lecture-light</code>) so they are easy to compare. Each shows only its most basic use."),
 ('<div class="kicker">色版</div>', '<div class="kicker">Palettes</div>'),
-("同一張圖，10 套簡易色版", "One chart, 10 palettes"),
-("色版在稿裡是一個欄位（<code>\"theme\"</code>）。換一個名字重跑，整支片的底色、字、強調色一起換，時間軸不動。", "The palette is one field in the script (<code>\"theme\"</code>). Change the name and rerun: background, type and accent colors change across the whole film, and the timeline stays the same."),
+("同一張圖，15 套色版", "One chart, 15 palettes"),
+("色版在稿裡是一個欄位（<code>\"theme\"</code>）。換一個名字重跑，整支片的底色、字、強調色一起換，時間軸不動。最後五套連卡片形狀與底紋也一起換。", "The palette is one field in the script (<code>\"theme\"</code>). Change the name and rerun: background, type and accent colors change across the whole film, and the timeline stays the same. The last five also change the shape of the cards and the texture of the ground."),
 ('<div class="kicker">片型</div>', '<div class="kicker">Kinds of film</div>'),
 ("<h2>做過哪幾種片</h2>", "<h2>What has been made with it</h2>"),
 ("場景與色版是零件，下面是用它們組出來的幾種片。前四種的流程與規則都在這個專案裡；後兩種是作者用這套工具、加上各自系列的腳本做的，專案裡沒有現成的範本。", "Scenes and palettes are the parts; below are the kinds of film built from them. The flow and rules for the first four are in this project. The last two are the author's own series, made with this toolkit plus scripts specific to each series, and the project has no ready-made template for them."),
@@ -221,7 +221,7 @@ TOOLS = [
 ("<dd>自己的音樂（CC BY 的曲子要標註），或下面的 MiniMax Music 3 生成的歌</dd>", "<dd>Your own music (credit CC BY tracks), or a song made with MiniMax Music 3 below</dd>"),
 ('<div class="stage">字型</div>', '<div class="stage">Fonts</div>'),
 ("<h3>Noto Sans TC、Noto Serif TC</h3>", "<h3>Noto Sans TC, Noto Serif TC</h3>"),
-("畫面與字幕用的字型，授權文字跟著字型檔一起放。", "The fonts used for visuals and subtitles. The license text ships next to the font files."),
+("畫面與字幕用的字型，授權文字跟著字型檔一起放。另列霞鶩文楷、jf 粉圓兩套選用字型與原始下載網址。", "The fonts used for visuals and subtitles. The license text ships next to the font files. Two optional fonts, LXGW WenKai and jf open-huninn, are listed with their original download links."),
 ("<dd>隨專案的素材層</dd>", "<dd>The asset layer that ships with the project</dd>"),
 ("<dd>免費（SIL OFL 1.1）</dd>", "<dd>Free (SIL OFL 1.1)</dd>"),
 ("<dd>你有授權的任何字型</dd>", "<dd>Any font you have a license for</dd>"),
