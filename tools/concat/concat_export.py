@@ -110,7 +110,7 @@ def export(client, proj, out, *, crf="default", post=None, ep=None, inputs=(), n
     if any(code == "all" for code, _ in no_check):
         return str(final)
     std = standard or film_check.load_standard(ep)
-    result = film_check.basic(str(final), standard=std, skip=[code for code, _ in no_check], sfx_bed=ep / "sfx/sfx_bed.wav")
+    result = film_check.basic(str(final), standard=std, skip=[code for code, _ in no_check], sfx_bed=ep / "sfx/sfx_bed.wav", ep=ep)
     film_check.write_record(final, result)
     film_check.show(result)
     if not result["ok"]:

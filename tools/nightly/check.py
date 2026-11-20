@@ -183,7 +183,7 @@ def main():
     except film_check.ConfigError as e:
         print(f"✗ film_check settings: {e}")
         sys.exit(2)
-    base = film_check.basic(mp4, standard=std, sfx_bed=P / "sfx/sfx_bed.wav")
+    base = film_check.basic(mp4, standard=std, sfx_bed=P / "sfx/sfx_bed.wav", ep=P)
     dur = duration(mp4)
     items = base["items"] + [{"code": "timeline_len", "item": f"length vs subtitle timeline ≤ {MAX_DRIFT}s",
                               "ok": abs(dur - bj["total"]) <= MAX_DRIFT, "value": f"{dur:.2f} vs {bj['total']:.2f}"}]

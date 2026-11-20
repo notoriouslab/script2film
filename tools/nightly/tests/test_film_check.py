@@ -184,3 +184,26 @@ def test_series_quiet_max(tmp_path):
     q = [x for x in fc.basic(str(film(tmp_path)), standard=fc.load_standard(ep), skip=("loudness", "peak"))["listed"]
          if x["code"] == "quiet"][0]
     assert "music may be covering" not in q["value"]
+
+
+def test_first30_leaves_out_the_cover(tmp_path):
+    """前 12 秒同一個畫面、之後每 3 秒換色：直接量 12 秒；12 秒那段是封面拍就只剩 3 秒。"""
+    cols = ["red"] + ["blue", "green", "white", "yellow", "purple", "orange"]
+    durs = [12] + [3] * 6
+    out = tmp_path / "c.mp4"
+    ins = sum((["-f", "lavfi", "-i", f"color=c={c}:s=320x240:r=30:d={d}"] for c, d in zip(cols, durs)), [])
+    ff(*ins, "-filter_complex", "".join(f"[{i}:v]" for i in range(len(cols))) + f"concat=n={len(cols)}:v=1:a=0,format=yuv420p",
+       "-c:v", "libx264", out)
+    assert abs(fc.first30(out) - 12) < 0.2
+    ep = tmp_path / "ep"
+    ep.mkdir()
+    (ep / "doc.json").write_text(json.dumps({"beats": [{"id": "B1", "scene": "cover"}, {"id": "B2", "scene": "photo"}]}))
+    (ep / "beats.json").write_text(json.dumps({"beats": [{"id": "B1", "start": 0.0, "end": 12.0}, {"id": "B2", "start": 12.0, "end": 30.0}]}))
+    assert fc.cover_spans(ep) == [(0.0, 12.0)]
+    assert abs(fc.first30(out, fc.cover_spans(ep)) - 3) < 0.2
+    assert fc.cover_spans(tmp_path) == []   # 沒有 doc.json：不扣
+
+
+def test_first30_is_listed_not_blocking(tmp_path):
+    r = run(film(tmp_path))
+    assert r["ok"] and [x for x in r["listed"] if x["code"] == "first30"]

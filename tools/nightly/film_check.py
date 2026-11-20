@@ -29,6 +29,9 @@
                  配樂沒讓開，可能蓋過人聲。依據（2026-11-20 量 57 支已上架片）：唯一被聽出配樂蓋人聲的一集（-20、沒 duck）
                  -26.4；刻意熱鬧的時事解說 11 支（-20＋duck 6）-29.8～-31.7；其他系列 -34～-46。正例只有一支、和時事只差
                  3.4 dB，所以只列不擋，門檻取兩者中點。
+  first30    列  前 30 秒最長不換畫面（量法與上限 5 秒照 pace.py 的 first30_gap，FORMAT §4c／§4e）。集資料夾有 doc.json＋beats.json 時，
+                 封面拍（scene "cover"）那段不算（2026-11-20 定：系列固定開場的封面可以停久一點）。§4c 寫所有長片都適用，但擋片
+                 只在開了 pace 的片；2026-11-20 量 22 支（封面扣掉）：開了 pace 的 4.5 秒，其他 5.7–16.4 秒，使用者都收了，所以這裡先列。
 系列門檻：系列資料夾（集資料夾的上一層）放 film_check.json，例
   {"lufs": -14, "lufs_tol": 0.8, "max_tp": -1.0, "skip": [{"item": "black_mid", "why": "刻意用黑場轉場"}]}
   缺鍵用預設；skip 的 item 不在代號表或 why 空白：設定錯誤（exit 2）。
@@ -37,7 +40,7 @@ import argparse, hashlib, json, re, subprocess, sys
 from pathlib import Path
 
 DEFAULT = {"lufs": -14.0, "lufs_tol": 0.8, "max_tp": -1.0, "quiet_max": -28.0, "skip": []}
-ITEMS = ("av_len", "last_frame", "black_mid", "loudness", "peak", "sfx", "stale", "quiet")
+ITEMS = ("av_len", "last_frame", "black_mid", "loudness", "peak", "sfx", "stale", "quiet", "first30")
 SLACK_FRAMES = 3       # 音畫差、最後一格的容許格數
 TAIL_GAP, TAIL_MAX = 0.1, 2.0   # 片尾黑：結束點離檔尾 < 0.1 秒，長度 ≤ 2 秒
 SFX_SR, SFX_MAXLAG, SFX_MIN, SFX_LAG = 8000, 1.0, 0.026, 0.02
@@ -180,6 +183,25 @@ def quiet_level(mp4):
     return float(np.percentile(20 * np.log10(rms + 1e-9), 5))
 
 
+def cover_spans(ep):
+    """封面拍在成片裡的 (起, 訖) 秒：doc.json 裡 scene 是 cover 的拍，時間從 beats.json 拿。缺檔或讀不了：[]。"""
+    try:
+        doc = json.loads((Path(ep) / "doc.json").read_text())
+        beats = json.loads((Path(ep) / "beats.json").read_text())["beats"]
+    except (OSError, ValueError, KeyError, TypeError):
+        return []
+    covers = {b["id"] for b in doc.get("beats", []) if b.get("scene") == "cover"}
+    return [(float(b["start"]), float(b["end"])) for b in beats if b.get("id") in covers]
+
+
+def first30(mp4, covers=()):
+    """前 30 秒最長不換畫面的秒數，封面那段扣掉。換畫面點照 pace.first30_gap 的量法。"""
+    from pace import first30_gap
+    _, cuts = first30_gap(str(mp4))
+    edges = [0.0] + cuts + [30.0]
+    return max((b - a) - sum(max(0.0, min(b, ce) - max(a, cs)) for cs, ce in covers) for a, b in zip(edges, edges[1:]))
+
+
 def stale(inputs_file):
     """(ok, value, notes)。沒有指紋檔：(None, "no record", [])。"""
     if not inputs_file.exists():
@@ -197,8 +219,9 @@ def stale(inputs_file):
     return not bad, value, bad + gone
 
 
-def basic(mp4, *, standard=None, skip=(), sfx_bed=None):
+def basic(mp4, *, standard=None, skip=(), sfx_bed=None, ep=None):
     """跑基本層。skip：這一次不跑的代號（--no-check 給的）；系列 film_check.json 的 skip 另外合併。
+    ep：集資料夾（有的話，first30 從它的 doc.json＋beats.json 找封面拍）。
     回傳 {"ok", "items", "listed", "size", "sha256", "skipped"}。"""
     std = standard or dict(DEFAULT)
     skipped = set(skip) | {s["item"] for s in std.get("skip", [])}
@@ -244,6 +267,11 @@ def basic(mp4, *, standard=None, skip=(), sfx_bed=None):
             listed.append({"code": "quiet", "item": "quietest 5% of the sound (listed, not blocking)",
                            "value": f"{q:.1f} dB" + (f"; louder than {qmax}: music may be covering the voice between lines"
                                                       if q > qmax else "")})
+    if "first30" not in skipped and p["v"] is not None:
+        from pace import GAP_S
+        g = first30(mp4, cover_spans(ep) if ep else [])
+        listed.append({"code": "first30", "item": "longest stretch without a new picture in the first 30 s, cover left out "
+                       "(listed, not blocking)", "value": f"{g:.1f}s" + (f"; over {GAP_S:.0f}s (FORMAT §4c)" if g > GAP_S else "")})
     return {"ok": all(x["ok"] for x in items), "items": items, "listed": listed,
             "size": Path(mp4).stat().st_size, "sha256": sha256(mp4), "skipped": sorted(skipped)}
 
@@ -280,7 +308,7 @@ def main(argv=None):
         print(f"✗ film_check settings: {e}")
         return 2
     ep = Path(a.ep or Path(a.mp4).resolve().parent)
-    r = basic(a.mp4, standard=std, sfx_bed=ep / "sfx/sfx_bed.wav")
+    r = basic(a.mp4, standard=std, sfx_bed=ep / "sfx/sfx_bed.wav", ep=ep)
     write_record(a.mp4, r)
     show(r)
     print("film check passed" if r["ok"] else "film check failed: do not upload")
