@@ -180,8 +180,9 @@ def check_assets(environ, repo):
     if not miss:
         for kind in ("fonts", "sfx"):
             try:
-                files = [f"{kind}/{x['file']}" for x in json.loads((a / kind / "manifest.json").read_text(encoding="utf-8"))]
-            except (ValueError, OSError, KeyError, TypeError):
+                files = [f"{kind}/{x['file']}" for x in json.loads((a / kind / "manifest.json").read_text(encoding="utf-8"))
+                         if not x.get("optional")]   # 選用字型（optional）不擋：assets/README.md「Optional fonts」
+            except (ValueError, OSError, KeyError, TypeError, AttributeError):
                 return row("bundled assets", "required", False, f"cannot read {a}/{kind}/manifest.json",
                            f"The manifest must be [{{\"file\": \"<file name>\"}}, …]; restore it with git (git checkout -- assets/{kind}/manifest.json)")
             n[kind] = len(files)

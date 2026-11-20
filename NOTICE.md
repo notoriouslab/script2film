@@ -38,6 +38,8 @@ Fonts, downloaded by the user (not in this repository; `assets/README.md`):
 | Asset | Licence | Note |
 |---|---|---|
 | Noto Sans TC, Noto Serif TC | SIL OFL 1.1 | the licence text travels with the fonts |
+| LXGW WenKai TC, LXGW WenKai (optional) | SIL OFL 1.1 (upstream repository, read 2026-11-20) | downloaded from the lxgw GitHub releases |
+| jf open-huninn 2.1 (optional) | SIL OFL 1.1 (upstream README, read 2026-11-20) | downloaded from the justfont GitHub release |
 
 Sound effects, in this repository (`assets/sfx/`; each file's licence is also in `assets/sfx/manifest.json`):
 

@@ -138,6 +138,11 @@ def test_assets_disk(tmp_path):
     (tmp_path / "fonts/manifest.json").write_text('[{"id": "A", "file": "A.ttf"}]', encoding="utf-8")
     (tmp_path / "fonts/A.ttf").write_bytes(b"x")
     assert doctor.check_assets({"S2F_ASSETS": str(tmp_path)}, REPO)["status"] == "ok"
+    # 選用字型沒下載不擋，也不算進數量
+    (tmp_path / "fonts/manifest.json").write_text('[{"id": "A", "file": "A.ttf"}, {"id": "B", "file": "B.ttf", "optional": true}]', encoding="utf-8")
+    r = doctor.check_assets({"S2F_ASSETS": str(tmp_path)}, REPO)
+    assert r["status"] == "ok" and "fonts: 1" in r["detail"]
+    (tmp_path / "fonts/manifest.json").write_text('[{"id": "A", "file": "A.ttf"}]', encoding="utf-8")
     # 音效隨倉庫附帶：manifest 列了但檔不在，修法是用 git 還原，不是下載字型
     (tmp_path / "sfx/manifest.json").write_text('[{"id": "s", "file": "ve-gen/s.mp3"}]', encoding="utf-8")
     r = doctor.check_assets({"S2F_ASSETS": str(tmp_path)}, REPO)

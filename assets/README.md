@@ -26,6 +26,26 @@ The two fonts can be fetched directly (OFL 1.1): from <https://github.com/google
 project uses). `python3 tools/doctor/doctor.py` prints the same instruction, as two `curl` commands, when they are
 missing.
 
+### Optional fonts
+
+Four more OFL 1.1 fonts are listed in `fonts/manifest.json` with `"optional": true`, each with the `url` of its
+original release (checked 2026-11-20). Nothing requires them yet and the doctor does not ask for them; download the ones
+you want into `assets/fonts/`:
+
+| File | Font | Use |
+|---|---|---|
+| `LXGWWenKaiTC-Regular.ttf`, `LXGWWenKaiTC-Medium.ttf` | LXGW WenKai TC 霞鶩文楷 TC | scripture and quote cards |
+| `LXGWWenKai-Regular.ttf` | LXGW WenKai 霞鶩文楷 | the same design for Simplified Chinese |
+| `jf-openhuninn-2.1.ttf` | jf open-huninn 粉圓 | rounded title cards for vertical videos; Traditional Chinese only, no Simplified edition |
+
+```bash
+python3 -c "import json;[print(f['url']) for f in json.load(open('assets/fonts/manifest.json')) if f.get('optional')]" \
+  | while read u; do curl -fL -o "assets/fonts/${u##*/}" "$u"; done
+```
+
+Fonts under other licences (for example the IPA Font License, which LXGW ZhiSong and I.Ming use) are not listed here;
+keep them in your own user layer (`$S2F_ASSETS_LOCAL/fonts/`).
+
 ## Your own sounds
 
 Make your own sounds with VideoExpress AI Sound Maker, from a list of prompts, on your own account:
