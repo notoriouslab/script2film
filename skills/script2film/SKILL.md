@@ -13,6 +13,7 @@ Paths below are from the repository root. Reply in the language the user writes 
 
 - The user has a script, an article or a topic and wants a narrated film with subtitles and drawn scenes (charts, lists, quotes, maps).
 - A VideoExpress storyboard, T2I / I2V prompts, or an acted story film: use `skills/ve-director/SKILL.md`.
+- One clip from Google Flow (Omni, Veo) or a song from Google Flow Music in the user's own Google AI account: use `skills/google-flow/SKILL.md`.
 
 ## Before anything else
 

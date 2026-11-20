@@ -179,6 +179,10 @@ Nothing here is tied to VideoExpress: the cut only needs clips in the right fold
 - Then run `ve_clipcheck.py <project>/ve_<look> --strips` (without `--run`) and go on to F5.
 - The rules above still apply on any platform: ask the user before spending their credits, the user logs in, no real person's photo into a video model.
 
+### Google Flow (shots)
+
+`skills/google-flow/SKILL.md`. One clip at a time from Omni or Veo in the user's own Google AI subscription, in the user's own Chrome (Claude in Chrome; Google refuses sign-in in automation-launched browsers). `flow_ingest.py --latest video --to <project>/ve_<look>/shotK.mp4 …` puts it in place with a provenance record; then `ve_clipcheck.py` as above. Tell the user the credits shown on the settings chip before sending.
+
 ### MiniMax H3 on Colab (shots)
 
 `tools/h3/README.md`. Generates on the user's own Colab GPU (Google AI Pro); the clips land in `ve_<look>/shotK.mp4` like the VideoExpress ones.
@@ -248,6 +252,10 @@ python3 skills/ve-director/doc/scripts/doc_sfx.py <project>/doc.json --report
 ```
 
 The first needs `bgm.arc` in `doc.json`; afterwards point `bgm.src` at `score_bgm.wav`. The second needs `"sfx_on": true` and runs before F5. Someone else's music needs a licence; put the credit in `bgm.credit`.
+
+### Google Flow Music (a song or an instrumental)
+
+`skills/google-flow/references/flow-music.md`. Lyrics and a Sound line in Flow Music's Compose panel, in the user's own Chrome (Google AI Pro includes the Plus plan). `flow_ingest.py --latest music --to <project>/flow_bgm.wav --doc <project>/doc.json …` sets `bgm.src` and `bgm.credit`. The lyrics must be the user's own; label the film as AI-generated (`--synthetic`).
 
 ### MiniMax Music 3 on Colab (a song or an instrumental)
 
