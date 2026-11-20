@@ -300,6 +300,8 @@ class VE:
         # Every candidate returned so far, by src and by content: the candidate carousel hides older
         # sets and shows them again later, so "not on screen before the click" is not "new".
         self._seen_srcs: set[str] = set()
+        self._before_image: set[str] = set()  # srcs in the dialog before the latest Create Image
+        self._last_cands: list[str] = []  # candidates the latest Create Image returned
         self._seen_hashes: set[str] = set()
         self.slot_ids: list[int | None] = [None, None]   # library id held by Reference Photo 1 / 2
         self.slot_srcs: list[str | None] = [None, None]  # slot thumbnail src right after picking
@@ -502,6 +504,7 @@ class VE:
         self.set_checkbox("auto_enhance_prompt", enhance)
         self.set_checkbox("image_creative_mode", creative)
         before = set(self.all_modal_srcs()) | self._seen_srcs
+        self._before_image = before  # select_candidate: a frame from here is not this shot's
         seen_alerts = set(self.alerts())
         self.dom_click("button:has-text('Create Image')")
         self.log("Create Image sent; waiting for candidates (up to 4 min)")
@@ -537,6 +540,7 @@ class VE:
                 self._seen_srcs.update(fresh)
                 self._seen_hashes.update(fresh.values())
                 self.log(f"{len(fresh)} candidate(s)")
+                self._last_cands = list(fresh)
                 return list(fresh)
         raise NoCandidates("no image candidates appeared within 4 min")
 
@@ -707,7 +711,7 @@ class VE:
             if self.active_frame() == src:
                 self.page.wait_for_timeout(1000)
                 if self.active_frame() == src and not any(self._is_gif(x) for x in self.modal_images()):
-                    return
+                    return src
                 continue
             self.page.evaluate(
                 """src => { const img=[...document.querySelectorAll('.swiper-slide img')].find(i=>i.src===src);
@@ -716,6 +720,17 @@ class VE:
                            sw.swiper.slideTo(slides.indexOf(img.closest('.swiper-slide'))); }""",
                 src,
             )
+        active = self.active_frame()
+        new_here = active and (active in self._last_cands or active not in self._before_image)
+        if self.auto_pick and new_here and not self._is_gif(active):
+            # 2026-11-20 (twice in one 48-shot run): a late second candidate kept the active slide and slideTo
+            # never moved it. Under --auto-pick any finished candidate is acceptable, so ship the active one
+            # (the frame Create Video animates) instead of stopping the run. Only a frame that appeared after this
+            # shot's Create Image counts: one left over from the previous shot (2026-11-09) still stops the run.
+            self.log(f"auto-pick: the carousel kept {active[-40:]}; using it instead of {src[-40:]}")
+            return active
+        self.log(f"select_candidate: active {str(active)[-40:]} in this shot's candidates={active in self._last_cands}, "
+                 f"present before Create Image={active in self._before_image}")
         self.shot_png("select_candidate_failed")
         raise RuntimeError(f"the dialog's active frame is {str(self.active_frame())[-40:]}, not the picked {src[-40:]}")
 
@@ -1215,7 +1230,7 @@ def _run(args, run_dir: Path):
                 if pick:
                     break
                 ve.log(f"{label} re-roll")
-            ve.select_candidate(pick)
+            pick = ve.select_candidate(pick)
             (run_dir / f"{label}.jpg").write_bytes(page.request.get(pick).body())
             masters[name] = ve.save_to_library(pick, rs.actors[idx - 1])["id"]
             (run_dir / "masters.json").write_text(json.dumps(masters, indent=1))
@@ -1288,7 +1303,7 @@ def _run(args, run_dir: Path):
                 if pick is SKIP:
                     ve.log(f"{label} skipped at QC (no video)")
                     continue
-            ve.select_candidate(pick)
+            pick = ve.select_candidate(pick)
             (run_dir / f"{label}_frame.jpg").write_bytes(page.request.get(pick).body())
             if shot.save == "master":
                 saved[label] = ve.save_to_library(pick, shot.t2i)["id"]
