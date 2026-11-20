@@ -2,10 +2,26 @@
 
 ## Unreleased
 
+- **Every exported film is checked, whatever kind it is.** Concat exports go through `tools/concat/concat_export.py`,
+  which runs `tools/nightly/film_check.py` on the delivered file: audio and video the same length, the last frame,
+  black frames inside the film, loudness and peak, sound effects really in the mix, and a film older than the files it
+  was made from. The result is kept next to the film with its SHA-256, and the release checklist (`film-check`, every
+  kind of film) uploads only that file. To skip an item you name it and give a reason (`--no-check <item>:<reason>`);
+  the skip is logged. A series can change thresholds in `film_check.json`.
+- **Reminders for matters of taste, which never fail a film.** In the script check (`doc_lint.py`): `peak_weight`
+  (generated shots on more than 40% of the lines, so the high points no longer stand out) and `vs_prev`, which now
+  compares with the last three episodes. In the film check: `quiet` (music that does not step aside between lines)
+  and `first30` (the longest stretch without a new picture in the first 30 s, the cover left out). Each threshold
+  comes from measuring published films; the numbers and where they came from are in the code.
+- **Side by side with a film you like.** `tools/sample/breakdown.py` measures a sample film and your own side by
+  side with the same functions the checks use (shot lengths, the opening, loudness, the quietest 5%, speaking rate and
+  share at three pause thresholds) and lays out contact sheets with the narration under each frame.
 - **Local transcription is whisper.cpp now, not mlx-whisper.** Same model (large-v3-turbo), so the same accuracy; it
   runs on any system whisper.cpp builds on, gives the same text every run, and no longer repeats a phrase dozens of
   times when many takes go in one run. Set `S2F_WHISPER_CPP_MODEL` to `ggml-large-v3-turbo.bin` (`setup_voice.sh` does
   it); `S2F_MLX_WHISPER_DIR` is no longer read, and a machine with only that set is told what to change.
+- **Fixes.** A film whose sound track is all silence no longer crashes the film check (the peak is reported as not
+  measurable and the loudness item fails).
 
 ## 1.1.0 (2026-11-18)
 

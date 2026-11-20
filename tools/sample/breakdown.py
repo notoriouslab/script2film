@@ -10,13 +10,15 @@
 說話時間＝相鄰兩字的開始時間差 ≤ 門檻的那些差加總；門檻報 0.35、0.5、0.65 三個，因為語速會隨門檻變
 （2026-11-20 四支片：門檻 0.3 時樣本比我方慢一成，0.65 時幾乎一樣；說話時間佔比的高低順序則每個門檻都一樣）。
 """
-import math, re, subprocess, sys, tempfile
-from pathlib import Path
+import sys as _sys, pathlib as _pl   # 設定檔：tools/config/s2f_config.py
+_sys.path.insert(0, str(_pl.Path(__file__).resolve().parents[2] / 'tools/config'))
+import s2f_config; s2f_config.load()  # noqa: E402,E702
+import math, re, subprocess, sys, tempfile  # noqa: E402
+from pathlib import Path  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[2]
-for _p in ("tools/config", "tools/nightly", "skills/ve-director/doc/scripts"):
+for _p in ("tools/nightly", "skills/ve-director/doc/scripts"):
     sys.path.insert(0, str(ROOT / _p))
-import s2f_config; s2f_config.load()  # noqa: E402,E702
 import numpy as np  # noqa: E402
 import film_check, pace  # noqa: E402,E401
 

@@ -117,7 +117,8 @@ figcaption { font-size: .82em; color: var(--muted); margin-top: 8px; }
   overflow-x: auto; white-space: pre; border: 1px solid var(--line); }
 .term .dim { opacity: .55; }
 .term .ok { color: #9ed39a; }
-.cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-top: 64px; }
+.feat-note { color: var(--muted); font-size: .94em; max-width: 760px; margin-top: 24px; }
+.cards { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; margin-top: 64px; }
 .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 22px; }
 .card h3 { font-size: 1.08em; }
 .card p { color: var(--muted); font-size: .94em; }

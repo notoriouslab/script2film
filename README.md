@@ -41,7 +41,7 @@ built to match what you want to say.
 | Start by cutting footage you shot | **Start from an idea.** The narration is in the script, and so is which line goes with which visual. |
 | Visuals are stock, or generated wholesale | **27 scenes drawn by code.** Numbers come straight from the script, so they are never drawn wrong. Change the script and rerun. |
 | The project is locked inside the app | **Every step leaves a readable file.** The script, the timing of every line and the edit plan are text files you can diff and version. |
-| Export, and you are done | **It checks its own output.** Loudness, length and subtitles are measured, and a sheet of frames is laid out for a person to read. |
+| Export, and you are done | **Every exported film is checked.** A half-written file, black frames, wrong loudness, sound effects that never made it into the mix, or a film older than its inputs stops the upload. |
 | Tied to one service | **Every stage can be swapped.** Voice, generated shots, host and editor each have a default and a documented alternative. |
 | Monthly subscription | **The core flow costs nothing.** Generated shots and the host are optional, and only those steps need an outside service. |
 | A GUI you drive with the mouse | **Tell an AI agent what you want.** It follows the docs step by step and asks you before spending credits, choosing a host look, or uploading. |
@@ -98,11 +98,24 @@ narration can carry English subtitles only.
 
 <img src="./docs/site/subtitles.jpg" alt="A chart with English subtitles below" width="640">
 
-**06 · It checks its own work.** Loudness, peak, film length and the subtitle timeline are measured, then the first
-and last frame of every beat go into one sheet. The agent has to read that sheet before reporting done, and reports
-what it cannot confirm instead of guessing.
+**06 · It checks its own work, and tells failures from judgement calls.** Every film exported through Concat is checked
+on the spot, whatever kind of film it is: audio and video the same length, no black frames inside, loudness and peak,
+sound effects really in the mix, and made from the current files. The result sits next to the film with its SHA-256,
+and the release checklist will not upload a different file. For explainers the first and last frame of every beat
+go into one sheet; the agent has to read it before reporting done, and reports what it cannot confirm instead of
+guessing.
+
+Some problems are matters of taste, so they are listed and never fail the film: music that does not step aside
+between lines, an opening that holds one picture for more than five seconds (the cover does not count), generated
+shots on so many lines that the high points no longer stand out, and an episode too close to the three before it.
+The thresholds come from measuring the author's published films and from the format rules; where each number came from is written next to it in the code.
 
 <img src="./docs/site/check-sheet.jpg" alt="A check sheet with two frames per beat" width="640">
+
+**Side by side with a film you like.** `tools/sample/` measures the rhythm of a film you admire and of your own films
+the same way: shot lengths, how fast the opening changes picture, how much of the film is speech, how quiet it gets
+between lines. It lays out a contact sheet with what is said under each frame. It only measures; what to change is
+yours to decide.
 
 **Also:** music composed by code from the on-screen events (or songs from MiniMax Music 3 on your own Colab), sound
 effects on the moment each element appears, start and release checklists that stop the run until rights and sources
@@ -204,7 +217,8 @@ Where each one got stuck and how to get past it: [docs/AGENT-TRIALS.md](./docs/A
 | `skills/ve-director/doc/` | doc mode: narrated explainer films. Narration, word timing, 27 drawn scenes, themes, fact checks, cutting. Start with its `README.md` |
 | `tools/doctor/`, `tools/config/` | the install check, the voice setup (`setup_voice.sh`) and the per-machine settings file |
 | `tools/tts/` | designing a voice, voiced lines for several characters, speaker similarity |
-| `tools/nightly/`, `tools/checklist/`, `tools/qa/` | checks: the delivery check (`check.py`), the start and release checklists, frame-by-frame motion checks |
+| `tools/nightly/`, `tools/checklist/`, `tools/qa/` | checks: the check every export runs (`film_check.py`), the explainer delivery check (`check.py`), the start and release checklists, frame-by-frame motion checks |
+| `tools/sample/` | measures a sample film and your own side by side, with contact sheets |
 | `tools/ve-runner/` | runs a storyboard on VideoExpress in a browser and collects the clips |
 | `tools/tp/` | makes a talking host on TalkingPhotos |
 | `tools/h3/`, `tools/music3/` | MiniMax H3 shots and host, and MiniMax Music 3 songs, on your own Google Colab GPU |

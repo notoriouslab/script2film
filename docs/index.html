@@ -160,7 +160,7 @@
         </div>
         <div class="cmp-row">
           <div class="them" data-label="一般工具：">輸出就結束</div>
-          <div class="us"><b>出片後可以自己檢查</b><span>量響度、長度、字幕，排一張截圖表給人看；字太晚出現、畫面停太久會被列出來。</span></div>
+          <div class="us"><b>每一支出片都會被檢查</b><span>半截檔、片中黑格、響度不對、音效沒混進去、成片比素材舊，就不能上傳。</span></div>
         </div>
         <div class="cmp-row">
           <div class="them" data-label="一般工具：">綁在固定的服務上</div>
@@ -291,7 +291,7 @@ narration 23.7s, 4 lines; lowest 1.00; below 0.85: none</div>
         <div class="feat-text">
           <div class="feat-num">06　出片檢查</div>
           <h3>做完不是結束，AI 會自己再確認一遍</h3>
-          <p>量響度、峰值、成片長度與字幕時間軸對不對得上，再把每一拍的開頭與結尾各截一格，排成一張表。agent 必須實際讀取這張圖、逐格檢查才能回報完成；畫面模糊或無法確認時不會亂做決定，會直接回報。</p>
+          <p>每一支出片當下就檢查，不論片型：音畫長度、片中黑格、響度與峰值、音效有沒有真的混進去、是不是用最新的素材做的。結果和成片的 SHA-256 一起留在片旁，上傳時只認這一支。解說片再把每一拍的開頭與結尾各截一格排成一張表，agent 必須實際讀過、逐格檢查才能回報完成；看不清楚的直接回報，不亂猜。</p>
         </div>
         <figure>
           <div class="frame"><img src="site/check-sheet.jpg" alt="四拍各兩格的截圖表" loading="lazy" width="1600" height="555">
@@ -299,6 +299,7 @@ narration 23.7s, 4 lines; lowest 1.00; below 0.85: none</div>
           <figcaption>第一個範例的截圖表：四拍，每拍的第一格與最後一格。</figcaption>
         </figure>
       </div>
+      <p class="feat-note">品味的事只提醒、不擋：句子之間配樂沒讓開、開場同一個畫面停超過 5 秒（封面不算）、生成畫面多到高點跳不出來、這一集和前三集太像。門檻來自實測已上架的片，出處都寫在程式裡。</p>
 
       <div class="cards">
         <div class="card">
@@ -312,6 +313,10 @@ narration 23.7s, 4 lines; lowest 1.00; below 0.85: none</div>
         <div class="card">
           <h3>上傳 YouTube</h3>
           <p>排程、縮圖、說明欄、合成內容標記一次帶上。要不要上傳、什麼時候公開，由你說了算。</p>
+        </div>
+        <div class="card">
+          <h3>看懂一支好片的節奏</h3>
+          <p>把欣賞的片和自己的片並排量：鏡頭長度、開場換畫面的速度、說話佔多少、句間多安靜，再排出每格寫著旁白的聯絡表。只量，不替你下判斷。</p>
         </div>
       </div>
       <div class="more">
