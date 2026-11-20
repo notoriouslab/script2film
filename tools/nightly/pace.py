@@ -28,12 +28,18 @@ SOURCE_KEYS = {"source", "by", "cap"}
 QUOTE_SCENES = {"quote_card", "web_evidence"}
 
 
-def first30_gap(mp4):
-    """(longest stretch without a picture change in the first 30 s, [cut times])."""
-    err = subprocess.run(["ffmpeg", "-hide_banner", "-t", "30", "-i", mp4, "-vf",
+def scene_cuts(mp4, seconds=None):
+    """[cut times]: picture changes (scene > SCENE, subtitle band left out). seconds=None: the whole film."""
+    lim = ["-t", str(seconds)] if seconds is not None else []
+    err = subprocess.run(["ffmpeg", "-hide_banner", *lim, "-i", mp4, "-vf",
                           f"crop=iw:ih*{KEEP}:0:0,select='gt(scene,{SCENE})',showinfo", "-an", "-f", "null", "-"],
                          capture_output=True, check=True).stderr.decode(errors="replace")
-    cuts = [float(m) for m in re.findall(r"pts_time:([\d.]+)", err)]
+    return [float(m) for m in re.findall(r"pts_time:([\d.]+)", err)]
+
+
+def first30_gap(mp4):
+    """(longest stretch without a picture change in the first 30 s, [cut times])."""
+    cuts = scene_cuts(mp4, 30)
     edges = [0.0] + cuts + [30.0]
     return max(b - a for a, b in zip(edges, edges[1:])), cuts
 

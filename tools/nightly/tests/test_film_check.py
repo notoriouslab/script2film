@@ -207,3 +207,13 @@ def test_first30_leaves_out_the_cover(tmp_path):
 def test_first30_is_listed_not_blocking(tmp_path):
     r = run(film(tmp_path))
     assert r["ok"] and [x for x in r["listed"] if x["code"] == "first30"]
+
+
+def test_silent_track_does_not_crash(tmp_path):
+    """有音軌但全是靜音：ebur128 的峰值印 -inf（響度印下限 -70），峰值當作量不到，不拋例外；響度不過。"""
+    out = tmp_path / "s.mp4"
+    ff("-f", "lavfi", "-i", "testsrc=s=320x240:r=30:d=3", "-f", "lavfi", "-i", "anullsrc=r=48000:cl=mono", "-t", "3",
+       "-c:v", "libx264", "-pix_fmt", "yuv420p", "-c:a", "aac", out)
+    _, lufs, tp = fc.black_and_loudness(str(out))
+    assert lufs == -70.0 and tp is None
+    assert {"loudness", "peak"} <= codes(fc.basic(str(out)), False)

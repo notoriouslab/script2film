@@ -120,7 +120,8 @@ def black_and_loudness(mp4):
     if "Summary:" not in err:
         return blacks, None, None
     summ = err[err.rindex("Summary:"):]
-    return blacks, float(re.search(r"I:\s+(-?[\d.]+) LUFS", summ)[1]), float(re.search(r"Peak:\s+(-?[\d.]+) dBFS", summ)[1])
+    i, pk = re.search(r"I:\s+(-?[\d.]+) LUFS", summ), re.search(r"Peak:\s+(-?[\d.]+) dBFS", summ)
+    return blacks, float(i[1]) if i else None, float(pk[1]) if pk else None   # 全靜音的音軌：ebur128 峰值印 -inf（響度印下限 -70.0），印不出數字的當作量不到
 
 
 def split_blacks(blacks, fmt):
