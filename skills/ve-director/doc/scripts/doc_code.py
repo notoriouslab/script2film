@@ -9,6 +9,7 @@ consecutive code shots that continue one board).
 "bg_video": {"src", "tone": "light"|"dark", "in"} puts a VE live-action clip under the scene (see bg_video below).
 """
 import json, re, shutil, subprocess, sys
+from pathlib import Path
 
 from doc_common import SKILL_DOC, asset, gsap_file, hyperframes, load, log_tail, read_beats, read_json, tokens
 from doc_credits import credit_groups
@@ -599,10 +600,11 @@ def bg_video(P, b, spec, out, d, real=()):
     return media, "lecture-dark" if tone == "dark" else None
 
 
-def build(P, doc, b, spec, theme):
+def build(P, doc, b, spec, theme, out_root=None):
+    """One code beat's page in <out_root or P/code_<theme>>/<id>/ (doc_theme_preview.py builds into its own folder)."""
     th = code_theme(theme, doc.get("palette"), doc.get("rise"))
     d = round(b["duration"] + TAIL, 2)
-    out = P / f"code_{theme}" / b["id"]
+    out = (Path(out_root) if out_root else P / f"code_{theme}") / b["id"]
     (out / "fonts").mkdir(parents=True, exist_ok=True)
     for f in ("NotoSerifTC-Variable.ttf", "NotoSansTC-Variable.ttf"):
         shutil.copy(asset("fonts", f), out / "fonts" / f)

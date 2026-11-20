@@ -21,6 +21,7 @@ Where to put a project: outside the repository, or under `examples/<name>/` (wha
 | Optional D | Final film in Concat | | |
 | Optional E | Start and release checklists | | answer truthfully; ask the user when you do not know |
 | Optional F | Upload to YouTube | | **upload, publish, schedule or delete only when the user says so** |
+| Optional G | Theme preview | | show it with the script at F1; the user picks |
 
 The steps are numbered, but not every step waits for the one before it: optional A can be sent when F2 starts, and optional B runs alongside A once F2 is done.
 
@@ -289,3 +290,19 @@ tools/youtube/.venv/bin/python tools/youtube/yt_upload.py upload <film.mp4> --ti
 - A synthetic or cloned voice, or generated pictures: add `--synthetic` (YouTube's altered or synthetic content label).
 - Do not upload a film that failed F6.
 - Record every asset's source and licence in `<project>/assets/CREDITS.md`; put required credits (CC BY and so on) in the video description. Do not use news-agency or broadcaster photos or footage.
+
+
+## Optional G: theme preview
+
+Three themes playing three of this film's own code beats side by side, before anything is voiced, so the theme can be picked while the script is read. Pick before optional A: the generated shots carry the theme's colours.
+
+```bash
+python3 skills/ve-director/doc/scripts/doc_theme_preview.py <project>/doc.json                 # about 45 s
+python3 skills/ve-director/doc/scripts/doc_theme_preview.py <project>/doc.json --pick <theme> "<why>"
+```
+
+- Writes `<project>/preview/theme_preview.mp4` (a 2x2 grid with no sound: three themes and a cell naming them and why each was offered) and `theme_preview.jpg` (every beat's last frame, one row per theme). Show both with the script.
+- The motion is real, the pace is estimated from the script (5 characters a second); pictures the generated shots have not made yet show as grey placeholders.
+- Which three: the previous episode's (or the series default's) theme, one with the other brightness, one with another shape; `series.json` `"themes"` lists the candidates in order; `--themes a,b,c` and `--beats B3,B7` choose by hand.
+- `--pick` writes `"theme"` into `doc.json` and records the reason in `preview/theme_choice.json`. Skipping this step changes nothing.
+- `doc_lint` reports the same theme three episodes in a row (a reminder, not a failure).

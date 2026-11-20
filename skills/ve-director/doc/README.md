@@ -173,6 +173,7 @@ The eight `lecture-*` colours are in `themes/lecture.json` (how to add one: "Add
 are defined in `scripts/doc_themes.py`; the five styled themes are in `themes/styles.json`: a palette with the same keys and
 contrast rule as "Adding a palette", a `shape` and a `ground` named from `SHAPES` / `GROUNDS` in `scripts/doc_themes.py`, and
 `ve`, their VE look (checked by `tests/test_styles.py`). A new styled theme changes all three layers, not only the colours.
+To see three themes on an episode's own beats before choosing, run `scripts/doc_theme_preview.py` (`docs/FLOW.md` optional G).
 Each theme also picks the look of the VE shots (`ve_look`, above).
 
 Several beats per line: `"from": "<phrase>"` opens a beat on that phrase inside its first line (the line's earlier

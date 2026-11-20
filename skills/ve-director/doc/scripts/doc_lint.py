@@ -408,7 +408,21 @@ def report_prev(doc, prev_path, base=None):
         for line in script_vs_prev(doc, prev, fixed):
             if i == 0 or line.startswith(("same ", "line openings")):   # notes about this episode itself: printed once
                 rep.append(line.replace("the previous episode", p.parent.name))
+    if (t := theme_streak(doc, eps)):
+        rep.append(t)
     print(f"script vs the last {len(eps)} episode(s): " + ("\n  " + "\n  ".join(rep) if rep else "no repeats"))
+
+
+THEME_STREAK = 3   # the same theme this many episodes in a row is reported (the theme ledger; doc_theme_preview offers others)
+
+
+def theme_streak(doc, eps):
+    """'same theme N episodes in a row: X' when this episode and the THEME_STREAK - 1 before it share a theme; else None."""
+    t = doc.get("theme")
+    back = [doc_common.read_json(p).get("theme") for p in eps[:THEME_STREAK - 1]]
+    if t and len(back) == THEME_STREAK - 1 and all(x == t for x in back):
+        return f"same theme {THEME_STREAK} episodes in a row: {t} (doc_theme_preview.py shows others; a reminder)"
+    return None
 
 
 AI_NOTE = " (a reminder, not a failure)"   # printed after every ai_phrasing line: a first-time reader took the ⚠ for a failure (2026-11-16)
