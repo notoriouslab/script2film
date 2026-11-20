@@ -6,8 +6,8 @@
 When the script passes and the user has not approved this narration yet (doc_approval.py), a `Next:` line follows
 `doc_lint: ok`: show the user the narration and the beat table, then doc_tts.py --script-approved once they say yes.
 
-Four reports never fail the doc (FORMAT §9): ai_phrasing (AI-sounding narration, FORMAT §4), read_time and late_reveal (both need beats.json) and vs_prev (this episode against the previous
-one, found as the sibling folder numbered one less).
+Four reports never fail the doc (FORMAT §9): ai_phrasing (AI-sounding narration, FORMAT §4), read_time and late_reveal (both need beats.json) and vs_prev (this episode against the last three
+episodes, found as the sibling folders numbered one, two and three less).
 
 make_doc.py ends with `doc_lint.check(doc)`. Rules and their numbers come from the author's series spec (SERIES.md「時代配色與畫面多樣性」)
 and episode 10's make_doc asserts; a series turns one off or changes its parameter, e.g. lint(doc, {**DEFAULT, "quote_card_cap": 8}).
@@ -355,16 +355,37 @@ def prev_episode(doc_path):
     return hits[0] if hits else None
 
 
+# How many earlier episodes the reports look back. Only four hook types (HOOKS), so three is the most an episode can
+# differ from every time. Measured 2026-11-20 on a 120-episode series checked against the last episode only: two
+# episodes back the same hook came up 21% of the time and the same main-line shot 37% (one back: 0% and 8%).
+COMPARE_LAST = 3
+
+
+def earlier_episodes(prev_path, n=COMPARE_LAST):
+    """prev_path and the episodes before it (each numbered one less), at most n, nearest first; a gap ends the chain."""
+    out = []
+    while prev_path and len(out) < n:
+        out.append(Path(prev_path))
+        prev_path = prev_episode(prev_path)
+    return out
+
+
 def report_prev(doc, prev_path, base=None):
-    """Print the vs_prev report and the script report (never fail); base: the episode folder, for series.json."""
-    if not prev_path:
+    """Print the vs_prev report and the script report for the last COMPARE_LAST episodes, starting at prev_path (never
+    fail); base: the episode folder, for series.json."""
+    eps = earlier_episodes(prev_path)
+    if not eps:
         return
-    prev = doc_common.read_json(prev_path)
-    same, differ = vs_prev(doc, prev)
-    mark = "ok" if differ >= 4 else "too close to the previous episode: at least 4 must differ"
-    print(f"vs_prev ({Path(prev_path).parent.name}): {differ} of 6 differ, {mark}" + (f"; same: {', '.join(same)}" if same else ""))
-    rep = script_vs_prev(doc, prev, fixed_lines(base or Path.cwd()))
-    print("script vs previous episode: " + ("\n  " + "\n  ".join(rep) if rep else "no repeats"))
+    fixed, rep = fixed_lines(base or Path.cwd()), []
+    for i, p in enumerate(eps):
+        prev = doc_common.read_json(p)
+        same, differ = vs_prev(doc, prev)
+        mark = "ok" if differ >= 4 else "too close: at least 4 must differ"
+        print(f"vs_prev ({p.parent.name}): {differ} of 6 differ, {mark}" + (f"; same: {', '.join(same)}" if same else ""))
+        for line in script_vs_prev(doc, prev, fixed):
+            if i == 0 or line.startswith(("same ", "line openings")):   # notes about this episode itself: printed once
+                rep.append(line.replace("the previous episode", p.parent.name))
+    print(f"script vs the last {len(eps)} episode(s): " + ("\n  " + "\n  ".join(rep) if rep else "no repeats"))
 
 
 AI_NOTE = " (a reminder, not a failure)"   # printed after every ai_phrasing line: a first-time reader took the ⚠ for a failure (2026-11-16)

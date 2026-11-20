@@ -5,7 +5,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
-from doc_lint import check, fixed_lines, script_vs_prev  # noqa: E402
+from doc_lint import check, earlier_episodes, fixed_lines, script_vs_prev  # noqa: E402
 
 
 def doc(lines, hook="反問", main="quote_card", lang="zh"):
@@ -65,6 +65,35 @@ def test_check_prints_the_report(tmp_path, capsys):
     d = {**doc(["你有沒有做過一件事？"]), "shots": {}}
     d["beats"] = [{**b, "lines": [1]} for b in d["beats"]]
     check(d, rules, prev=prev, base=tmp_path / "002_b")
-    assert "script vs previous episode" in capsys.readouterr().out
+    out = capsys.readouterr().out
+    assert "script vs the last 1 episode(s)" in out and "same hook type as 001_a: 反問" in out
     check(d, rules, prev=None, base=tmp_path / "002_b")
-    assert "script vs previous episode" not in capsys.readouterr().out
+    assert "script vs the last" not in capsys.readouterr().out
+
+
+def test_report_looks_back_three_episodes_and_names_each(tmp_path, capsys):
+    """Episodes 001–004 before 005: the report compares 004, 003 and 002 (COMPARE_LAST), not 001; a repeat from an
+    older one names that episode."""
+    def write(name, d):
+        p = tmp_path / name / "doc.json"
+        p.parent.mkdir()
+        p.write_text(json.dumps({**d, "shots": {}}, ensure_ascii=False))
+        return p
+    write("001_a", doc([], hook="反問"))
+    write("002_b", doc(["雅各回家了。"], hook="數字"))
+    write("003_c", doc([], hook="衝突", main="stat_count"))
+    last = write("004_d", doc([], hook="反常識", main="stat_count"))
+    d = {**doc(["雅各回家了。"], hook="反問"), "shots": {}}
+    d["beats"] = [{**b, "lines": [1]} for b in d["beats"]]
+    check(d, {"lines_covered": True}, prev=last, base=tmp_path / "005_e")
+    out = capsys.readouterr().out
+    assert [x.split(")")[0] for x in out.splitlines() if x.startswith("vs_prev (")] == ["vs_prev (004_d", "vs_prev (003_c", "vs_prev (002_b"]
+    assert "same hook type" not in out                       # 反問 was 001's, four back: not compared
+    assert "line openings as in 002_b" in out
+
+
+def test_a_missing_number_ends_the_chain(tmp_path):
+    for name in ("001_a", "003_c"):
+        (tmp_path / name).mkdir()
+        (tmp_path / name / "doc.json").write_text("{}")
+    assert earlier_episodes(tmp_path / "003_c" / "doc.json") == [tmp_path / "003_c" / "doc.json"]
