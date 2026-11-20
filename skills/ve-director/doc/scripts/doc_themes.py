@@ -5,6 +5,8 @@ halftone photo cutouts, tape). live = documentary realism (VE photoreal shots, d
 Code-shot filters are userSpaceOnUse and extend into negative coordinates: with the default region a purely horizontal or
 vertical line has a zero-size box and vanishes, and dots drawn around their own origin get clipped.
 lecture-<mode> = knowledge-teaching look (flat panels, no paper): light, dark, story, finance, food, colours from ../themes/lecture.json.
+dark-gold, newsroom, vintage-poster, editorial-serif, cinematic-dark = styled themes from ../themes/styles.json: palette, shape and
+ground each change, and each names the VE look its VE shots use.
 "light": the frame is light, so subtitles without sub_bg are dark ink and paper wipes are paper-coloured.
 "pill": (fill, text) of doc_cut's keyword pills.
 """
@@ -118,6 +120,110 @@ for _mode in (k for k in LECTURE if not k.startswith("_")):   # light, dark, the
     CODE_THEMES[f"lecture-{_mode}"] = _lecture(_mode)
 
 
+# Styled themes (themes/styles.json): a palette like lecture.json's, plus a shape and a ground picked by name from the
+# presets below, plus the VE look their VE shots use. A theme changes all three layers, not only its colours.
+STYLES = json.loads((Path(__file__).resolve().parents[1] / "themes/styles.json").read_text(encoding="utf-8"))
+_GRAIN = """<filter id="fib"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="2"/>
+      <feColorMatrix values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 %s 0"/></filter>
+    <rect width="1920" height="1080" filter="url(#fib)"/>"""
+# ground: (paper css, texture svg, vignette); t = the palette
+GROUNDS = {
+    "warm-grain": lambda t: (f"background: radial-gradient(ellipse at 50% 40%, {t['panel']} 0%, {t['bg']} 75%);", _GRAIN % ".06",
+                             "rgba(0,0,0,0) 50%, rgba(0,0,0,.55) 100%"),
+    "grid": lambda t: (f"background: linear-gradient(180deg, {t['panel']} 0%, {t['bg']} 100%);",
+                       f"""<pattern id="grid" width="80" height="80" patternUnits="userSpaceOnUse">
+      <path d="M 80 0 L 0 0 0 80" fill="none" stroke="{t['fg']}" stroke-width="1" opacity=".06"/></pattern>
+    <rect width="1920" height="1080" fill="url(#grid)"/>""", "rgba(0,0,0,0) 60%, rgba(0,0,0,.4) 100%"),
+    "paper-halftone": lambda t: (f"background: {t['bg']};", f"""<filter id="fib"><feTurbulence type="fractalNoise" baseFrequency="0.7" numOctaves="3" seed="2"/>
+      <feColorMatrix values="0 0 0 0 .30  0 0 0 0 .22  0 0 0 0 .12  0 0 0 .16 0"/></filter>
+    <rect width="1920" height="1080" filter="url(#fib)"/>
+    <pattern id="ht" width="9" height="9" patternUnits="userSpaceOnUse"><circle cx="4.5" cy="4.5" r="1.3" fill="{t['fg']}" opacity=".08"/></pattern>
+    <rect width="1920" height="1080" fill="url(#ht)"/>""", "rgba(0,0,0,0) 62%, rgba(70,45,15,.25) 100%"),
+    "flat": lambda t: (f"background: {t['bg']};", "", "rgba(0,0,0,0) 75%, rgba(40,30,30,.06) 100%"),
+    "dark-vignette": lambda t: (f"background: radial-gradient(ellipse at 50% 45%, {t['panel']} 0%, {t['bg']} 55%, #000 100%);",
+                                _GRAIN % ".05", "rgba(0,0,0,0) 40%, rgba(0,0,0,.7) 100%"),
+}
+# shape: css for cards, captions, quotes, photos and the burst word; plus the keyword pill (fill, text) and the svg
+# dot shadow. Cards are .card blocks (scenes' boxes), --strip is the palette's panel.
+SHAPES = {
+    "gold-frame": lambda t, sh: (f"""
+  .card {{ border: 2px solid var(--red); border-radius: 0; outline: 1px solid {t['accent']}55; outline-offset: 7px; }}
+  .ph {{ border: 2px solid var(--red); box-shadow: 0 18px 50px {sh}; }}
+  .cap, .quote {{ position:absolute; color: var(--fg); font-family: var(--font-ui); font-weight: 600; padding: 6px 4px;
+                 border-bottom: 2px solid var(--red); white-space: nowrap; }}
+  .cap {{ font-size: 30px; letter-spacing: 3px; }} .cap .bar {{ display:none; }}
+  .quote {{ font-family: var(--font-big); font-size: 40px; font-weight: 700; }}
+  #big {{ color: var(--red); font-family: var(--font-big); }}
+  #term .main, #label .main {{ border-bottom: 2px solid var(--red); padding: 4px 10px; display:inline-block; }}
+""", (t["accent"], t["bg"]), f'<feDropShadow dx="0" dy="6" stdDeviation="8" flood-color="{sh}" flood-opacity="1"/>'),
+    "news-bar": lambda t, sh: (f"""
+  .card {{ border-left: 10px solid var(--red); border-radius: 0; box-shadow: 0 10px 24px {sh}; }}
+  .ph {{ box-shadow: 0 14px 40px {sh}; outline: 4px solid var(--fg); }}
+  .cap, .quote {{ position:absolute; background: var(--red); color: var(--bg); font-family: var(--font-ui); font-weight: 900;
+                 padding: 8px 18px; white-space: nowrap; }}
+  .cap {{ font-size: 30px; letter-spacing: 1px; }} .cap .bar {{ display:none; }}
+  .quote {{ background: var(--strip); color: var(--fg); border-left: 10px solid var(--red); font-size: 40px; }}
+  #big {{ color: var(--fg); font-family: var(--font-big); }}
+  #term .main, #label .main {{ background: var(--red); color: var(--bg); padding: 6px 18px; display:inline-block; }}
+""", (t["accent"], t["bg"]), f'<feDropShadow dx="0" dy="6" stdDeviation="6" flood-color="{sh}" flood-opacity="1"/>'),
+    "offset-print": lambda t, sh: (f"""
+  .card {{ border: 4px solid var(--fg); border-radius: 0; box-shadow: 10px 10px 0 var(--red); }}
+  .ph {{ border: 4px solid var(--fg); box-shadow: 12px 12px 0 var(--must); }}
+  .ph .inner {{ filter: sepia(.35) contrast(1.1); }}
+  .cap, .quote {{ position:absolute; background: var(--strip); color: var(--fg); font-family: var(--font-ui); font-weight: 900;
+                 padding: 8px 18px; border: 3px solid var(--fg); box-shadow: 6px 6px 0 var(--red); white-space: nowrap; }}
+  .cap {{ font-size: 30px; }} .cap .bar {{ display:none; }}
+  .quote {{ font-family: var(--font-big); font-size: 40px; }}
+  #big {{ color: var(--red); font-family: var(--font-big); text-shadow: 8px 8px 0 var(--fg); }}
+  #term .main, #label .main {{ background: var(--strip); border: 3px solid var(--fg); padding: 6px 18px; display:inline-block; }}
+""", (t["fg"], t["panel"]), f'<feDropShadow dx="5" dy="5" stdDeviation="0" flood-color="{t["accent"]}" flood-opacity="1"/>'),
+    "rule": lambda t, sh: (f"""
+  .card {{ border-radius: 0; border-top: 3px solid var(--fg); border-bottom: 1px solid var(--muted); box-shadow: none; }}
+  .ph {{ box-shadow: 0 10px 30px {sh}; }}
+  .cap, .quote {{ position:absolute; background: var(--strip); color: var(--muted); font-family: var(--font-ui); font-weight: 500;
+                 font-style: italic; padding: 6px 14px; white-space: nowrap; }}
+  .cap {{ font-size: 28px; letter-spacing: 2px; }} .cap .bar {{ display:none; }}
+  .quote {{ font-family: var(--font-big); font-style: normal; color: var(--fg); font-size: 40px; border-top: 3px solid var(--fg); }}
+  #big {{ color: var(--fg); font-family: var(--font-big); }}
+  #term .main, #label .main {{ border-top: 3px solid var(--fg); padding: 6px 10px; display:inline-block; }}
+""", (t["fg"], t["panel"]), f'<feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="{sh}" flood-opacity="1"/>'),
+    "glow": lambda t, sh: (f"""
+  .card {{ border-radius: 0; box-shadow: 0 0 70px rgba(0,0,0,.65); text-shadow: 0 0 22px {t['fg']}40; }}
+  .ph {{ box-shadow: 0 30px 80px rgba(0,0,0,.75); }}
+  .ph .inner {{ filter: contrast(1.08) saturate(.85); }}
+  .cap, .quote {{ position:absolute; color: var(--fg); font-family: var(--font-ui); font-weight: 400; padding: 6px 4px;
+                 letter-spacing: 4px; text-shadow: 0 2px 18px rgba(0,0,0,.9); white-space: nowrap; }}
+  .cap {{ font-size: 28px; }} .cap .bar {{ display:none; }}
+  .quote {{ font-family: var(--font-big); font-size: 40px; font-weight: 600; }}
+  #big {{ color: var(--fg); font-family: var(--font-big); text-shadow: 0 0 40px {t['accent']}99; }}
+  #term .main, #label .main {{ letter-spacing: 6px; text-shadow: 0 0 24px {t['accent']}88; }}
+""", (t["panel"], t["fg"]), f'<feGaussianBlur stdDeviation="3" result="g"/><feMerge><feMergeNode in="g"/><feMergeNode in="SourceGraphic"/></feMerge>'),
+}
+
+
+def _styled(name):
+    """A styled theme from themes/styles.json: palette + SHAPES[shape] + GROUNDS[ground]."""
+    t = STYLES[name]
+    light = t["light"]
+    sh = "rgba(30,40,70,.18)" if light else "rgba(0,0,0,.6)"
+    paper, texture, vignette = GROUNDS[t["ground"]](t)
+    css, pill, bleed = SHAPES[t["shape"]](t, sh)
+    return dict(
+        vars=(f"--bg:{t['bg']}; --bg-solid:{t['bg']}; --fg:{t['fg']}; --red:{t['accent']}; --must:{t['accent2']}; --hi:{t['hi']}; "
+              f"--strip:{t['panel']}; --muted:{t['muted']}; --font-big:'{t['font_big']}'; --font-ui:'{t['font_ui']}'; "
+              + _rise_vars("red")),
+        paper=paper, texture=texture,
+        filters=f"""<filter id="bleed" {U}>{bleed}</filter>
+      <filter id="wash" {U}><feGaussianBlur stdDeviation="16"/></filter>
+      <filter id="brush" {U}><feGaussianBlur stdDeviation=".3"/></filter>""",
+        vignette=vignette, dim=t["dim"], flash="#ffffff", css=css,
+        torn=False, photo_ease="power2.out", light=light, pill=pill, ring=t["ring"])
+
+
+for _name in (k for k in STYLES if not k.startswith("_")):
+    CODE_THEMES[_name] = _styled(_name)
+
+
 VE_THEMES = {
     # v1 水墨（已退役，留作對照）
     "ink": dict(
@@ -170,7 +276,7 @@ VE_THEMES = {
 def ve_look(doc, theme):
     """Which VE_THEMES entry a theme's VE shots use (doc.json "ve_look" overrides). It names the VE folder ve_<look>/, so
     switching lecture-light ↔ lecture-dark reuses the same clips: the VE look is shared by both."""
-    return doc.get("ve_look") or ("flat" if theme.startswith("lecture-") else theme)
+    return doc.get("ve_look") or ("flat" if theme.startswith("lecture-") else STYLES[theme]["ve"] if theme in STYLES else theme)
 
 
 # Era palettes for collage (2026-10-25): doc.json "palette": "<時代>" re-inks the code shots and swaps the VE palette
@@ -227,11 +333,11 @@ def _palette(theme, palette):
 
 def code_theme(theme, palette=None, rise=None):
     """CODE_THEMES[theme], re-inked for an era palette, or with green as the rising colour (a copy; the table itself is
-    never changed). rise only applies to lecture-* (their charts default to red up)."""
+    never changed). rise only applies to lecture-* and the styles.json themes (their charts default to red up)."""
     th, p = dict(CODE_THEMES[theme]), _palette(theme, palette)
     if rise is not None:
-        if not theme.startswith("lecture-"):
-            raise ValueError("rise only applies to the lecture-* themes")
+        if not (theme.startswith("lecture-") or theme in STYLES):
+            raise ValueError("rise only applies to the lecture-* and styles.json themes")
         th["vars"] = th["vars"].replace(_rise_vars("red"), _rise_vars(rise))
     if p:
         bg, fg, red, must, strip, tint, tape, _ = p

@@ -33,7 +33,8 @@ def test_every_theme_has_the_same_keys_and_a_light_flag():
     assert {k: th["light"] for k, th in CODE_THEMES.items()} == \
         {"collage": True, "live": False, "lecture-light": True, "lecture-dark": False,
          "lecture-story": False, "lecture-finance": True, "lecture-food": True,
-         "lecture-tech": False, "lecture-history": True, "lecture-faith": True}
+         "lecture-tech": False, "lecture-history": True, "lecture-faith": True,
+         "dark-gold": False, "newsroom": False, "vintage-poster": True, "editorial-serif": True, "cinematic-dark": False}
 
 
 def test_code_theme_copies_lecture():

@@ -10,7 +10,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 import doc_code  # noqa: E402
 from doc_themes import CODE_THEMES  # noqa: E402
 
-THEMES = [t for t in CODE_THEMES if t in ("collage", "live") or t.startswith("lecture-")]
+THEMES = list(CODE_THEMES)   # every theme, the styles.json ones included
 BEAT = {"id": "B1", "duration": 5.0, "tokens": [["甲", 0.2]]}
 SCENES = {
     "line_chart": {"labels": [f"{m}月" for m in range(1, 13)], "title": "月營收",

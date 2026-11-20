@@ -163,9 +163,17 @@ with no voice and a voice without `ref_wav` or `ref_text`. Design a voice that b
 | `lecture-faith` | faith |
 | `collage` | the VOX paper collage look (torn paper, halftone cut-outs, tape); `examples/seventy-times-seven.*.json` use it; the only theme that takes `"palette"` |
 | `live` | documentary realism: photoreal VE shots, dark infographic code shots |
+| `dark-gold` | dark warm ground, gold hairline frames, serif titles (VE look `live`) |
+| `newsroom` | news desk: charcoal ground with a faint grid, cards with a thick left bar, captions as yellow label strips (VE look `live`) |
+| `vintage-poster` | old poster: yellowed paper with halftone, thick black frames with an offset colour block (misregistered print) (VE look `flat`) |
+| `editorial-serif` | magazine page: cream ground, serif titles, rules above and below instead of boxes (VE look `collage`) |
+| `cinematic-dark` | film: near-black ground with a heavy vignette, soft glow on the words, cards as faint dark panels with no border (VE look `live`) |
 
 The eight `lecture-*` colours are in `themes/lecture.json` (how to add one: "Adding a palette" above); `collage` and `live`
-are defined in `scripts/doc_themes.py`. Each theme also picks the look of the VE shots (`ve_look`, above).
+are defined in `scripts/doc_themes.py`; the five styled themes are in `themes/styles.json`: a palette with the same keys and
+contrast rule as "Adding a palette", a `shape` and a `ground` named from `SHAPES` / `GROUNDS` in `scripts/doc_themes.py`, and
+`ve`, their VE look (checked by `tests/test_styles.py`). A new styled theme changes all three layers, not only the colours.
+Each theme also picks the look of the VE shots (`ve_look`, above).
 
 Several beats per line: `"from": "<phrase>"` opens a beat on that phrase inside its first line (the line's earlier
 beat ends there), so a sentence can cut every 1-2 s; trigger tokens are trimmed to each beat's own span.
