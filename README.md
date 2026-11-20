@@ -87,7 +87,9 @@ this episode's own beats (about 45 seconds), so you pick with the script in fron
 **03 · Generated shots for the beats that need live footage.** The tool works out how long each shot must be, writes
 the prompts and lays them out as a run sheet. By default it submits to VideoExpress and collects the results; MiniMax
 H3 on your own Google Colab GPU is another option (its licence excludes some territories, see
-[tools/h3/README.md](./tools/h3/README.md)), and generating by hand works too.
+[tools/h3/README.md](./tools/h3/README.md)). With a Google AI plan, single shots can come from Google Flow (Omni, Veo):
+the agent works in your signed-in Chrome and files each download with the model, settings and prompt that made it
+([skills/google-flow](./skills/google-flow/SKILL.md)). Generating by hand works too.
 
 <img src="./docs/site/shot-generated.jpg" alt="A generated coffee bar shot with a host circle and subtitles" width="640">
 
@@ -124,7 +126,7 @@ the same way: shot lengths, how fast the opening changes picture, how much of th
 between lines. It lays out a contact sheet with what is said under each frame. It only measures; what to change is
 yours to decide.
 
-**Also:** music composed by code from the on-screen events (or songs from MiniMax Music 3 on your own Colab), sound
+**Also:** music composed by code from the on-screen events (or a song from MiniMax Music 3 on your own Colab or from Google Flow Music, set as the film's music in one step), sound
 effects on the moment each element appears, start and release checklists that stop the run until rights and sources
 are answered, YouTube upload with schedule, thumbnail and the altered-content label, and optional fonts (LXGW WenKai,
 jf open-huninn) listed with their original download links.
@@ -192,7 +194,7 @@ and upload.
 | Pictures: drawn | beats and parameters → one mp4 per beat | the scene engine in `skills/ve-director/doc/` (27 scenes) | |
 | Pictures: footage | photos and clips → the picture of a beat | photos with a licence record | VideoExpress (`tools/ve-runner/`), MiniMax H3 on your own Colab (`tools/h3/`) |
 | Host | narration → a presenter video | no host | TalkingPhotos, MiniMax H3 |
-| Sound | beats → sound marks, music | the effects in `assets/sfx/`; music composed by `tools/score/` | CC BY tracks; your own VideoExpress sounds; MiniMax Music 3 on your own Colab (`tools/music3/`) |
+| Sound | beats → sound marks, music | the effects in `assets/sfx/`; music composed by `tools/score/` | CC BY tracks; your own VideoExpress sounds; MiniMax Music 3 on your own Colab (`tools/music3/`); Google Flow Music (`skills/google-flow/`) |
 | Assembly | everything above → the film | `doc_cut.py --render` | Concat, for overlay layers |
 | Publishing | the film → a platform | upload by hand | YouTube API |
 
@@ -223,6 +225,7 @@ Where each one got stuck and how to get past it: [docs/AGENT-TRIALS.md](./docs/A
 | `skills/script2film/` | the skill an agent follows to make an explainer film; it routes to `docs/FLOW.md` |
 | `skills/ve-director/` | the storyboard skill for VideoExpress: plans a scene as a shot table, then renders checked prompts. Its rules live in `skills/ve-director/rules/` |
 | `skills/ve-director/doc/` | doc mode: narrated explainer films. Narration, word timing, 27 drawn scenes, themes, fact checks, cutting. Start with its `README.md` |
+| `skills/google-flow/` | optional: one clip from Google Flow (Omni, Veo) or a song from Flow Music in your own Google AI account, made in your signed-in Chrome; `scripts/flow_ingest.py` brings the download into the project with a provenance record |
 | `tools/doctor/`, `tools/config/` | the install check, the voice setup (`setup_voice.sh`) and the per-machine settings file |
 | `tools/tts/` | designing a voice, voiced lines for several characters, speaker similarity |
 | `tools/nightly/`, `tools/checklist/`, `tools/qa/` | checks: the check every export runs (`film_check.py`), the explainer delivery check (`check.py`), the start and release checklists, frame-by-frame motion checks |
@@ -250,7 +253,7 @@ but Windows, Linux and Intel Macs have not been tried (see "Not covered" in [doc
 
 No account or key is needed for the core flow: voice, timing, drawn scenes, `doc_cut.py --render` and the check. The
 optional parts use your own accounts: VideoExpress (generated shots, sound effects), TalkingPhotos (host), Google
-Colab (MiniMax H3 and Music 3), YouTube (upload), and both a Groq and an ElevenLabs key for cloud transcription.
+Colab (MiniMax H3 and Music 3), a Google AI plan (Flow and Flow Music, through your own signed-in Chrome), YouTube (upload), and both a Groq and an ElevenLabs key for cloud transcription.
 Concat is a separate app you install. Each is described where it is used in [docs/FLOW.md](./docs/FLOW.md).
 
 ## Contributing

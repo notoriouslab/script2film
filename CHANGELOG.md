@@ -1,5 +1,30 @@
 # Changelog
 
+## 1.1.4 (2026-11-21)
+
+### Generated shots: Google Flow joins VideoExpress and H3
+
+With a Google AI Plus, Pro or Ultra plan, a single shot can come from Google Flow (Omni 1.2 Flash, Veo). The new
+`google-flow` skill drives Flow in your own signed-in Chrome, because Google refuses sign-in in browsers launched by
+automation tools. `skills/google-flow/scripts/flow_ingest.py` puts the download at `ve_<look>/shotK.mp4` with a
+`.flow.json` record (model, settings, prompt, source file, SHA-256) and a ten-frame sheet to look at before cutting.
+`references/flow-video.md` holds the steps and what was measured: a reference image keeps faces and clothes, one
+continuous action with one camera path flows better than timed blocks, selfie vlogs and bullet time work, large
+martial-arts scenes do not, and which wording gets refused by policy.
+
+### Music: a song from Google Flow Music
+
+The same skill makes a song or an instrumental in Flow Music (included in Google AI Pro) from your lyrics and a style
+line, and `flow_ingest.py --doc` sets it as the film's `bgm` with its credit. `references/flow-music.md` covers the
+Compose panel, how to write the style line (describe a singer's style instead of naming them), and what the terms
+do and do not say about commercial use.
+
+### VideoExpress runs no longer stop on a late candidate
+
+When VideoExpress adds a second candidate frame after `--auto-pick` has chosen the first, the run now keeps the
+frame VideoExpress has selected, as long as it was made for this shot, instead of stopping the whole batch. A frame
+left over from the previous shot still stops it.
+
 ## 1.1.2 (2026-11-20)
 
 - **Every exported film is checked.** Concat exports run `tools/nightly/film_check.py`: length, black frames, loudness,

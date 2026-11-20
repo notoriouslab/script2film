@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>每個環節用什麼工具｜Script2Film</title>
   <meta name="description"
-    content="Script2Film 每個環節的預設工具、在哪裡跑、要不要錢、能換成什麼：Qwen3-TTS、whisper.cpp、HyperFrames、VideoExpress、TalkingPhotos、MiniMax H3、MiniMax Music 3、Concat、YouTube。">
+    content="Script2Film 每個環節的預設工具、在哪裡跑、要不要錢、能換成什麼：Qwen3-TTS、whisper.cpp、HyperFrames、VideoExpress、TalkingPhotos、MiniMax H3、MiniMax Music 3、Google Flow、Flow Music、Concat、YouTube。">
   <!-- share preview: written by tools/site/og_tags.py -->
   <link rel="canonical" href="https://notoriouslab.github.io/script2film/tools.html">
   <link rel="alternate" hreflang="zh-Hant" href="https://notoriouslab.github.io/script2film/tools.html">
@@ -15,7 +15,7 @@
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Script2Film">
   <meta property="og:title" content="每個環節用什麼工具｜Script2Film">
-  <meta property="og:description" content="Script2Film 每個環節的預設工具、在哪裡跑、要不要錢、能換成什麼：Qwen3-TTS、whisper.cpp、HyperFrames、VideoExpress、TalkingPhotos、MiniMax H3、MiniMax Music 3、Concat、YouTube。">
+  <meta property="og:description" content="Script2Film 每個環節的預設工具、在哪裡跑、要不要錢、能換成什麼：Qwen3-TTS、whisper.cpp、HyperFrames、VideoExpress、TalkingPhotos、MiniMax H3、MiniMax Music 3、Google Flow、Flow Music、Concat、YouTube。">
   <meta property="og:url" content="https://notoriouslab.github.io/script2film/tools.html">
   <meta property="og:locale" content="zh_TW">
   <meta property="og:locale:alternate" content="en_US">
@@ -126,7 +126,7 @@
             <dt>費用</dt>
             <dd>免費；SoundFont 要自己下載</dd>
             <dt>可以換成</dt>
-            <dd>自己的音樂（CC BY 的曲子要標註），或下面的 MiniMax Music 3 生成的歌</dd>
+            <dd>自己的音樂（CC BY 的曲子要標註），或下面的 MiniMax Music 3、Google Flow Music 生成的歌</dd>
           </dl>
         </div>
         <div class="tool">
@@ -219,6 +219,42 @@
           </dl>
           <a class="btn" href="https://github.com/notoriouslab/script2film/blob/main/tools/music3/README.md" target="_blank"
             rel="noopener">怎麼用 MiniMax Music 3</a>
+        </div>
+      </div>
+      <div class="tools two colab">
+        <div class="tool feature">
+          <div class="stage">生成鏡頭</div>
+          <h3>Google Flow（需要 Google AI 方案）</h3>
+          <p>Google 的影片工作室，模型是 Omni 1.2 Flash 與 Veo。給一張參考圖，人物的臉和衣服都留得住；一個連續動作配一條運鏡最流暢，手機自拍邊走邊講、子彈時間都做得出來，大開大闔的武打場面還不行。Flow 沒有可用的 API，Google 也不讓自動化工具開的瀏覽器登入，所以由 agent 在你已登入的 Chrome 裡操作，下載後連同模型、參數、提示詞一起歸檔，附一張抽格表先看再用。</p>
+          <dl>
+            <dt>在哪跑</dt>
+            <dd>Google 的服務，透過你自己的 Chrome</dd>
+            <dt>費用</dt>
+            <dd>用 Google AI Plus、Pro、Ultra 方案的點數；送出前畫面會顯示這次要幾點。實測 360p、10 秒、一次兩支 20 點，被政策擋下的會退回</dd>
+            <dt>授權</dt>
+            <dd>Google 不主張產出的所有權，成品帶隱形的 SynthID 浮水印；公開發布要標示 AI 生成</dd>
+            <dt>可以換成</dt>
+            <dd>上面的 VideoExpress、MiniMax H3，或任何能照檔名放回的工具</dd>
+          </dl>
+          <a class="btn" href="https://github.com/notoriouslab/script2film/blob/main/skills/google-flow/SKILL.md" target="_blank"
+            rel="noopener">怎麼用 Google Flow</a>
+        </div>
+        <div class="tool feature">
+          <div class="stage">配樂與歌曲</div>
+          <h3>Google Flow Music（需要 Google AI 方案）</h3>
+          <p>Google 的音樂工作室（Lyria 模型），貼上歌詞和一段曲風描述，不到一分鐘生成一首完整的歌，可下載 WAV 與分軌。同樣在你已登入的 Chrome 裡操作；收檔程式一步把它設成片子的背景音樂，寫好出處。</p>
+          <dl>
+            <dt>在哪跑</dt>
+            <dd>Google 的服務，透過你自己的 Chrome</dd>
+            <dt>費用</dt>
+            <dd>Google AI Pro 內含 Flow Music 的 Plus 方案，點數和 Flow 影片分開算</dd>
+            <dt>授權</dt>
+            <dd>歌詞要是你自己的；Google 不主張所有權，但商用與 YouTube 營利的條款沒寫清楚，販售或發行前先看當下的條款</dd>
+            <dt>可以換成</dt>
+            <dd>上面的程式作曲、MiniMax Music 3，或任何有授權的音樂</dd>
+          </dl>
+          <a class="btn" href="https://github.com/notoriouslab/script2film/blob/main/skills/google-flow/references/flow-music.md" target="_blank"
+            rel="noopener">怎麼用 Flow Music</a>
         </div>
       </div>
       <p class="disclose">說明：VideoExpress 和 TalkingPhotos 的按鈕、上面旁白一欄的 CloneVoice.ai 連結是推薦連結。VideoExpress 和 TalkingPhotos 是作者自己每週在用的；透過連結購買，作者會收到一點推廣費，你付的價錢不變（2026年11月）。不買也完全不影響核心流程。</p>

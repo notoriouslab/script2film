@@ -76,8 +76,9 @@
 <img src="./docs/site/scene-prompt.jpg" alt="旁白唸到哪一段，那一段就被標出來" width="640">
 
 **03・需要實景的那幾拍，交給影片生成。** 工具先算出每個鏡頭要幾秒、寫好提示詞，排成一張跑單。預設接 VideoExpress，自動送出、收回；
-也可以在自己的 Google Colab 顯示卡上跑 MiniMax H3（授權排除部分地區，見 [tools/h3/README.md](./tools/h3/README.md)），
-或手動生成後照檔名放回來。
+也可以在自己的 Google Colab 顯示卡上跑 MiniMax H3（授權排除部分地區，見 [tools/h3/README.md](./tools/h3/README.md)）。
+有 Google AI 方案的話，單一鏡頭可以交給 Google Flow（Omni、Veo）：agent 在你已登入的 Chrome 裡操作，下載後連同模型、參數、
+提示詞一起歸檔（[skills/google-flow](./skills/google-flow/SKILL.md)）。手動生成後照檔名放回來也可以。
 
 <img src="./docs/site/shot-generated.jpg" alt="生成的咖啡吧台鏡頭，疊上主持人圓框與字幕" width="640">
 
@@ -105,7 +106,7 @@
 **看懂一支好片的節奏。** `tools/sample/` 把你欣賞的片和自己的片用同樣的方法並排量：鏡頭長度、開場換畫面的速度、說話佔全片多少、
 句子之間靜到什麼程度，再排出每格下寫著當下旁白的聯絡表。它只量，要改什麼由你判斷。
 
-**另外還有：** 照畫面事件作曲的配樂（或在自己的 Colab 上用 MiniMax Music 3 生成歌曲）、對準畫面出現那一刻的音效、
+**另外還有：** 照畫面事件作曲的配樂（或用自己 Colab 上的 MiniMax Music 3、Google Flow Music 生成一首歌，一步設成片子的配樂）、對準畫面出現那一刻的音效、
 授權與出處沒答完就停下的開工與出片清單、一次帶上排程、縮圖、合成內容標記的 YouTube 上傳，以及附原始下載連結的選用字型（霞鶩文楷、jf 粉圓）。
 
 ## 這些都是用它做的
@@ -168,7 +169,7 @@ Windows 要開 git 的 `core.symlinks`。
 | 畫面：程式畫面 | 拍與參數 → 每拍一支 mp4 | `skills/ve-director/doc/` 的場景引擎（27 個場景） | |
 | 畫面：素材 | 照片與影片 → 某一拍的畫面 | 附授權紀錄的照片 | VideoExpress（`tools/ve-runner/`）、自己 Colab 上的 MiniMax H3（`tools/h3/`） |
 | 主持人 | 旁白 → 主持人影片 | 不放主持人 | TalkingPhotos、MiniMax H3 |
-| 音效配樂 | 拍 → 音效標記、配樂 | `assets/sfx/` 附帶的音效；`tools/score/` 程式作曲 | CC BY 曲；自己的 VideoExpress 音效；自己 Colab 上的 MiniMax Music 3（`tools/music3/`） |
+| 音效配樂 | 拍 → 音效標記、配樂 | `assets/sfx/` 附帶的音效；`tools/score/` 程式作曲 | CC BY 曲；自己的 VideoExpress 音效；自己 Colab 上的 MiniMax Music 3（`tools/music3/`）；Google Flow Music（`skills/google-flow/`） |
 | 組裝 | 以上全部 → 成片 | `doc_cut.py --render` | Concat，用來加疊加層 |
 | 發佈 | 成片 → 平台 | 手動上傳 | YouTube API |
 
@@ -197,6 +198,7 @@ Windows 要開 git 的 `core.symlinks`。
 | `skills/script2film/` | agent 做解說片時照著走的 skill；它把步驟導到 `docs/FLOW.md` |
 | `skills/ve-director/` | VideoExpress 的分鏡 skill：先把一場戲排成分鏡表，再產出檢查過的提示詞。規則在 `skills/ve-director/rules/` |
 | `skills/ve-director/doc/` | doc 模式：有旁白的解說片。配音、逐字對時、27 個程式畫面場景、主題、事實檢查、剪輯。先讀它的 `README.md` |
+| `skills/google-flow/` | 選用：在自己的 Google AI 帳號裡用 Google Flow（Omni、Veo）做一段鏡頭，或用 Flow Music 做一首歌，透過已登入的 Chrome 操作；`scripts/flow_ingest.py` 把下載的檔案搬進專案並記下來源 |
 | `tools/doctor/`、`tools/config/` | 安裝檢查、配音環境安裝（`setup_voice.sh`）、每台機器一份的設定檔 |
 | `tools/tts/` | 設計聲音、多角色配音、語者相似度比對 |
 | `tools/nightly/`、`tools/checklist/`、`tools/qa/` | 檢查：每次出片都跑的體檢（`film_check.py`）、解說片的出片檢查（`check.py`）、開工與出片清單、逐格的動態檢查 |
@@ -223,7 +225,7 @@ Windows 要開 git 的 `core.symlinks`。
 都沒有試過（見 [docs/INSTALL.md](./docs/INSTALL.md) 的「Not covered」）。
 
 核心流程不用任何帳號或金鑰：配音、對時、程式畫面、`doc_cut.py --render` 與檢查。選用的部分用你自己的帳號：VideoExpress
-（生成鏡頭、音效）、TalkingPhotos（主持人）、Google Colab（MiniMax H3 與 Music 3）、YouTube（上傳），雲端轉錄要 Groq 與
+（生成鏡頭、音效）、TalkingPhotos（主持人）、Google Colab（MiniMax H3 與 Music 3）、Google AI 方案（Flow 與 Flow Music，透過你自己已登入的 Chrome）、YouTube（上傳），雲端轉錄要 Groq 與
 ElevenLabs 兩把金鑰。Concat 是另外安裝的軟體。每一項在 [docs/FLOW.md](./docs/FLOW.md) 用到的地方都有說明。
 
 ## 參與貢獻
