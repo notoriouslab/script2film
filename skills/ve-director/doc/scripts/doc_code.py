@@ -38,7 +38,7 @@ SCREEN_CLIP_MAX = 10.0
 
 TIME_KEYS = {"sigh", "pulse", "appear", "hits", "word", "loop", "a", "b", "good", "bad", "revenge", "other", "attack", "forgive",
              "start", "pull", "far", "at", "cap_at", "accent_at", "caption_at", "w", "freeze",
-             "a_at", "b_at", "merge_at", "sub_at", "hot_at", "title_at", "note_at"}
+             "a_at", "b_at", "merge_at", "sub_at", "hot_at", "title_at", "note_at", "to_at", "pan_at"}
 
 
 def missing_triggers(params, beat, lang):
@@ -259,8 +259,11 @@ def relation_overlaps(cards):
 
 def relation_params(P, b, params):
     """relation (scenes/relation.js): unique node ids, each placed by x / y inside the frame (subtitles below) or by p.rows,
-    pictures that exist in the project, links of a known kind between two different nodes, a focus on nodes that exist."""
+    pictures that exist in the project, links of a known kind between two different nodes, a focus on nodes that exist,
+    look left out or "board"."""
     bid, nodes, rows = b["id"], params.get("nodes") or [], params.get("rows") or []
+    if params.get("look", "board") != "board":
+        sys.exit(f"✗ {bid}: relation look must be \"board\" or left out: {params['look']!r}")
     if len(nodes) < 2:
         sys.exit(f"✗ {bid}: relation needs at least 2 nodes")
     ids = [n.get("id") for n in nodes]
@@ -413,11 +416,15 @@ def formula_size(terms, ops):
 
 
 def formula_params(P, b, params):
-    """formula (scenes/formula.js): 2-5 terms joined by one known operator each,
-    focus and strike on terms that exist, and a row short enough to stay at 72 px or more."""
+    """formula (scenes/formula.js): 2-5 terms joined by one known operator each (one term only with a strike that rewrites it:
+    「不是 A，而是 B」), focus and strike on terms that exist, a rewrite (strike "to") short enough to stay at 72 px or more,
+    and a row short enough to stay at 72 px or more."""
     bid, terms, ops = b["id"], params.get("terms") or [], params.get("ops") or []
-    if not (isinstance(terms, list) and 2 <= len(terms) <= 5):
-        sys.exit(f"✗ {bid}: formula needs 2-5 terms: {len(terms) if isinstance(terms, list) else terms!r}")
+    rewrites = [s for s in params.get("strike") or [] if isinstance(s, dict) and "to" in s]
+    lo = 1 if rewrites else 2
+    if not (isinstance(terms, list) and lo <= len(terms) <= 5):
+        sys.exit(f"✗ {bid}: formula needs 2-5 terms (1 only with a strike that has to): "
+                 f"{len(terms) if isinstance(terms, list) else terms!r}")
     for k, t in enumerate(terms):
         if not str(t.get("text", "")).strip():
             sys.exit(f"✗ {bid}: formula term {k} needs text")
@@ -432,6 +439,42 @@ def formula_params(P, b, params):
                 sys.exit(f"✗ {bid}: formula {key} i must be a term 0-{len(terms) - 1}: {f.get('i')!r}")
     if formula_size(terms, ops) < 72:
         sys.exit(f"✗ {bid}: formula too long: shorten the terms or split it into two beats")
+    for r in rewrites:   # formula.js: min(row size × 0.8, 1600 / units)
+        units = sum(1 if CJK.match(c) else 0.55 for c in str(r["to"]))
+        if not str(r["to"]).strip() or 1600 // units < 72:
+            sys.exit(f"✗ {bid}: formula strike to must be 1 to about 22 characters: {r['to']!r}")
+
+
+def _span(v, n):
+    """[first, last] item indexes inside 0..n-1 covering 2-6 items, or None."""
+    if not (isinstance(v, list) and len(v) == 2 and all(isinstance(i, int) and not isinstance(i, bool) for i in v)):
+        return None
+    return v if 0 <= v[0] < v[1] < n and 2 <= v[1] - v[0] + 1 <= 6 else None
+
+
+def timeline_params(P, b, params):
+    """timeline (scenes/timeline.js): 2-6 dated items, or up to 12 with a window [first, last] of 2-6 items; from (the
+    stretch shown first, before the line slides) is as long as the window; pan_at only with from; hot on an item."""
+    bid, items = b["id"], params.get("items") or []
+    win, frm = params.get("window"), params.get("from")
+    top = 12 if win is not None else 6
+    if not (isinstance(items, list) and 2 <= len(items) <= top):
+        sys.exit(f"✗ {bid}: timeline needs 2-6 items (up to 12 with a window): "
+                 f"{len(items) if isinstance(items, list) else items!r}")
+    for k, it in enumerate(items):
+        if not isinstance(it, dict) or not str(it.get("date", "")).strip():
+            sys.exit(f"✗ {bid}: timeline item {k} needs a date")
+    if win is not None and not _span(win, len(items)):
+        sys.exit(f"✗ {bid}: timeline window must be [first, last] item indexes 0-{len(items) - 1} covering 2-6 items: {win!r}")
+    if frm is not None:
+        if win is None:
+            sys.exit(f"✗ {bid}: timeline from needs a window (where the line slides to)")
+        if not _span(frm, len(items)) or frm[1] - frm[0] != win[1] - win[0]:
+            sys.exit(f"✗ {bid}: timeline from must be [first, last] item indexes covering as many items as the window: {frm!r}")
+    if "pan_at" in params and frm is None:
+        sys.exit(f"✗ {bid}: timeline pan_at needs from (the stretch the line slides from)")
+    if params.get("hot") is not None and not _index(params["hot"], len(items)):
+        sys.exit(f"✗ {bid}: timeline hot must be an item 0-{len(items) - 1}: {params['hot']!r}")
 
 
 BREAKDOWN_OPS = ("+", "−", "×", "÷")
@@ -596,6 +639,10 @@ def build(P, doc, b, spec, theme):
         pie_params(P, b, params)
     elif spec["scene"] == "formula":
         formula_params(P, b, params)
+    elif spec["scene"] == "timeline":
+        timeline_params(P, b, params)
+    elif spec["scene"] == "quote_card" and params.get("reveal", "blur") != "blur":
+        sys.exit(f"✗ {b['id']}: quote_card reveal must be \"blur\" or left out: {params['reveal']!r}")
     elif spec["scene"] == "breakdown":
         breakdown_params(P, b, params)
     vin, vout = spec.get("veil", [False, False])

@@ -11,12 +11,29 @@
 //   one bracket), "line" (straight, default), "dash" (a tie that is broken or refused: dashed), "arrow" (one way);
 //   label: a small tag at the middle; at: when it draws (default: just after the later of its two cards); hot: red
 // p.focus {ids: [...], at} — everything else dims to a quarter · p.title (card top-left) · p.note (small caption bottom-right)
+// p.look "board": a clue board — dark cork ground, the cards are paper notes pinned at the top, pictures are instant photos,
+// the ties are red string pinned note to note, sagging a little ("dash": dashed string). Same layout and checks.
+const BOARD_INK = "#2a2018", BOARD_PAPER = "#f6efdc", BOARD_STRING = "#c0281e";
 SCENES.relation = p => {
   drift(p, 1.05);
   if (!document.getElementById("relcss")) { const st = document.createElement("style"); st.id = "relcss"; st.textContent =
     ".rname{font-family:var(--font-big);font-weight:900;font-size:1.25em;line-height:1.15}.rsub{font-size:.62em;opacity:.75;margin-top:4px}" +
     ".rpic{width:150px;height:150px;border-radius:50%;margin:4px auto 10px;background-size:cover;background-position:50% 30%;border:4px solid}";
     document.head.appendChild(st); }
+  const BOARD = p.look === "board";
+  if (BOARD && !document.getElementById("boardcss")) { const st = document.createElement("style"); st.id = "boardcss"; st.textContent =
+    ".board-note{background:" + BOARD_PAPER + ";color:" + BOARD_INK + ";box-shadow:0 8px 16px rgba(0,0,0,.45)}" +
+    ".board-note .rpic{border-radius:2px;border:10px solid #fbfbf6;border-bottom-width:28px;box-shadow:0 3px 8px rgba(0,0,0,.35)}" +
+    ".board-pin{position:absolute;left:50%;top:-12px;width:26px;height:26px;margin-left:-13px;border-radius:50%;" +
+    "background:radial-gradient(circle at 35% 35%,#ff8a7a,#b3261e 55%,#6e140f);box-shadow:0 3px 4px rgba(0,0,0,.5)}";
+    document.head.appendChild(st);
+    const g = document.createElement("div"); g.className = "full"; CONTENT.prepend(g);
+    Object.assign(g.style, { zIndex: 1, border: "18px solid #3b2816", boxShadow: "inset 0 0 120px rgba(0,0,0,.55)",
+      backgroundColor: "#7a5a3a", backgroundImage: "radial-gradient(rgba(40,24,10,.35) 1.4px, transparent 1.6px), " +
+      "radial-gradient(rgba(255,220,170,.12) 1.2px, transparent 1.5px)", backgroundSize: "9px 9px, 13px 13px",
+      backgroundPosition: "0 0, 4px 6px" });
+    tl.fromTo(g, { opacity: 0 }, { opacity: 1, duration: .4, immediateRender: false }, 0);
+  }
   const N = {}, nodes = p.nodes || [], rows = p.rows || [];
   rows.forEach((r, ri) => r.forEach((id, k) => {
     const n = nodes.find(o => o.id === id); if (!n || n.x != null) return;
@@ -27,10 +44,12 @@ SCENES.relation = p => {
   }));
   if (p.title) popIn(box(p.title, { x: 90, y: 70, cls: "card", size: 44, rot: -1 }), at(p.title_at, .1));
   nodes.forEach((n, k) => {
-    const t = at(n.at, .3 + k * .5), col = n.hot ? RED : FG;
+    const t = at(n.at, .3 + k * .5), col = n.hot ? RED : BOARD ? BOARD_INK : FG;
     const pic = n.src ? `<div class="rpic" style="background-image:url('${n.src}');border-color:${col}"></div>` : "";
     const b = box(`${pic}<div class="rname" style="color:${col}">${n.label}</div>${n.sub ? `<div class="rsub">${n.sub}</div>` : ""}`,
-                  { cx: n.x, y: 0, cls: "card", size: n.src ? 40 : 46, rot: (k % 3 - 1) * 1.2 });
+                  { cx: n.x, y: 0, cls: BOARD ? "card board-note" : "card", size: n.src ? 40 : 46, rot: (k % 3 - 1) * 1.2 });
+    if (BOARD) { const pin = document.createElement("div"); pin.className = "board-pin"; b.appendChild(pin);
+      gsap.set(b, { rotation: (k % 3 - 1) * 2.2 }); }
     b.style.textAlign = "center"; b.style.top = (n.y - b.offsetHeight / 2) + "px"; b.style.left = (n.x - b.offsetWidth / 2) + "px";
     if (n.hot) b.style.outline = `4px solid ${RED}`;
     popIn(b, t); sfx(n.hot ? "pop" : "paper", t);
@@ -53,16 +72,24 @@ SCENES.relation = p => {
   };
   const tagAt = (x, y, text, col, t) => {
     const g = box(text, { cx: x, y: y - 26, size: 30 });
-    Object.assign(g.style, { background: col === RED ? RED : "var(--bg-solid, #f4ecd8)", color: col === RED ? "#fff" : FG,
+    Object.assign(g.style, { background: col === RED ? RED : BOARD ? BOARD_PAPER : "var(--bg-solid, #f4ecd8)",
+      color: col === RED ? "#fff" : BOARD ? BOARD_INK : FG,
       padding: "4px 14px", borderRadius: "999px", border: `2px solid ${col}`, zIndex: 23 });
     g.style.left = (x - g.offsetWidth / 2) + "px"; popIn(g, t + .25);
   };
   const LINKS = [];
   (p.links || []).forEach(l => {
     const A = N[l.from], C = N[l.to]; if (!A || !C) return;
-    const t = at(l.at, Math.max(A.t, C.t) + .25), col = l.hot ? RED : FG, kind = l.kind || "line";
+    const t = at(l.at, Math.max(A.t, C.t) + .25), col = BOARD ? BOARD_STRING : l.hot ? RED : FG, kind = l.kind || "line";
     let d, mx, my;
-    if (kind === "tree") {
+    if (BOARD && kind !== "tree") {         // string from pin to pin, sagging by a tenth of its length
+      const x0 = A.n.x, y0 = A.n.y - A.h / 2 + 1, x1 = C.n.x, y1 = C.n.y - C.h / 2 + 1, sag = Math.hypot(x1 - x0, y1 - y0) * .1;
+      d = arc(x0, y0, x1, y1, sag); mx = (x0 + x1) / 2; my = (y0 + y1) / 2 + sag / 2;
+      if (kind === "arrow") {                // the head on the pin, pointing along the last stretch
+        const ang = Math.atan2(y1 - ((y0 + y1) / 2 + sag), x1 - (x0 + x1) / 2), h = 26, a1 = ang + 2.6, a2 = ang - 2.6;
+        d += ` M ${x1} ${y1} L ${x1 + h * Math.cos(a1)} ${y1 + h * Math.sin(a1)} M ${x1} ${y1} L ${x1 + h * Math.cos(a2)} ${y1 + h * Math.sin(a2)}`;
+      }
+    } else if (kind === "tree") {
       const y0 = A.n.y + A.h / 2 + 8, y1 = C.n.y - C.h / 2 - 8, ym = (y0 + y1) / 2;
       d = `M ${A.n.x} ${y0} L ${A.n.x} ${ym} L ${C.n.x} ${ym} L ${C.n.x} ${y1}`; mx = C.n.x; my = ym;
     } else {
@@ -72,7 +99,8 @@ SCENES.relation = p => {
         d += ` M ${x1} ${y1} L ${x1 + h * Math.cos(a1)} ${y1 + h * Math.sin(a1)} M ${x1} ${y1} L ${x1 + h * Math.cos(a2)} ${y1 + h * Math.sin(a2)}`;
       }
     }
-    const s = stroke(d, l.hot ? 6 : 4.5, col, .85);
+    const s = stroke(d, l.hot ? 6 : 4.5, col, BOARD ? .95 : .85);
+    if (BOARD) s.parentNode.parentNode.style.zIndex = 23;   // the string runs over the notes, to their pins
     if (kind === "dash") {                 // draw it, then switch to dashes (a dasharray cannot both draw and dash)
       draw(s, t, .5); tl.set(s, { attr: { "stroke-dasharray": "14 12", "stroke-dashoffset": 0 } }, t + .52);
     } else draw(s, t, kind === "tree" ? .6 : .45);

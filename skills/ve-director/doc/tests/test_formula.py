@@ -37,6 +37,9 @@ def test_good_params_pass(tmp_path):
 
 @pytest.mark.parametrize("change,msg", [
     ({"terms": TWO["terms"][:1], "ops": []}, "2-5 terms"),
+    ({"terms": TWO["terms"][:1], "ops": [], "strike": [{"i": 0, "at": 1}]}, "2-5 terms"),   # one term needs a strike with to
+    ({"strike": [{"i": 0, "at": 1, "to": " "}]}, "strike to"),
+    ({"strike": [{"i": 0, "at": 1, "to": "一" * 23}]}, "strike to"),
     ({"terms": TWO["terms"] * 3, "ops": ["+"] * 5}, "2-5 terms"),
     ({"ops": ["−", "+"]}, "ops"),
     ({"ops": []}, "ops"),
@@ -87,3 +90,24 @@ def test_latin_and_digits_do_not_overlap_once_fonts_are_in(tmp_path):
         assert a[0] + a[2] <= b[0] + 0.5, (a, b)
     assert abs(row[0][0] - (1920 - row[-1][0] - row[-1][2])) <= 2
     assert abs(dict(map(tuple, got["strikes"]))[1] - got["terms"][1][2]) <= 1
+
+
+ONE = {"terms": [{"text": "努力", "at": 0.3}], "ops": [], "strike": [{"i": 0, "at": 1.0, "to": "恩典", "to_at": 1.6}]}
+REWRITE = """(() => { tl.seek(D);
+  const n = document.querySelector('#content .rewrite'), t = document.querySelector('#content .blk.term');
+  const nr = n.getBoundingClientRect(), tr = t.getBoundingClientRect();
+  return { text: n.textContent, chars: [...n.children].map(c => +getComputedStyle(c).opacity),
+           dim: +getComputedStyle(t.firstChild).opacity, above: nr.bottom <= tr.top + 2,
+           centre: [(nr.left + nr.right) / 2, (tr.left + tr.right) / 2], size: parseFloat(getComputedStyle(n).fontSize),
+           row: parseFloat(getComputedStyle(t).fontSize) }; })()"""
+
+
+def test_one_term_rewrite(tmp_path):
+    """⑥ 「不是 A，而是 B」: one term with a strike that has to passes; at the end the new words stand above the struck term,
+    centred on it, every character shown, the term dimmed to .4, the words at 0.8 of the row size."""
+    formula_params(tmp_path, BEAT, ONE)
+    out, _ = doc_code.build(tmp_path, DOC, BEAT, {"scene": "formula", "params": ONE}, "lecture-light")
+    got = doc_code.page_value(out, REWRITE)
+    assert got["text"] == "恩典" and got["chars"] == [1, 1] and got["dim"] == pytest.approx(.4) and got["above"]
+    assert abs(got["centre"][0] - got["centre"][1]) <= 40   # tilted 3°: the box's centre moves a little
+    assert got["size"] == round(got["row"] * .8)

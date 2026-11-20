@@ -93,3 +93,23 @@ def test_a_row_of_long_labels_is_respread_and_one_too_wide_stops(tmp_path):
     build(tmp_path, {**wide, "rows": [["y"], ["a", "b"], ["c"]]}, "en")       # split the row: fits
     build(tmp_path, GOOD, "zh")
     build(tmp_path, ROWS, "zh")
+
+
+def test_board_look(tmp_path):
+    """look "board": accepted; anything else stops. On the page the notes are paper with a pin each, and the same size and
+    place as without the look (layout and the overlap check unchanged)."""
+    relation_params(tmp_path, BEAT, {**GOOD, "look": "board"})
+    with pytest.raises(SystemExit, match="look must be"):
+        relation_params(tmp_path, BEAT, {**GOOD, "look": "cork"})
+    import doc_code
+    beat = {"id": "B10", "duration": 6.0, "tokens": [["沒", 1.0], ["有", 1.2], ["請", 1.4]]}
+    read = """(() => { tl.seek(D); return [...document.querySelectorAll('#content .blk.card')].map(b =>
+      [b.offsetLeft, b.offsetTop, b.offsetWidth, b.offsetHeight, !!b.querySelector('.board-pin'), getComputedStyle(b).backgroundColor]); })()"""
+    got = {}
+    for look in (None, "board"):
+        params = {**GOOD, "look": look} if look else GOOD
+        out, _ = doc_code.build(tmp_path / str(look), {"lang": "zh"}, beat, {"scene": "relation", "params": params}, "collage")
+        got[look] = doc_code.page_value(out, read)
+    assert [c[:4] for c in got[None]] == [c[:4] for c in got["board"]]
+    assert all(c[4] for c in got["board"]) and not any(c[4] for c in got[None])
+    assert {c[5] for c in got["board"]} == {"rgb(246, 239, 220)"}

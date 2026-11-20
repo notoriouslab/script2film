@@ -126,8 +126,11 @@ T = {   # scene → lang → params, or a list of params when one set cannot rea
     "seed_dot": lambda L: s7(L, "B1"),
     "split_duel": lambda L: s7(L, "B4"),
     "stat_count": lambda L: {"value": 88, "suffix": "%", "caption": W("一個數字（示意）", "One number that matters")(L), "at": .4, "dur": 1.2},
-    "timeline": lambda L: {"hot": 1, "items": [{"date": d, "text": t, "at": .2 + k * .4} for k, (d, t) in enumerate(
+    "timeline": lambda L: [{"hot": 1, "items": [{"date": d, "text": t, "at": .2 + k * .4} for k, (d, t) in enumerate(
         W([("原初", "創 1–11"), ("族長", "創 12–50"), ("出埃及", "出 1–40")], [("1950", "First shop opens"), ("1971", "Seattle store"), ("2008", "Global crash")])(L))]},
+        {"hot": 4, "window": [2, 5], "items": [{"date": d, "text": t} for d, t in   # a long line shown a stretch at a time
+         W([("原初", ""), ("族長", ""), ("出埃及", "出 1–40"), ("士師", "士 1–21"), ("聯合王國", "撒上–王上 11"), ("分裂王國", "王上 12–")],
+           [("1900", ""), ("1930", ""), ("1950", "First shop"), ("1971", "Seattle"), ("1987", "Bought out"), ("2008", "Crash")])(L)]}],
     "ve_annotate": lambda L: {"src": "stills/clip.mp4", "freeze": 1.0, "hold": 1.5, "rings": [{"x": 960, "y": 500, "r": 80}],
                               "note": {"text": W("注意這裡", "Look here")(L), "x": 1200, "y": 300}},
     "web_evidence": lambda L: {"src": "stills/screen.png", "source": W("官方網站｜2026-11-01", "Official site, 2026-11-01")(L),

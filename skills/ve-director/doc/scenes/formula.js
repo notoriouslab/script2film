@@ -3,8 +3,10 @@
 // at most 190 px (doc_code.formula_params stops below 72: 公式太長).
 // p.terms [{text, sub, at, hot}] (2-5; sub: one small line under the term; hot: lands with slamIn, keep for the 3-5
 //   numbers a film turns on) · p.ops [..] (one fewer than terms: = + − × ÷ → > <; each comes in with the term on its
-//   right) · p.focus [{i, at}] (frame around term i, the other terms dim to .25) · p.strike [{i, at}] (red line through
-//   term i) · p.title (card top-left) · p.note (small caption bottom-right)
+//   right) · p.focus [{i, at}] (frame around term i, the other terms dim to .25) · p.strike [{i, at, to, to_at}] (red line
+//   through term i; with to: the struck term fades and the new words are written in red above it, one character after
+//   another, at to_at (default 0.4 s after the line): 「不是 A，而是 B」. One term is allowed when it carries a strike with
+//   to) · p.title (card top-left) · p.note (small caption bottom-right)
 SCENES.formula = p => {
   const terms = p.terms, ops = p.ops || [], y = 410, MUTED = cv("--muted") || FG;
   const cjk = /[⺀-鿿가-힯豈-﫿＀-￯]/;
@@ -35,6 +37,20 @@ SCENES.formula = p => {
     tl.to(s, { opacity: 1, duration: .3 }, tt + .2); return s.firstChild;
   });
   const spans = T.map(b => b.firstChild), frames = [];
+  // rewrite — the struck term fades to .4 and the new words are written above it in red, character by character, slightly
+  // tilted (a correction in the margin). Sized like the row, smaller when the new words are long (doc_code checks the width).
+  const rewrite = (b, s, t) => {
+    const t1 = at(s.to_at, t + .4), chars = [...String(s.to)];
+    const w = chars.reduce((a, c) => a + (cjk.test(c) ? 1 : .55), 0), sz = Math.min(Math.round(size * .8), Math.floor(1600 / w));
+    const n = hang(b, "rewrite", { left: "50%", bottom: "calc(100% + 14px)", whiteSpace: "nowrap", color: RED, fontSize: sz + "px",
+      lineHeight: 1, fontWeight: 900, transform: `translateX(-50%) rotate(${TORN ? -4 : -3}deg)`, transformOrigin: "50% 100%" });
+    n.innerHTML = chars.map(c => `<span style="display:inline-block;opacity:0">${c === " " ? "&nbsp;" : c}</span>`).join("");
+    tl.to(b.firstChild, { opacity: .4, duration: .3 }, t + .3);
+    const k = Math.min(.09, .7 / chars.length);
+    [...n.children].forEach((c, j) => { tl.set(c, { y: 10 }, t1 + j * k);
+      tl.to(c, { opacity: 1, y: 0, duration: TORN ? .12 : .2, ease: TORN ? "steps(2)" : "power2.out" }, t1 + j * k); });
+    sfx("marker", t1);
+  };
   (p.focus || []).forEach(f => {
     const t = at(f.at, D - TAIL - 1.5);
     const fr = hang(T[f.i], "frame", { left: "-18px", right: "-18px", top: "-14px", bottom: "-14px", border: `5px solid ${RED}`,
@@ -48,6 +64,7 @@ SCENES.formula = p => {
     const u = hang(T[s.i], "strike", { left: 0, top: "calc(50% - 4px)", width: "0%", height: "8px", background: RED, borderRadius: "4px" });
     u.dataset.i = s.i;
     tl.to(u, { width: "100%", duration: .35, ease: TORN ? "steps(4)" : "power2.out" }, t);
+    if (s.to) rewrite(T[s.i], s, t);
   });
   if (p.note) { const c = box(p.note, { x: 0, y: 824, size: 32 }); c.style.left = (1830 - c.offsetWidth) + "px"; c.style.opacity = 0;
     tl.to(c, { opacity: .7, duration: .5 }, at(p.note_at, .8)); }
