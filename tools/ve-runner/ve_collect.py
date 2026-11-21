@@ -11,8 +11,11 @@ logged-in profile as ve_runner.
 --submitted: runs/<ts>/submitted.json written by ve_runner.py — exact match by job uuid (preferred).
 --map: JSON {"shot1": "2026-10-08T16:49:14Z", ...} — submission times (UTC); each
 shot gets the library item created closest after its time (within 120 s). Legacy runs only.
+
+Collecting while ve_runner is still submitting (same profile already open in Chrome): the profile is
+copied to a temp folder without caches (about 24 MB instead of 1.5 GB) and the copy is used, then deleted.
 """
-import argparse, json, sys, time
+import argparse, json, shutil, sys, tempfile, time
 from datetime import datetime, timedelta
 from pathlib import Path
 import sys as _sys, pathlib as _pl   # 設定檔：tools/config/s2f_config.py
@@ -25,6 +28,25 @@ APP = "https://app.videoexpress.ai/"
 LIST = APP + "api/library/get_media/4?categoryId={cat}&page=1&start=0&limit={limit}&query=&orderBy=id&orderDir=desc&filter="
 
 def ts(s): return datetime.fromisoformat(s.replace("Z", "+00:00"))
+
+# 複製設定檔時略過：Chrome 的鎖檔與各種快取（登入狀態在 Cookies／Local Storage，不在快取裡）
+SKIP = shutil.ignore_patterns("Singleton*", "*Cache*", "Service Worker", "GPUCache")
+
+
+def in_use(profile: Path) -> bool:
+    """Chrome 開著這個設定檔時會留 SingletonLock（指向主機與程序號的符號連結）。"""
+    lock = profile / "SingletonLock"
+    return lock.is_symlink() or lock.exists()
+
+
+def usable_profile(profile: Path) -> tuple[Path, Path | None]:
+    """回傳（要用的設定檔, 用完要刪的暫存資料夾）。設定檔沒人用就直接用；被 ve_runner 佔用就複製一份不含快取的。"""
+    if not in_use(profile):
+        return profile, None
+    tmp = Path(tempfile.mkdtemp(prefix="ve_collect_"))
+    shutil.copytree(profile, tmp / "profile", symlinks=True, ignore=SKIP)
+    return tmp / "profile", tmp
+
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -46,8 +68,21 @@ def main():
         - timedelta(minutes=1)
     want = {k: ts(v) for k, v in json.loads(Path(a.map).read_text()).items()} if a.map else None
 
+    profile, tmp = usable_profile(HERE / ".profile")
+    if tmp:
+        print(f"profile in use by another Chrome (ve_runner?): collecting with a copy in {tmp}", flush=True)
+    try:
+        manifest = collect(a, profile, by_uuid, want, since, out)
+    finally:
+        if tmp:
+            shutil.rmtree(tmp, ignore_errors=True)
+    bad = [n for n, m in manifest.items() if "file" not in m]
+    sys.exit(f"not downloaded: {bad}" if bad else 0)
+
+
+def collect(a, profile: Path, by_uuid, want, since, out: Path) -> dict:
     with sync_playwright() as pw:
-        ctx = pw.chromium.launch_persistent_context(str(HERE / ".profile"), channel="chrome", headless=True)
+        ctx = pw.chromium.launch_persistent_context(str(profile), channel="chrome", headless=True)
         pg = ctx.pages[0] if ctx.pages else ctx.new_page()
         pg.goto(APP)
         deadline = time.time() + a.wait * 60
@@ -94,8 +129,7 @@ def main():
             print(f"  {name}: {dst.name} {len(body)//1024} KB", flush=True)
         (out / "collect.json").write_text(json.dumps(manifest, indent=1, ensure_ascii=False))
         ctx.close()
-    bad = [n for n, m in manifest.items() if "file" not in m]
-    sys.exit(f"not downloaded: {bad}" if bad else 0)
+    return manifest
 
 if __name__ == "__main__":
     main()

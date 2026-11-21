@@ -64,6 +64,9 @@ Chrome runs without a window by default (2026-11-12; `ve_runner.py`, and `ve_voi
    Candidate detection remembers every candidate already returned (by src and by content hash): the candidate carousel hides
    older sets and shows them again, which once made a shot return an earlier shot's candidates after about six Create Images.
 5. `ve_collect.py` matches clips by uuid and downloads them via `library/download/<id>`.
+   It can run while ve_runner is still submitting: when `.profile/SingletonLock` exists it copies the profile without
+   caches (about 24 MB of 1.5 GB) to a temp folder, collects with the copy and deletes it (2026-11-21; tested with the
+   profile held by another Chrome and with it free, files identical; `test_ve_collect.py`).
 6. `Start: chain`: the runner waits until the previous shot's videos are completed; with several takes it downloads them,
    takes each last frame and opens a QC gate `shotN_chain` showing those last frames side by side to pick the take to continue.
    Then the chosen clip's menu > **Save Last Frame** (Title `#modalFieldName` = `chain_<run>_shotN`, Save) puts VE's own last
