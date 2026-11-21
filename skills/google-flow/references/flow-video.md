@@ -4,7 +4,7 @@ Site: `https://flow.google.com/`. Needs Google AI Plus, Pro or Ultra. Checked 20
 
 ## What it costs
 
-The settings chip in the prompt box shows the price before you send (「生成內容會使用 N 點」, "this uses N credits"). Measured on Omni 1.2 Flash: 360p, 10 s, ×2 = 20 credits. Google AI Pro gives 1,000 credits a month (shared with Whisk) plus a small daily allowance; check the current numbers on the user's account, not in blogs. A job refused by policy is refunded.
+The settings chip in the prompt box shows the price before you send (「生成內容會使用 N 點」, "this uses N credits"). Measured on Omni 1.2 Flash: 360p, 10 s, ×2 = 20 credits; native 720p, 10 s, ×2 = 60 credits (three times 360p; checked 2026-11-21). Google AI Pro gives 1,000 credits a month (shared with Whisk) plus a small daily allowance; check the current numbers on the user's account, not in blogs. A job refused by policy is refunded.
 
 ## Steps
 
@@ -53,7 +53,7 @@ Plain English sentences; the model knows the world, so describe intent, not ever
   Watched in full, all three still read as two people running a routine rather than a wide-swinging fight scene. Big martial-arts action is a weak spot; do not promise it.
 - **Bullet time works**: one moment, extreme slow motion, the subject bending back while projectiles pass with air-distortion trails, then a snap back to full speed. The camera turned only part of the way round although the prompt asked for 360°.
 - **Selfie vlog works** (9:16): a character reference, "smartphone front-camera selfie look", walking a named street at a named time of day, the line to say in quotes with the accent ("in a natural Taiwanese Mandarin accent: \"…\""), "Exactly one person talking to camera", and "No music. No subtitles, no on-screen text."
-- **Sound** is generated with the picture: write a "Sound:" line (ambience, footsteps, impacts, the voice). It cannot take an audio file.
+- **Sound** is generated with the picture: write a "Sound:" line (ambience, footsteps, impacts, the voice). It cannot take an audio file. So it cannot lip-sync a narration you already have (a cloned voice): a talking host on your own audio stays with TalkingPhotos (`tools/tp/`).
 - End with "No text, no subtitles." Omni draws captions otherwise.
 
 ## Where this fits
