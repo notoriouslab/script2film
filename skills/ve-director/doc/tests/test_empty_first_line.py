@@ -72,3 +72,20 @@ def test_late_still_or_the_card_s_own_photo_does_not_count():
 def test_phrase_missing_or_already_stopped_is_not_repeated():
     assert late_first_element(DOC1, ONE, spec(at="不存在")) is None
     assert empty_first_line(DOC, BEAT, spec()) and late_first_element(DOC, BEAT, spec()) is None
+
+
+# ---- quote_card "photo_at": its own stills come in first, so the frame is not empty while the strip waits (2026-11-22) ----
+def test_quote_stills_with_early_photo_at_pass_both_checks():
+    s = {"scene": "quote_card", "params": {"text": "x", "at": "撒該", "photo": {"src": "a.jpg"}, "photo_at": 0.3}}
+    assert late_first_element(DOC1, ONE, s) is None
+    s2 = {"scene": "quote_card", "params": {"text": "x", "at": "我就是", "photo": {"src": "a.jpg"}, "photo_at": 0.3}}
+    assert empty_first_line(DOC, BEAT, s2) is None
+
+
+def test_quote_stills_without_photo_at_or_late_still_flagged():
+    s = {"scene": "quote_card", "params": {"text": "x", "at": "撒該", "photo": {"src": "a.jpg"}}}
+    assert late_first_element(DOC1, ONE, s)
+    s["params"]["photo_at"] = 2.0
+    assert late_first_element(DOC1, ONE, s)
+    s3 = {"scene": "quote_card", "params": {"text": "x", "at": "撒該", "photo_at": 0.3}}   # photo_at without a photo
+    assert late_first_element(DOC1, ONE, s3)

@@ -7,6 +7,7 @@ starts when that phrase starts being spoken), a number of seconds, or {"w", "d",
 "veil": [in, out] fades from / to the background colour at the shot's edges (use it next to VE shots, not between
 consecutive code shots that continue one board).
 "bg_video": {"src", "tone": "light"|"dark", "in"} puts a VE live-action clip under the scene (see bg_video below).
+"photo_color": true keeps photo layers in colour (see PHOTO_COLOR_CSS); "collage_color": true implies it.
 """
 import json, re, shutil, subprocess, sys
 from pathlib import Path
@@ -22,6 +23,9 @@ TAIL = 0.2
 # (2026-10-28 lecture pilot: 「左邊的搭配解說字，可以都同步大一些」); scenes keep their words near the canvas centre, so
 # a moderate zoom stays left of the host frame.
 SIDE_ZOOM_MIN, SIDE_ZOOM_MAX = 1.0, 1.5
+# doc.json "photo_color": true — photo layers keep their colours: the collage theme turns every photo grey with a halftone
+# screen, which also greyed the coloured charts drawn for the beat (2026-11-22 EP3:「照片、畫作都是黑白灰階，我希望是原本的顏色」)
+PHOTO_COLOR_CSS = "\n  .ph .inner { filter: contrast(1.04); }\n  .ph .tone { display: none; }\n"
 
 
 def stage_left(doc):
@@ -79,10 +83,21 @@ def phrase_at(beat, v, lang):
 EMPTY_UNTIL_AT = {"quote_card", "stat_count"}
 
 
+def quote_stills_early(doc, beat, params):
+    """A quote card whose own stills come in by LEAD_MAX through "photo_at" (quote_card.js): the frame is not empty while
+    the strip waits for the spoken quote."""
+    if not params.get("photo") or params.get("photo_at") is None:
+        return False
+    ta = phrase_at(beat, params["photo_at"], doc["lang"])
+    return ta is not None and ta <= LEAD_MAX
+
+
 def empty_first_line(doc, beat, spec):
     """'B19: at='我就是' comes in line 20 (4.3 s)' (doc line numbers) when the scene's first element waits past the beat's first line; else None."""
     at = spec.get("params", {}).get("at")
     if spec.get("scene") not in EMPTY_UNTIL_AT or not isinstance(at, (str, dict)) or len(beat["lines"]) < 2:
+        return None
+    if quote_stills_early(doc, beat, spec.get("params", {})):
         return None
     n1 = len(tokens(doc["lines"][beat["lines"][0] - 1]["text"], doc["lang"]))
     t = phrase_at(beat, at, doc["lang"])
@@ -101,8 +116,8 @@ LEAD_MAX = 1.0
 def late_first_element(doc, beat, spec):
     """'B48: at='當場說' comes 2.5 s into the beat' when an EMPTY_UNTIL_AT scene shows its first element later than LEAD_MAX
     and nothing else is on screen; else None. Something else on screen: a bg_video under the scene, the host in a side or
-    round frame, or a "photos" still that comes in by LEAD_MAX. A quote card's own "photo" does not count: it enters
-    with the card (quote_card.js). Cases empty_first_line already stops are not repeated here."""
+    round frame, or a "photos" still that comes in by LEAD_MAX. A quote card's own "photo" counts only with "photo_at"
+    by LEAD_MAX; without it the stills enter with the card (quote_card.js). Cases empty_first_line already stops are not repeated here."""
     params = spec.get("params", {})
     at = params.get("at")
     if spec.get("scene") not in EMPTY_UNTIL_AT or at is None or empty_first_line(doc, beat, spec):
@@ -111,6 +126,8 @@ def late_first_element(doc, beat, spec):
     if t is None or t <= LEAD_MAX or spec.get("bg_video"):   # phrase not in the beat: missing_triggers reports that
         return None
     if beat["id"] in (doc.get("side") or {}).get("beats", []) + (doc.get("pip") or {}).get("beats", []):
+        return None
+    if quote_stills_early(doc, beat, params):
         return None
     for ph in params.get("photos") or []:
         ta = phrase_at(beat, ph.get("at", 0), doc["lang"])
@@ -603,6 +620,8 @@ def bg_video(P, b, spec, out, d, real=()):
 def build(P, doc, b, spec, theme, out_root=None):
     """One code beat's page in <out_root or P/code_<theme>>/<id>/ (doc_theme_preview.py builds into its own folder)."""
     th = code_theme(theme, doc.get("palette"), doc.get("rise"))
+    if doc.get("photo_color") or doc.get("collage_color"):   # keep photos, paintings and drawn charts in their own colours (collage greys them by default)
+        th["css"] += PHOTO_COLOR_CSS
     d = round(b["duration"] + TAIL, 2)
     out = (Path(out_root) if out_root else P / f"code_{theme}") / b["id"]
     (out / "fonts").mkdir(parents=True, exist_ok=True)

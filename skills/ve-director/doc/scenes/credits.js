@@ -14,5 +14,6 @@ SCENES.credits = p => {
   // roll in from below the frame and come to rest under the title, the last line above the subtitle band (y 860) when it fits
   const h = col.offsetHeight, rest = Math.max(160, Math.min(200, 860 - h));
   tl.set(col, { y: 1080, opacity: 1 }, t0);
-  tl.to(col, { y: rest, duration: Math.max(1.5, D - TAIL - t0 - .4), ease: "power1.out" }, t0);
+  // p.roll: seconds for the roll-in (default: the whole beat); a long list rolling the whole beat sat over the subtitle band until the end (2026-11-22 EP3)
+  tl.to(col, { y: rest, duration: p.roll ? Math.min(p.roll, D - TAIL - t0) : Math.max(1.5, D - TAIL - t0 - .4), ease: "power1.out" }, t0);
 };

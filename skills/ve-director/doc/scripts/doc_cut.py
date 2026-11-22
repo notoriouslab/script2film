@@ -398,7 +398,7 @@ def concat_layers(P, doc, beats, out, theme, plan):
     offsets from the frame centre. Sizes and the pill font are computed here once, not in Concat.
     - "side": {"clip", "beats": [ids], "rect": [x, y, w, h] (default SIDE_RECT), "crop": [w, h, x, y] in the take
       (default: the centred full-height cut of the rect's shape), "radius" (28), "ring" (theme ring colour)}.
-    - "pills": [{"beat", "text", "at": phrase in that beat, "dur" (2.0), "pos": PILL_POS key (default lower-left on a
+    - "pills": [{"beat", "text", "at": phrase in that beat, "dur" (2.0), "fill" / "color" (hex, default the theme's), "pos": PILL_POS key (default lower-left on a
       full-frame host beat, else center)}].
     - "chapters": {"tags": [{"beat", "text"}], "end": beat id where the tags stop (default the film's end), "number"
       (true: 第 N 章), "frame" (true: four corner brackets over the whole film)}: a tag in the upper right per chapter.
@@ -468,7 +468,7 @@ def concat_layers(P, doc, beats, out, theme, plan):
             layers["pills"].append({"beat": beat, "text": p["text"], "start": round(by_id[beat]["start"] + t, 3),
                                     "dur": float(dur), "fade": PILL_FADE, "size": size,
                                     "offsetX": round((px - 960) / 1920, 5), "offsetY": round((py - 540) / 1080, 5),
-                                    "fill": fill, "color": ink})
+                                    "fill": p.get("fill", fill), "color": p.get("color", ink)})
     if doc.get("chapters"):
         layers["chapters"] = {**CHAPTER_TAG, "tags": chapter_spans(doc, beats)}
         if doc["chapters"].get("frame", True):

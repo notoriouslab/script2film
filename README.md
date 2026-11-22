@@ -80,7 +80,9 @@ relation chart can become a clue board with red string.
 **15 looks, and three of them tried on your own script first.** Each look changes the colours, the shapes and the
 ground together: flat teaching panels, paper collage, documentary, dark gold, newsroom, vintage poster, editorial
 serif, cinematic dark. Before anything is voiced, `doc_theme_preview.py` plays three looks side by side on three of
-this episode's own beats (about 45 seconds), so you pick with the script in front of you.
+this episode's own beats (about 45 seconds), so you pick with the script in front of you. Paper collage comes in
+black and grey with one accent, or in muted natural colours (`collage_color`) for subjects where colour is part of the
+story (food, cloth, dyes); photos, paintings and drawn charts can keep their colours in either (`photo_color`).
 
 <img src="./docs/site/scene-prompt.jpg" alt="Text highlighted as it is read" width="640">
 

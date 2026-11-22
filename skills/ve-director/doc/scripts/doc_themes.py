@@ -348,9 +348,23 @@ def code_theme(theme, palette=None, rise=None):
     return th
 
 
-def ve_theme(theme, palette=None):
-    """VE_THEMES[theme] with the era's palette law in place of the collage one (a copy)."""
+# doc.json "collage_color": true — colour paper collage (2026-11-22, user choice for 穿越聖經時代): the cut, tape, torn
+# layers and halftone print stay, but the cut-outs keep their own muted natural colours, because in a series about daily
+# life the colour of bread, olives, dyed wool and clay is part of what is told (EP3 review: every collage shot was grey).
+# It replaces the whole palette law, the era palette's included; the code shots keep the era palette and photos keep
+# their colours (doc_code PHOTO_COLOR_CSS).
+COLLAGE_COLOR_LAW = ("the cut-outs keep their own muted natural colours (olive-brown skin, undyed and dyed wool, ochre clay, "
+                     "golden bread, green and black olives), printed with visible halftone dots, on pale tan kraft paper "
+                     "with ink black outlines and soft cutout shadows; colour comes from the subjects themselves, never a "
+                     "tint over the whole frame, and nothing is glossy or saturated like a digital illustration")
+
+
+def ve_theme(theme, palette=None, color=False):
+    """VE_THEMES[theme] with the era's palette law in place of the collage one, or the colour collage law (a copy)."""
     th, p = dict(VE_THEMES[theme]), _palette(theme, palette)
-    if p:
-        th["style"] = th["style"].replace(_COLLAGE_LAW, p[7])
+    if color and theme != "collage":
+        raise ValueError("collage_color only applies to the collage look")
+    law = COLLAGE_COLOR_LAW if color else p[7] if p else None
+    if law:
+        th["style"] = th["style"].replace(_COLLAGE_LAW, law)
     return th

@@ -1,5 +1,39 @@
 # Changelog
 
+## 1.1.6 (2026-11-22)
+
+### Colour where colour is the content
+
+- **Photos keep their colours:** `"photo_color": true` stops the collage theme from turning photos, paintings and the
+  charts you draw into grey halftone. One episode's review found every chart and photo grey, the colours drawn into
+  the charts included.
+- **Colour paper collage:** `"collage_color": true` keeps the cut, tape, torn layers and halftone print but lets the
+  cut-outs keep muted natural colours (`doc_themes.COLLAGE_COLOR_LAW`), for subjects such as food, cloth and dyes.
+  It implies `photo_color`. Black and grey with one accent stays the default.
+
+### Cards that never look broken
+
+- **Quote cards:** with `photo_at` (e.g. 0.3) the stills come in first and the quote strip waits for the spoken quote.
+  Before, a faint strip sat on screen for seconds until the voice reached the quote. The bare-paper check counts these
+  stills.
+- **Closing credits:** `roll` sets how many seconds the list takes to come to rest. Rolling for the whole beat kept a
+  long list over the subtitles until the end.
+- **Keyword pills:** each pill can set its own `fill` and `color`.
+- **Layout notes from a frame-by-frame review** (`formats/vox-host/FORMAT.md` §7b):
+  - With the host on the right, the diagram fills the left half.
+  - A cover on a dark background does not take a dark title.
+  - The round host frame sits above two-line subtitles.
+  - Question pills are drawn into full-frame charts.
+  - People in diagrams are small friendly figures, not dots.
+
+### Tools
+
+- `tools/tp/tp_wait.py` waits for a TalkingPhotos card in My Videos to finish rendering and downloads it, for any
+  flow, Replicate Motion included.
+- `ve_collect.py` no longer stops when `ve_runner` holds the browser profile. It copies the profile without its cache
+  (about 24 MB), collects, then deletes the copy.
+- `google-flow`: the credit price for 720p is recorded, and Omni cannot lip-sync your own narration.
+
 ## 1.1.4 (2026-11-21)
 
 ### Generated shots: Google Flow joins VideoExpress and H3

@@ -1,5 +1,5 @@
 // quote_card — a full-screen quotation with its source (scripture, a speech, a paper's key sentence).
-// p.text · p.by (attribution) · p.at · p.size (default 64) · p.photo: one still {src, rect, rot, cap, push} or two [{...}, {...}].
+// p.text · p.by (attribution) · p.at · p.photo_at · p.size (default 64) · p.photo: one still {src, rect, rot, cap, push} or two [{...}, {...}].
 // Leave rect / rot out to use the layout below: one still upper left, two stills upper left and lower right at
 // opposite tilts; the quote strip overlaps them in the middle. Stills without rect slowly push in (push 1.05).
 // p.reveal "blur": the card comes in with the words as a faint blur (opacity .15; a card left empty until the voice reached
@@ -15,11 +15,15 @@ const QUOTE_PHOTOS = {
 SCENES.quote_card = p => {
   drift(p);
   const t = at(p.at, .3), ph = p.photo ? [].concat(p.photo) : [];
+  // p.photo_at: the stills come in then (e.g. 0.3) and the quote strip waits for p.at, the spoken quote: a faint card sitting
+  // seconds before the voice reached the quote read as broken (2026-11-22 EP3:「前面就會有個白底等幾秒後才有字出來」)
+  const tp = p.photo_at != null ? Math.min(at(p.photo_at, .3), t) : t;
   if (ph.length > 2) throw new Error("quote_card: photo takes one or two stills");
   ph.forEach((o, i) => {
     const d = QUOTE_PHOTOS[ph.length][i], auto = !o.rect;
     const w = photo({ src: o.src, rect: o.rect || d.rect, rot: o.rot ?? (auto ? d.rot : 0), cap: o.cap });
-    photoIn(w, t - .2 + i * .25); sfx("paper", t - .2 + i * .25); capIn(w, t + .2 + i * .25);
+    const t0 = p.photo_at != null ? tp + i * .25 : t - .2 + i * .25;
+    photoIn(w, t0); sfx("paper", t0); capIn(w, t0 + .4);
     const push = o.push ?? (auto ? 1.05 : null);
     if (push) tl.fromTo(w.inner, { scale: 1 }, { scale: push, duration: D, ease: "none", immediateRender: false }, 0);
   });

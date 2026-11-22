@@ -71,7 +71,7 @@ def main():
     if look not in VE_THEMES:
         sys.exit(f"✗ VE look must be one of {', '.join(VE_THEMES)} (doc.json ve_look, or the theme): {look}")
     try:
-        th = ve_theme(look, doc.get("palette"))
+        th = ve_theme(look, doc.get("palette"), bool(doc.get("collage_color")))
     except ValueError as e:
         sys.exit(f"✗ {e}")
 
