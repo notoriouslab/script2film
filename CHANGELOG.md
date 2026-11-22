@@ -6,6 +6,11 @@
   each column from the start (`params.photos`, at 0.3 / 0.8). Words alone left a bare dividing line for seconds; with
   stills the user called it clearly better and made it the rule (`formats/vox-host/FORMAT.md` §7b). `doc_lint` lists
   words-only comparison cards (`bare_compare`, a reminder).
+- **Occlusion one-take (VideoExpress, photoreal):** a sideways track where each wall passing the lens changes the
+  place, the time or the clothes, measured on 11 clips: the prompt, up to four places or two changes of clothes per
+  10 s, solid walls only (glass and slim posts turn into dissolves), a passer-by or a door as alternatives
+  (`skills/ve-director/references/styles/live.md`). `tools/ve-runner/ve_wallcuts.py` finds the walls, makes a sheet
+  to check them and joins several clips behind a wall, so a sequence can hold more changes than one clip.
 
 ## 1.1.6 (2026-11-22)
 

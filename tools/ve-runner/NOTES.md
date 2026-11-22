@@ -26,6 +26,7 @@ python3 ve_runner.py x.md --takes 3                         # 3 videos per shot 
 python3 ve_runner.py x.md --auto-pick                      # accept candidate 1 at every image QC gate (official VOX: first take ships)
 python3 ve_collect.py --submitted runs/<ts>/submitted.json --out DIR   # download finished clips
 python3 ve_voice.py --submitted runs/<ts>/submitted.json --labels shot21_t2 --ref voice.wav --out DIR [--run-dir …/ve-runs]  # re-voice clips (Voice Changer)
+python3 ve_wallcuts.py join out.mp4 a.mp4:0:6.2 b.mp4:3.55:end   # occlusion one-take: join clips behind a wall (also: spans, sheet; styles/live.md)
 python3 -m pytest -q                                       # run-sheet parser + ve_qc log-state tests
 ```
 QC answers: interactive prompt, or without a TTY use `ve_qc.py` (it writes `runs/<ts>/decision.txt`):
