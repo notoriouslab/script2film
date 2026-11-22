@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+- **Comparison cards carry pictures:** a `compare` card with no video under it and no host frame puts one still under
+  each column from the start (`params.photos`, at 0.3 / 0.8). Words alone left a bare dividing line for seconds; with
+  stills the user called it clearly better and made it the rule (`formats/vox-host/FORMAT.md` §7b). `doc_lint` lists
+  words-only comparison cards (`bare_compare`, a reminder).
+
 ## 1.1.6 (2026-11-22)
 
 ### Colour where colour is the content

@@ -93,3 +93,22 @@ def test_late_reveal_reports_a_countdown_whose_clock_outruns_the_beat():
     assert "dur at most 2.9" in late_reveal(doc, [late_beat(3.7)])[0]
     doc["beats"][0]["params"]["at"] = "沒有這個詞"                         # not spoken: doc_code.py reports that
     assert late_reveal(doc, [late_beat(3.7)]) == []
+
+
+# ---- bare_compare (2026-11-22): a words-only comparison card is listed, never a failure ----
+from doc_lint import bare_compare  # noqa: E402
+
+
+def test_bare_compare_lists_words_only_cards():
+    doc = {"beats": [{"id": "B1", "scene": "compare", "params": {}},
+                     {"id": "B2", "scene": "compare", "params": {"photos": [{"src": "a.jpg"}]}},
+                     {"id": "B3", "scene": "compare", "params": {}, "bg_video": {"src": "v.mp4"}},
+                     {"id": "B4", "scene": "compare", "params": {}},
+                     {"id": "B5", "scene": "quote_card", "params": {}}],
+           "side": {"beats": ["B4"]}}
+    w = bare_compare(doc)
+    assert len(w) == 1 and "B1" in w[0] and not any(b in w[0] for b in ("B2", "B3", "B4", "B5"))
+
+
+def test_bare_compare_quiet_when_all_dressed():
+    assert bare_compare({"beats": [{"id": "B1", "scene": "compare", "params": {"photos": [{"src": "a"}]}}]}) == []

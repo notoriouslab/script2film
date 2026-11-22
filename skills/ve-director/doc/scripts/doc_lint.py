@@ -191,6 +191,17 @@ def peak_weight(doc):
             f"{GEN_SHARE_MAX:.0%}): they read as the background; keep them for the high points"]
 
 
+# bare_compare (2026-11-22, one episode's review): a comparison card with only words, no video under it, no stills and no
+# host frame, read as plain; with one still under each column from the start the user called it 「明顯好」 and made it the rule
+# (formats/vox-host/FORMAT.md §7b). A report, never a failure: the stills are picked per episode.
+def bare_compare(doc):
+    side = set((doc.get("side") or {}).get("beats", []))
+    bare = [b["id"] for b in doc["beats"] if b.get("scene") == "compare" and not b.get("bg_video")
+            and not (b.get("params") or {}).get("photos") and b["id"] not in side]
+    return [f"bare_compare: {', '.join(bare)}: a comparison card with words only; put one still under each column "
+            "(params.photos, at 0.3 / 0.8) or a bg_video"] if bare else []
+
+
 # Reading time: after text finishes coming in, hold it (characters / 4.5 + 1.5) s in Chinese,
 # (letters / 15 + 1.5) s in English. Narration reads most quote cards aloud, so this is a report for the reviewer.
 READ_CPS = {"zh": 4.5, "en": 15}
@@ -436,6 +447,8 @@ def check(doc, rules=DEFAULT, prev=None, base=None):
         print(note)
     for w in ai_phrasing(doc) + peak_weight(doc):
         print("⚠ " + w + AI_NOTE)
+    for w in bare_compare(doc):
+        print("⚠ " + w)
     problems = lint(doc, rules, base)
     if problems:
         sys.exit("doc_lint:\n" + "\n".join(problems))
@@ -465,6 +478,7 @@ def main():
         print("\n".join(late) if late else "late_reveal: ok")
     print("\n".join(f"⚠ {w}{AI_NOTE}" for w in ai_phrasing(doc)) or "ai_phrasing: ok")
     print("\n".join(f"⚠ {w}{AI_NOTE}" for w in peak_weight(doc)) or "peak_weight: ok")
+    print("\n".join(f"⚠ {w}" for w in bare_compare(doc)) or "bare_compare: ok")
     print("\n".join(problems) if problems else "doc_lint: ok")
     if not problems and (nxt := doc_approval.next_step(doc, Path(a.doc).resolve().parent)):
         print(nxt)   # a script the user has not approved yet: doc_tts.py will not voice it (doc_approval.py)
