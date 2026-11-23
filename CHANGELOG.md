@@ -14,6 +14,10 @@
   redrawn backgrounds do not flicker. `"talk": false` turns it off.
   A face drawn mid-laugh gets a closed frame with its mouth squeezed to half height (`doc_avatar.py shut`), so it
   still reads as talking in the small corner badge.
+- **New scene `ui_steps`:** app steps drawn instead of recorded. A panel of simple parts (card, button, toggle, menu,
+  check box, input, chips) changes state on the spoken word, and a cursor glides to each click. No screen recording,
+  no account on screen, and it follows the theme's colours. The install-desktop example now uses it for the Desktop
+  steps and ends with two lines on adding VideoExpress shots.
 
 ## 1.1.7 (2026-11-23)
 

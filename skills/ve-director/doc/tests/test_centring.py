@@ -131,6 +131,10 @@ T = {   # scene → lang → params, or a list of params when one set cannot rea
         {"hot": 4, "window": [2, 5], "items": [{"date": d, "text": t} for d, t in   # a long line shown a stretch at a time
          W([("原初", ""), ("族長", ""), ("出埃及", "出 1–40"), ("士師", "士 1–21"), ("聯合王國", "撒上–王上 11"), ("分裂王國", "王上 12–")],
            [("1900", ""), ("1930", ""), ("1950", "First shop"), ("1971", "Seattle"), ("1987", "Bought out"), ("2008", "Crash")])(L)]}],
+    "ui_steps": lambda L: {"title": W("開一個資料夾", "Open a folder")(L), "widgets": [
+        {"kind": "menu", "label": W("對話", "Chat")(L), "items": W(["對話", "程式"], ["Chat", "Code"])(L), "pick": W("程式", "Code")(L), "pick_at": .8},
+        {"kind": "toggle", "options": W(["雲端", "本機"], ["Cloud", "Local"])(L), "picks": [{"pick": W("本機", "Local")(L), "at": 1.6}]},
+        {"kind": "check", "text": W("空的資料夾", "an empty folder")(L), "check_at": 2.4}]},
     "ve_annotate": lambda L: {"src": "stills/clip.mp4", "freeze": 1.0, "hold": 1.5, "rings": [{"x": 960, "y": 500, "r": 80}],
                               "note": {"text": W("注意這裡", "Look here")(L), "x": 1200, "y": 300}},
     "web_evidence": lambda L: {"src": "stills/screen.png", "source": W("官方網站｜2026-11-01", "Official site, 2026-11-01")(L),

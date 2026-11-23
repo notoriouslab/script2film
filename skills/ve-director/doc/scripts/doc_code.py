@@ -43,7 +43,8 @@ SCREEN_CLIP_MAX = 10.0
 
 TIME_KEYS = {"sigh", "pulse", "appear", "hits", "word", "loop", "a", "b", "good", "bad", "revenge", "other", "attack", "forgive",
              "start", "pull", "far", "at", "cap_at", "accent_at", "caption_at", "w", "freeze",
-             "a_at", "b_at", "merge_at", "sub_at", "hot_at", "title_at", "note_at", "to_at", "pan_at"}
+             "a_at", "b_at", "merge_at", "sub_at", "hot_at", "title_at", "note_at", "to_at", "pan_at",
+             "press_at", "pick_at", "open_at", "check_at", "type_at", "send_at"}
 
 
 def missing_triggers(params, beat, lang):
@@ -273,6 +274,58 @@ def relation_overlaps(cards):
             if ox > 0 and oy > 0:
                 out.append(f"{a} and {c} overlap by {round(min(ox, oy))} px")
     return out
+
+
+UI_KINDS = {"card": ("text",), "button": ("text",), "toggle": ("options", "picks"), "menu": ("label", "items", "pick", "pick_at"),
+            "check": ("text", "check_at"), "input": ("text", "type_at", "send_at"), "chips": ("items",)}
+# fixed heights (scenes/ui_steps.js), the gap between parts, the panel's top + bottom padding and the most it may hold
+UI_HEIGHT = {"card": 120, "button": 96, "toggle": 96, "menu": 96, "check": 88, "input": 140, "chips": 80}
+UI_GAP, UI_PAD, UI_TITLE, UI_ROOM, UI_FLOOR = 28, 72, 90, 710, 860
+
+
+def ui_params(P, b, params, doc):
+    """ui_steps (scenes/ui_steps.js): known parts, 1-5 of them, their fields, picks that exist, a panel that fits the 150-860
+    band, an open menu above the subtitles, and a part whose own "at" is not after its action. Phrases are checked with
+    every other scene's (TIME_KEYS / missing_triggers). A beat with an avatar peek or panel keeps the panel at its own size:
+    enlarged, it would reach into the 400 px a peek takes at the side. Stops on the first problem."""
+    bid, W, lang = b["id"], params.get("widgets") or [], doc.get("lang", "en")
+    if not 1 <= len(W) <= 5:
+        sys.exit(f"✗ {bid}: ui_steps needs 1-5 widgets, has {len(W)}")
+    for k, w in enumerate(W):
+        kind = w.get("kind")
+        if kind not in UI_KINDS:
+            sys.exit(f"✗ {bid}: ui_steps widget {k + 1} kind must be one of {', '.join(UI_KINDS)}: {kind!r}")
+        if miss := [f for f in UI_KINDS[kind] if not w.get(f)]:
+            sys.exit(f"✗ {bid}: ui_steps {kind} (widget {k + 1}) needs {', '.join(miss)}")
+        if kind == "toggle":
+            if not 2 <= len(w["options"]) <= 3:
+                sys.exit(f"✗ {bid}: ui_steps toggle needs 2-3 options: {w['options']}")
+            if bad := [x.get("pick") for x in w["picks"] if x.get("pick") not in w["options"]]:
+                sys.exit(f"✗ {bid}: ui_steps toggle pick not among its options {w['options']}: {bad}")
+        if kind == "menu":
+            if not 2 <= len(w["items"]) <= 5:
+                sys.exit(f"✗ {bid}: ui_steps menu needs 2-5 items: {w['items']}")
+            if w["pick"] not in w["items"]:
+                sys.exit(f"✗ {bid}: ui_steps menu pick {w['pick']!r} is not one of its items {w['items']}")
+        if w.get("at") is not None:
+            acts = [w.get(f) for f in ("press_at", "open_at", "pick_at", "check_at", "type_at")] + [x.get("at") for x in w.get("picks") or []]
+            first = [t for t in (phrase_at(b, v, lang) for v in acts if v is not None) if t is not None]
+            show = phrase_at(b, w["at"], lang)
+            if show is not None and first and show > min(first):
+                sys.exit(f"✗ {bid}: ui_steps {kind} (widget {k + 1}) appears at {show:.2f}s, after its own action at {min(first):.2f}s; "
+                         "drop its \"at\" (it then appears just before the action) or move it earlier")
+    h = UI_PAD + (UI_TITLE if params.get("title") else 0) + sum(UI_HEIGHT[w["kind"]] for w in W) + UI_GAP * (len(W) - 1)
+    if h > UI_ROOM:
+        sys.exit(f"✗ {bid}: ui_steps panel is {h}px tall, more than the {UI_ROOM}px between the top and the subtitles; split it into two beats")
+    peek = any(m.get("beat") == bid and m.get("show") in ("peek", "panel") for m in (doc.get("avatar") or {}).get("moments", []))
+    sc = min(1.0 if peek else 1.35, UI_ROOM / h)
+    params["_scale_max"] = 1.0 if peek else 1.35
+    top, y = 505 - h * sc / 2, UI_PAD / 2 + (UI_TITLE if params.get("title") else 0)
+    for w in W:
+        if w["kind"] == "menu" and top + (y + 104 + len(w["items"]) * 72 + 20) * sc > UI_FLOOR:
+            sys.exit(f"✗ {bid}: ui_steps menu {w['label']!r} opens down into the subtitles; move it higher up the panel or give it fewer items")
+        y += UI_HEIGHT[w["kind"]] + UI_GAP
+    return params
 
 
 def relation_params(P, b, params):
@@ -652,6 +705,8 @@ def build(P, doc, b, spec, theme, out_root=None):
         params = web_params(P, b, params)
     elif spec["scene"] == "flow":
         flow_params(P, b, params)
+    elif spec["scene"] == "ui_steps":
+        params = ui_params(P, b, dict(params), doc)
     elif spec["scene"] == "relation":
         relation_params(P, b, params)
     elif spec["scene"] == "line_chart":
