@@ -1,0 +1,561 @@
+{
+ "title": "Install Script2Film with Claude Code Desktop",
+ "lang": "en",
+ "theme": "lecture-tech",
+ "speaker": "Narrator",
+ "voice": {
+  "ref_wav": "refs/narrator.wav",
+  "ref_text": "refs/narrator.txt",
+  "seed": 11,
+  "tail_fade": 0.08
+ },
+ "gaps": {
+  "default": 0.6
+ },
+ "facts": "facts.md",
+ "avatar": {
+  "pack": "ahua",
+  "moments": [
+   {
+    "beat": "B1",
+    "at": "just by asking",
+    "face": "shock",
+    "show": "panel",
+    "pos": "left"
+   },
+   {
+    "beat": "B3",
+    "at": "for you",
+    "face": "point-you",
+    "show": "peek",
+    "pos": "right"
+   },
+   {
+    "beat": "B4",
+    "at": "paid plan",
+    "face": "think",
+    "show": "badge"
+   },
+   {
+    "beat": "B5",
+    "at": "Good news",
+    "face": "cheer",
+    "show": "peek",
+    "pos": "lower-left"
+   },
+   {
+    "beat": "B6",
+    "at": "empty one",
+    "face": "point-down",
+    "show": "badge"
+   },
+   {
+    "beat": "B7",
+    "at": "one request",
+    "face": "point-you",
+    "show": "badge"
+   },
+   {
+    "beat": "B8",
+    "at": "keeps going",
+    "face": "cool",
+    "show": "badge"
+   },
+   {
+    "beat": "B9",
+    "at": "the steps",
+    "face": "think",
+    "show": "badge"
+   },
+   {
+    "beat": "B10",
+    "at": "slow part",
+    "face": "cry",
+    "show": "peek",
+    "pos": "lower-right"
+   },
+   {
+    "beat": "B11",
+    "at": "Ready to go",
+    "face": "thumbs-up",
+    "show": "peek",
+    "pos": "right"
+   },
+   {
+    "beat": "B14",
+    "at": "See you",
+    "face": "wave",
+    "show": "panel",
+    "pos": "right"
+   }
+  ],
+  "badge": {
+   "pos": "lower-right",
+   "from": "B2",
+   "face": "cheer"
+  }
+ },
+ "lines": [
+  {
+   "text": "Want to make a film just by asking? Let's install Script2Film."
+  },
+  {
+   "text": "Two ways in. Live in the terminal? Clone the repo, start Claude Code, and say: follow docs/INSTALL.md. That's all."
+  },
+  {
+   "text": "Everyone else, this one's for you: Claude Code Desktop."
+  },
+  {
+   "text": "Download the Claude desktop app and sign in. The Code tab needs a paid plan."
+  },
+  {
+   "text": "Good news: nothing else to install first. The app already includes Claude Code."
+  },
+  {
+   "text": "Click Code at the top of the sidebar, pick Local, then Open folder, and choose an empty one."
+  },
+  {
+   "text": "Now give it one request: clone Script2Film and follow docs/INSTALL.md."
+  },
+  {
+   "text": "It runs in Auto mode, so it just keeps going. Want to approve each command yourself? Switch to Manual."
+  },
+  {
+   "text": "It works through the steps: Python packages, the renderer, two fonts, and the voice model."
+  },
+  {
+   "text": "The voice model is the slow part, about twenty minutes."
+  },
+  {
+   "text": "Last, it runs the install check. Ready to go? You're set."
+  },
+  {
+   "text": "On VideoExpress? Ask for shots in the same breath: make this script into a film, with VideoExpress shots."
+  },
+  {
+   "text": "It writes the shot prompts, sends them, and cuts the clips into your film."
+  },
+  {
+   "text": "Then just say: make examples/coffee into a film. See you next time!"
+  }
+ ],
+ "beats": [
+  {
+   "id": "B1",
+   "lines": [
+    1
+   ],
+   "source": "code",
+   "scene": "cover",
+   "params": {
+    "series": "Script2Film",
+    "title": "Install Script2Film",
+    "at": 0.2,
+    "cx": 1300,
+    "size": 124
+   }
+  },
+  {
+   "id": "B2",
+   "lines": [
+    2
+   ],
+   "source": "code",
+   "scene": "list_reveal",
+   "params": {
+    "title": "In a terminal",
+    "items": [
+     {
+      "text": "git clone github.com/notoriouslab/script2film",
+      "at": "Clone"
+     },
+     {
+      "text": "claude",
+      "at": "start"
+     },
+     {
+      "text": "\"follow docs/INSTALL.md\"",
+      "at": "follow"
+     }
+    ]
+   }
+  },
+  {
+   "id": "B3",
+   "lines": [
+    3
+   ],
+   "source": "code",
+   "scene": "cover",
+   "params": {
+    "series": "Everyone else",
+    "title": "Claude Code Desktop",
+    "at": 0.2,
+    "cx": 800,
+    "size": 118
+   }
+  },
+  {
+   "id": "B4",
+   "lines": [
+    4
+   ],
+   "source": "code",
+   "scene": "ui_steps",
+   "params": {
+    "widgets": [
+     {
+      "kind": "card",
+      "text": "Claude",
+      "sub": "desktop app",
+      "icon": "app"
+     },
+     {
+      "kind": "button",
+      "text": "Download",
+      "press_at": "Download"
+     },
+     {
+      "kind": "button",
+      "text": "Sign in",
+      "press_at": "sign in"
+     },
+     {
+      "kind": "chips",
+      "items": [
+       {
+        "text": "Code tab: paid plan",
+        "at": "paid plan"
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "id": "B5",
+   "lines": [
+    5
+   ],
+   "source": "code",
+   "scene": "ui_steps",
+   "params": {
+    "title": "Install first?",
+    "widgets": [
+     {
+      "kind": "chips",
+      "items": [
+       {
+        "text": "Node.js",
+        "at": "nothing else",
+        "off": true
+       },
+       {
+        "text": "Claude Code CLI",
+        "at": "install first",
+        "off": true
+       }
+      ]
+     },
+     {
+      "kind": "check",
+      "text": "Claude Code: already in the app",
+      "check_at": "already includes"
+     }
+    ]
+   }
+  },
+  {
+   "id": "B6",
+   "lines": [
+    6
+   ],
+   "source": "code",
+   "scene": "ui_steps",
+   "params": {
+    "widgets": [
+     {
+      "kind": "menu",
+      "label": "Chat",
+      "items": [
+       "Chat",
+       "Code"
+      ],
+      "pick": "Code",
+      "pick_at": "Click Code"
+     },
+     {
+      "kind": "toggle",
+      "options": [
+       "Cloud",
+       "Local"
+      ],
+      "picks": [
+       {
+        "pick": "Local",
+        "at": "pick Local"
+       }
+      ]
+     },
+     {
+      "kind": "button",
+      "text": "Open folder…",
+      "press_at": "Open folder"
+     },
+     {
+      "kind": "check",
+      "text": "an empty folder",
+      "check_at": "empty one"
+     }
+    ]
+   }
+  },
+  {
+   "id": "B7",
+   "lines": [
+    7
+   ],
+   "source": "code",
+   "scene": "ui_steps",
+   "params": {
+    "title": "One request",
+    "widgets": [
+     {
+      "kind": "input",
+      "text": "Clone https://github.com/notoriouslab/script2film into this folder and follow docs/INSTALL.md to install it.",
+      "type_at": "one request",
+      "send_at": "follow docs"
+     }
+    ]
+   }
+  },
+  {
+   "id": "B8",
+   "lines": [
+    8
+   ],
+   "source": "code",
+   "scene": "ui_steps",
+   "params": {
+    "widgets": [
+     {
+      "kind": "toggle",
+      "options": [
+       "Auto",
+       "Manual"
+      ],
+      "picks": [
+       {
+        "pick": "Auto",
+        "at": "Auto mode"
+       },
+       {
+        "pick": "Manual",
+        "at": "Switch to Manual"
+       }
+      ]
+     },
+     {
+      "kind": "chips",
+      "items": [
+       {
+        "text": "keeps going",
+        "at": "keeps going"
+       },
+       {
+        "text": "asks before each command",
+        "at": "approve each"
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "id": "B9",
+   "lines": [
+    9
+   ],
+   "source": "code",
+   "scene": "flow",
+   "params": {
+    "look": "pipe",
+    "nodes": [
+     {
+      "id": "py",
+      "x": 330,
+      "y": 500,
+      "label": "Python packages",
+      "icon": "container",
+      "at": "Python"
+     },
+     {
+      "id": "hf",
+      "x": 750,
+      "y": 500,
+      "label": "Renderer",
+      "icon": "laptop"
+     },
+     {
+      "id": "ft",
+      "x": 1170,
+      "y": 500,
+      "label": "Two fonts",
+      "icon": "stamp"
+     },
+     {
+      "id": "vm",
+      "x": 1590,
+      "y": 500,
+      "label": "Voice model",
+      "icon": "ai",
+      "hot": true
+     }
+    ],
+    "links": [
+     {
+      "from": "py",
+      "to": "hf",
+      "at": "renderer"
+     },
+     {
+      "from": "hf",
+      "to": "ft",
+      "at": "fonts"
+     },
+     {
+      "from": "ft",
+      "to": "vm",
+      "at": "voice"
+     }
+    ]
+   }
+  },
+  {
+   "id": "B10",
+   "lines": [
+    10
+   ],
+   "source": "code",
+   "scene": "stat_count",
+   "params": {
+    "value": 20,
+    "prefix": "~",
+    "suffix": " min",
+    "caption": "the voice model, about 6 GB",
+    "at": 0.3,
+    "hot": true
+   }
+  },
+  {
+   "id": "B11",
+   "lines": [
+    11
+   ],
+   "source": "code",
+   "scene": "quote_card",
+   "params": {
+    "text": "✓ ready to go",
+    "by": "python3 tools/doctor/doctor.py",
+    "at": 0.3,
+    "size": 96
+   }
+  },
+  {
+   "id": "B12",
+   "lines": [
+    12
+   ],
+   "source": "code",
+   "scene": "ui_steps",
+   "params": {
+    "title": "On VideoExpress?",
+    "widgets": [
+     {
+      "kind": "input",
+      "text": "Make this script into a film, with VideoExpress shots.",
+      "type_at": "same breath",
+      "send_at": "VideoExpress shots"
+     }
+    ]
+   }
+  },
+  {
+   "id": "B13",
+   "lines": [
+    13
+   ],
+   "source": "code",
+   "scene": "flow",
+   "params": {
+    "look": "pipe",
+    "nodes": [
+     {
+      "id": "sp",
+      "x": 330,
+      "y": 500,
+      "label": "Shot prompts",
+      "icon": "stamp",
+      "at": "shot prompts"
+     },
+     {
+      "id": "ve",
+      "x": 750,
+      "y": 500,
+      "label": "VideoExpress",
+      "icon": "ai"
+     },
+     {
+      "id": "cl",
+      "x": 1170,
+      "y": 500,
+      "label": "Clips",
+      "icon": "container"
+     },
+     {
+      "id": "fm",
+      "x": 1590,
+      "y": 500,
+      "label": "Your film",
+      "icon": "laptop",
+      "hot": true
+     }
+    ],
+    "links": [
+     {
+      "from": "sp",
+      "to": "ve",
+      "at": "sends them"
+     },
+     {
+      "from": "ve",
+      "to": "cl",
+      "at": "cuts the clips"
+     },
+     {
+      "from": "cl",
+      "to": "fm",
+      "at": "your film"
+     }
+    ]
+   }
+  },
+  {
+   "id": "B14",
+   "lines": [
+    14
+   ],
+   "source": "code",
+   "scene": "cover",
+   "params": {
+    "series": "Next",
+    "title": "Your first film",
+    "sub": "make examples/coffee into a film",
+    "sub_at": "make",
+    "at": 0.2,
+    "cx": 720,
+    "size": 124
+   }
+  }
+ ]
+}

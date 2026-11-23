@@ -1,6 +1,7 @@
 {
  "_readme": "Pronunciation table applied to every narration line before speech synthesis (tools/tts/lexicon.py). One table for every series: when a word is heard read wrong, add it here, not in one episode's script. Rules run top to bottom; keep whole-word rules above single-character rules. note: when it was heard and what was heard.",
  "rules": [
+  {"from": "docs/INSTALL.md", "to": "docs slash install dot M D", "lang": "en", "note": "2026-11-23 install-desktop line 7: five of six takes garbled the path (InskilnallMD, Ince Allndahl, in Ondale)"},
   {"from": "姪", "to": "侄", "lang": "zh", "note": "2026-11-09「姪兒」四條候選都唸不出來，改「侄兒」後正確"},
   {"from": "罣", "to": "掛", "lang": "zh", "note": "2026-11-19「罣慮」四條候選都唸錯（聽成寡慮／伽律），改「掛慮」後正確"},
   {"from": "徬", "to": "彷", "lang": "zh", "note": "2026-12-02「徬徨」四條候選都唸錯（聽成通狂），改「彷徨」"},

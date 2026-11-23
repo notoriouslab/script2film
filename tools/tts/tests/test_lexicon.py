@@ -13,8 +13,17 @@ CASES = [("姪兒來了", "侄兒來了"), ("不要罣慮", "不要掛慮"), ("�
          ("帶著孩子", "帶着孩子")]
 
 
-def test_table_has_these_eleven_rules():
-    assert len(lexicon.load()) == len(CASES) == 11 and lexicon.problems(lexicon.load()) == []
+EN_CASES = [("follow docs/INSTALL.md.", "follow docs slash install dot M D.")]
+
+
+def test_table_has_these_twelve_rules():
+    assert len(lexicon.load()) == len(CASES) + len(EN_CASES) == 12 and lexicon.problems(lexicon.load()) == []
+
+
+@pytest.mark.parametrize("text,want", EN_CASES)
+def test_each_english_rule(text, want):
+    assert lexicon.spoken(text, "en") == want and lexicon.spoken(want, "en") == want
+    assert lexicon.spoken(text, "zh") == text            # an English rule leaves Chinese narration alone
 
 
 @pytest.mark.parametrize("text,want", CASES)
