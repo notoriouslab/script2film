@@ -89,4 +89,4 @@ A dialogue cut only from singles of each speaker reads as two people talking alo
 - **Singles.** Never write that the speaker looks at someone off frame: VE draws that someone. Give the eye direction (`eyes looking toward frame right`) and add `Only this one person is in the frame; the rest of the frame is the plain wall and the table, empty.` Check the head count in the first frame at QC.
 - **Edit.** Trim each dialogue clip to its speech window (`plan-rules.md` § Edit pass); full-length clips leave gaps between lines.
 
-`scripts/drama_sheet.py` does not write the Actor 1 line or the listener's lock and reaction; add them to the run sheet by hand for two-person shots.
+`scripts/drama_sheet.py` writes the Actor 1 line, the listener's lock and the reaction from a shot's `listener` field (format in its docstring), and warns when a single mentions someone off frame.

@@ -678,14 +678,18 @@ class VE:
                 self.pick_reference(k, want)
 
     def active_frame(self) -> str | None:
-        """src of the image on the dialog's active carousel slide: the frame Create Video animates."""
+        """src of the image on the dialog's active carousel slide: the frame Create Video animates. With Consistent
+        Character the two candidates share one slide (`swiper-slide-pair`) and the picked one's item has `selected`
+        (seen 2026-11-23); reading only the slide's first img reported candidate 1 after candidate 2 was picked."""
         return self.page.evaluate(
             """() => { const ta=document.querySelector('#opt_prompt'); if(!ta) return null;
                        let root=ta; for(let i=0;i<8&&root.parentElement;i++) root=root.parentElement;
-                       const img=root.querySelector('.swiper-slide-active img'); return img ? img.src : null; }"""
+                       const act=root.querySelector('.swiper-slide-active'); if(!act) return null;
+                       const img=act.querySelector('.swiper-slide-pair-item.selected img') || act.querySelector('img');
+                       return img ? img.src : null; }"""
         )
 
-    def select_candidate(self, src: str):
+    def select_candidate(self, src: str, label: str | None = None):
         """Make src the active slide and check it. 2026-11-09: a new candidate landed on the slide right of the active
         one, the click did not move the carousel, and two takes of a shot were made from the previous shot's frame.
         Now the slide is moved with Swiper's own slideTo and
@@ -731,6 +735,30 @@ class VE:
             return active
         self.log(f"select_candidate: active {str(active)[-40:]} in this shot's candidates={active in self._last_cands}, "
                  f"present before Create Image={active in self._before_image}")
+        try:
+            self.log("select_candidate: carousel state " + json.dumps(self.page.evaluate(
+                """src => { const tail=u=>(u||'').slice(-24);
+                           return [...document.querySelectorAll('.swiper')].map(sw=>({
+                             locked: sw.swiper ? !!sw.swiper.isLocked : null,
+                             slides: [...sw.querySelectorAll('.swiper-slide')].map(sl=>({
+                               cls: sl.className.replace(/\\s+/g,' ').slice(0,80),
+                               imgs: [...sl.querySelectorAll('img')].map(i=>({src: tail(i.src), picked: i.src===src,
+                                       item: (i.parentElement.className||'').slice(0,60)}))}))})); }""",
+                src)))
+        except Exception as e:
+            self.log(f"select_candidate: carousel state unavailable ({str(e).splitlines()[0][:80]})")
+        if label and new_here and not self._is_gif(active):
+            # Human QC: the carousel would not move to the picked frame but shows another finished candidate of this
+            # image. Show that frame and let the person accept it instead of losing the run.
+            f = self.run_dir / f"{label}_stuck.jpg"
+            try:
+                f.write_bytes(self.page.request.get(active).body())
+            except Exception:
+                f = None
+            self.log(f"QC {label}_stuck: 1 candidate(s)" + (f"; compare {f}" if f else ""))
+            if self.ask(f"the carousel stays on another candidate ({active[-40:]}): a = use it, q = quit: ", "aq") == "a":
+                self.log(f"{label}: using the frame the carousel shows")
+                return active
         self.shot_png("select_candidate_failed")
         raise RuntimeError(f"the dialog's active frame is {str(self.active_frame())[-40:]}, not the picked {src[-40:]}")
 
@@ -1230,7 +1258,7 @@ def _run(args, run_dir: Path):
                 if pick:
                     break
                 ve.log(f"{label} re-roll")
-            pick = ve.select_candidate(pick)
+            pick = ve.select_candidate(pick, label)
             (run_dir / f"{label}.jpg").write_bytes(page.request.get(pick).body())
             masters[name] = ve.save_to_library(pick, rs.actors[idx - 1])["id"]
             (run_dir / "masters.json").write_text(json.dumps(masters, indent=1))
@@ -1303,7 +1331,7 @@ def _run(args, run_dir: Path):
                 if pick is SKIP:
                     ve.log(f"{label} skipped at QC (no video)")
                     continue
-            pick = ve.select_candidate(pick)
+            pick = ve.select_candidate(pick, label)
             (run_dir / f"{label}_frame.jpg").write_bytes(page.request.get(pick).body())
             if shot.save == "master":
                 saved[label] = ve.save_to_library(pick, shot.t2i)["id"]

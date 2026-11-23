@@ -42,7 +42,7 @@ def report(s: dict) -> int:
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("run_dir")
-    ap.add_argument("choice", nargs="?", help="1/2/…, r (re-roll), s (skip this shot) or q (quit) for the waiting gate")
+    ap.add_argument("choice", nargs="?", help="1/2/…, r (re-roll), s (skip this shot) or q (quit) for the waiting gate; a <label>_stuck gate takes a (use the frame shown) or q")
     ap.add_argument("--timeout", type=float, default=1800, help="seconds to wait (default 1800)")
     a = ap.parse_args(argv)
     run = Path(a.run_dir)

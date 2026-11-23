@@ -75,3 +75,59 @@ def test_two_speakers_refused():
     d["shots"][0]["motion"] = 'CHEN says in a calm accent: "好。" and SUQIN says in a calm accent: "嗯。"'
     with pytest.raises(ds.SheetError, match="one speaker"):
         ds.render(d)
+
+
+def _two(listener, line_where="the woman on the left"):
+    d = copy.deepcopy(D)
+    d["characters"]["MEI"] = {"actor": 2, "bible": "MEI — a woman of thirty"}
+    d["actors"]["2"] = "MEI master"
+    line = {"who": "MEI", "tone": "tense, hushed", "text": "你去哪了？"}
+    if line_where:
+        line["where"] = line_where
+    d["shots"] = [{"id": "T1", "dur": 6, "slug": "two-shot", "framing": "Medium two-shot.", "image": "{MEI} left, {CHEN} right.",
+                   "cast": ["MEI", "CHEN"], "line": line, "listener": listener, "sound": "her voice"}]
+    return d
+
+
+def test_listener_two_shot():
+    md = ds.render(_two({"who": "CHEN", "where": "the man on the right", "react": "lowers his eyes and folds his hands"}))
+    v = [l for l in shot_md(md, 1).splitlines() if l.startswith("- **Image-To-Video")][0]
+    assert "Actor 1 is the woman on the left; Actor 2 is the man on the right. Actor 2 listens without speaking." in v
+    assert ds.LOCK.format(a="Actor 2") in v
+    assert "While the line is spoken, Actor 2 lowers his eyes and folds his hands." in v
+    assert 'Right from the first second, Actor 1 says in a tense, hushed Taiwanese Mandarin accent: "你去哪了？"' in v
+    assert v.index("Actor 2 lowers") < v.index("Actor 1 says")  # ve_runner takes the last "Actor N" before the line
+
+
+def test_listener_from_behind():
+    md = ds.render(_two({"who": "CHEN", "where": "the man in the foreground", "back": True}))
+    v = [l for l in shot_md(md, 1).splitlines() if l.startswith("- **Image-To-Video")][0]
+    assert "the man in the foreground is seen only from behind, does not speak and holds still." in v
+    assert ds.LOCK.format(a="Actor 2") not in v
+
+
+@pytest.mark.parametrize("listener,where,msg", [
+    ({"who": "CHEN", "where": "the man on the right", "react": "smiles warmly"}, "the woman on the left", "moves the mouth"),
+    ({"who": "CHEN", "where": "the man on the right"}, "the woman on the left", "needs \"react\""),
+    ({"who": "CHEN", "where": "the man on the right", "react": "nods"}, None, "needs \"where\""),
+    ({"who": "MEI", "where": "the woman", "react": "nods"}, "the woman on the left", "two different characters"),
+])
+def test_listener_errors(listener, where, msg):
+    with pytest.raises(ds.SheetError, match=msg):
+        ds.render(_two(listener, where))
+
+
+def test_listener_refused_with_speech_in_prompt():
+    with pytest.raises(ds.SheetError, match="Lipsync path"):
+        ds.render(_two({"who": "CHEN", "where": "the man on the right", "react": "nods"}), segmented=True, warn=[])
+
+
+def test_single_off_frame_warns():
+    d = copy.deepcopy(D)
+    d["shots"][2]["image"] = "{CHEN}, looking toward someone off frame right."
+    warn = []
+    ds.render(d, warn=warn)
+    assert any("someone off frame" in w for w in warn)
+    warn = []
+    ds.render(D, warn=warn)
+    assert not warn

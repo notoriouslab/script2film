@@ -40,3 +40,13 @@ def test_compare_path_with_spaces():
 def test_skip_answer_closes_the_gate():
     s = state(LOG_WAIT + "10:00:30 decision: s\n10:00:30 shot1 skipped at QC (no video)\n")
     assert not s["pending"] and not s["failed"]
+
+
+def test_stuck_gate_after_a_pick():
+    log = LOG_WAIT + """10:00:30 decision: 2
+10:02:00 select_candidate: active abc.jpg in this shot's candidates=True, present before Create Image=False
+10:02:01 QC shot1_stuck: 1 candidate(s); compare /r/shot1_stuck.jpg
+10:02:01 QC WAITING: write one of [aq] to /r/decision.txt
+"""
+    s = state(log)
+    assert s["pending"] and s["label"] == "shot1_stuck" and s["compare"] == "/r/shot1_stuck.jpg"

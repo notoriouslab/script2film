@@ -22,6 +22,11 @@ Rules enforced (sources: 02-modes.md §4.5 "Acted live scenes", 01-core.md §3 d
   it across two shots of <= 11 characters each (dialogue.md:129; 16 characters in 8 s 0/4, 2 of 4 drew a second person; 6 s 11 characters 3/4).
   Start frame: have the speaker already facing the listener or the camera; a frame that needs a head turn first starts
   the line 1-2 s later (D17 0.9-3.2 s vs D14 0-0.8 s), and no wording fixes that.
+- a listener in a speaking shot (07-experimental.md §5, Lipsync path only): the line goes to Actor 1's script, so the video
+  prompt names the speaker "Actor 1" and says who is who by position; a visible listener gets the mouth lock (01-core.md §11)
+  and one reaction ("react": a verb phrase, no mouth, lips, smile or talking); a listener seen from behind ("back": true)
+  only holds still. Both characters must be in "cast".
+- a single never mentions someone off frame in its image text (VE draws that someone): a warning
 
 drama.json:
 {
@@ -40,6 +45,9 @@ drama.json:
     "cast": ["XIAOMEI"], "set": null,
     "motion": "CHEN frowns in his sleep ...",                       # silent shots
     "line": {"who": "XIAOMEI", "lead": "looking toward the bed", "tone": "calm, firm", "text": "阿明，下來。"},
+    "listener": {"who": "CHEN", "where": "the man on the right", "react": "lowers his eyes and folds his hands"},
+                                  # optional; with it "line" also needs "where" ("the woman on the left"); "back": true for an
+                                  # over-the-shoulder listener seen from behind ("react" then not used)
     "act": "CHEN stands frozen by the table.",   # optional, --speech-in-prompt only: action after the line
     "end": "She sets the basin down.",          # optional, --speech-in-prompt only: closing motion of the speaker
     "camera": "Camera locked.",   # default; "" when the motion text moves the camera itself
@@ -63,6 +71,11 @@ KEEP_EMPTY = "Keep the framing identical to the start image; no person appears."
 # "No on-screen text." stays.
 TAIL = "No music. No on-screen text."
 SILENT = "No dialogue; nobody speaks."
+# 01-core.md §11, verbatim: the listener in a speaking shot
+LOCK = ("{a} 的嘴唇輕輕閉合成放鬆的閉口表情，全程維持不變；下巴、臉頰與下半臉保持靜止，不說話、不對嘴、不張嘴、不露齒。"
+        "情緒只透過眼神、眉毛、眨眼、頭部、雙手與姿態表現。")
+MOUTHY = re.compile(r"\b(mouth|lips?|smil\w*|laugh\w*|talk\w*|speak\w*|says?|sing\w*|grin\w*)\b", re.I)
+OFF_FRAME = re.compile(r"\bsomeone\b|\bsomebody\b|off[- ]frame\s+(?:person|figure)", re.I)
 END = "Dynamic composition, subject fills the frame."
 CAMERA_PHRASE = " shot on a cinema camera,"
 # 01-core.md §3 dialogue length, Shape A (narrative): hard ceiling in 字 per shot length
@@ -128,6 +141,9 @@ def spoken_parts(d: dict, s: dict) -> dict | None:
 
 
 def i2v_segmented(d: dict, s: dict, warn: list[str]) -> tuple[str, bool] | None:
+    if s.get("listener"):
+        raise SheetError(f"{s['id']}: \"listener\" is for the Lipsync path (07-experimental.md §5); "
+                         "it is untested with --speech-in-prompt")
     sp = spoken_parts(d, s)
     if not sp:
         return None
@@ -169,7 +185,10 @@ def i2v(d: dict, s: dict, segmented: bool = False, warn: list[str] | None = None
     line = s.get("line")
     if line:
         lead = f", {line['lead']}," if line.get("lead") else ""
-        body = (f'Right from the first second, {line["who"]}{lead} says in a {line["tone"]} {d.get("accent", "Taiwanese Mandarin")} '
+        who, pre = line["who"], ""
+        if s.get("listener"):
+            who, pre = "Actor 1", listener_text(s)
+        body = pre + (f'Right from the first second, {who}{lead} says in a {line["tone"]} {d.get("accent", "Taiwanese Mandarin")} '
                 f'accent: "{line["text"]}"' + (f" {line['after']}" if line.get("after") else ""))
         spoken = True
     else:
@@ -178,6 +197,27 @@ def i2v(d: dict, s: dict, segmented: bool = False, warn: list[str] | None = None
         if spoken:
             body = "Right from the first second, " + body
     return _wrap(d, s, body, spoken)
+
+
+def listener_text(s: dict) -> str:
+    """07-experimental.md §5: who is who by position, then the listener's lock and reaction (or stillness from behind)."""
+    line, li = s["line"], s["listener"]
+    if not line.get("where") or not li.get("where"):
+        raise SheetError(f"{s['id']}: a shot with a listener needs \"where\" in both \"line\" and \"listener\" "
+                         "(\"the woman on the left\"): the lipsync prompt says who Actor 1 is by position")
+    cast = s.get("cast", [])
+    if line["who"] not in cast or li["who"] not in cast or line["who"] == li["who"]:
+        raise SheetError(f"{s['id']}: speaker {line['who']} and listener {li['who']} must be two different characters in \"cast\"")
+    if li.get("back"):
+        return f"Actor 1 is {line['where']}; {li['where']} is seen only from behind, does not speak and holds still. "
+    react = (li.get("react") or "").strip().rstrip(".")
+    if not react:
+        raise SheetError(f"{s['id']}: a visible listener needs \"react\" (one small reaction: eyes, head or hands)")
+    if MOUTHY.search(react):
+        raise SheetError(f"{s['id']}: the listener's reaction \"{react}\" moves the mouth; after the mouth lock use eyes, "
+                         "head or hands only (01-core.md §11)")
+    return (f"Actor 1 is {line['where']}; Actor 2 is {li['where']}. Actor 2 listens without speaking. {LOCK.format(a='Actor 2')} "
+            f"While the line is spoken, Actor 2 {react}. ")
 
 
 def _wrap(d: dict, s: dict, body: str, spoken: bool) -> tuple[str, bool]:
@@ -227,6 +267,11 @@ def render(d: dict, segmented: bool = False, warn: list[str] | None = None) -> s
             raise SheetError(f"{s['id']}: {len(lines)} spoken lines; one speaker per shot")
         if lines:
             check_line(s, "".join(lines))
+        if len(s.get("cast", [])) == 1 and OFF_FRAME.search(s.get("image", "")) and warn is not None:
+            warn.append(f"{s['id']}: the image text mentions someone off frame; VE tends to draw that person. Give the eye "
+                        "direction and say only this one person is in the frame (07-experimental.md §5)")
+        if s.get("listener") and not s.get("line"):
+            raise SheetError(f"{s['id']}: \"listener\" needs a spoken \"line\"")
         cast = cast_of(d, s)
         out += [f"## Shot {n}", f"- **Beat:** {s['id']} | {s.get('beat', s['slug'])}", f"- **Duration:** {s['dur']}s",
                 f"- **Cast:** {', '.join(cast) if cast else 'none'}", f"- **Text-To-Image Prompt:** {t2i(d, s)}",

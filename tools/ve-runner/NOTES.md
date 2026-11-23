@@ -34,6 +34,7 @@ QC answers: interactive prompt, or without a TTY use `ve_qc.py` (it writes `runs
 python3 ve_qc.py runs/<ts>        # wait for the next QC gate; prints the label and runs/<ts>/<label>_compare.jpg (candidates side by side)
 python3 ve_qc.py runs/<ts> 2      # answer 1/2/r/q, then wait for the next gate or the end (exit 0 = at a gate, 2 = finished, 1 = failed)
 ```
+With Consistent Character both candidates sit in one carousel slide; the picked one is the item marked `selected`. If the dialog still shows a different frame from the one picked, a `<label>_stuck` gate shows that frame: `a` uses it, `q` quits.
 Artifacts in `runs/<ts>/`: `masterN.jpg`, `masters.json` (actor → My AI Images id), candidate jpgs,
 `shotN_frame.jpg`, `submitted.json` (label → video uuid; `shotN_tK` with `--takes`), screenshots, `run.log`.
 Watch `run.log`, not stdout: stdout redirected to a file is block-buffered unless run with `python3 -u`.
