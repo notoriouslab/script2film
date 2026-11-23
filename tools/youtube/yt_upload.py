@@ -10,6 +10,7 @@
 憑證放家目錄、不進專案：~/.config/script2film/youtube/youtube_client_secret.json（OAuth 電腦版用戶端）、同資料夾 youtube_token.json（授權後產生）。
 資料夾可用 S2F_YT_DIR 指定（yt_paths.py）。
 另一個頻道：命令前加 YT_ACCOUNT=second（權杖存在同一個資料夾的 youtube_token_second.json；auth 時在 Google 的選頻道畫面選那個頻道）。
+頻道屬於另一個 Google 帳號時，可放該帳號專案的 youtube_client_secret_second.json，就會改用它。
 預設上傳「不公開」（unlisted）；加 --publish-at <ISO 時間> 改成私人＋排定該時刻自動公開（時間可由 tools/nightly/yt_meta.py 依集數算好）。
 時間已過或 15 分鐘內就停下不傳（斷檔要讓人看見，不自動往後延）。API 專案未通過審核前，上傳的片會被 YouTube 鎖成私人且改不回
 （support.google.com/youtube/answer/7300965），這時改用瀏覽器上傳。
@@ -35,7 +36,8 @@ from yt_snippet import upload_snippet  # noqa: E402
 HOME = creds_dir(os.environ, Path.home())
 # 第二個頻道：YT_ACCOUNT=<名稱> 用另一份權杖 youtube_token_<名稱>.json，不動預設頻道的權杖
 _acct = os.environ.get("YT_ACCOUNT", "").strip()
-SECRET = HOME / "youtube_client_secret.json"
+# 各帳號可用自己的 OAuth 用戶端（youtube_client_secret_<名稱>.json）；沒有就用共用的那份
+SECRET = next((p for p in [HOME / f"youtube_client_secret_{_acct}.json"] if _acct and p.exists()), HOME / "youtube_client_secret.json")
 TOKEN = HOME / (f"youtube_token_{_acct}.json" if _acct else "youtube_token.json")
 # youtube（管理）才能加播放清單；token 缺這個範圍時 creds() 會要求重跑 auth
 SCOPES = ["https://www.googleapis.com/auth/youtube.upload", "https://www.googleapis.com/auth/youtube"]
