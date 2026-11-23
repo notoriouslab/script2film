@@ -63,6 +63,8 @@ examples/*/host/
 examples/*/storyboard_*.md
 examples/*/checklist_answers.json
 examples/*/script_approval.json
+examples/*/preview/
+examples/*/avatar/*/faces_check.png
 
 # 規格與每一期的紀錄：只留在本機，不公開
 openspec/

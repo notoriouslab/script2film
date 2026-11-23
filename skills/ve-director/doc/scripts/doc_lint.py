@@ -33,7 +33,7 @@ DEFAULT = {
     "needs_fresh_scene": ["cover", "timeline", "quote_card", "compare", "burst_title", "object_draw"],
     "from_in_line": True,
     "lines_covered": True,
-    "ids_exist": ["pip.beats", "wipes", "side.beats", "pills[].beat"],
+    "ids_exist": ["pip.beats", "wipes", "side.beats", "pills[].beat", "avatar.moments[].beat"],
     "shots_match": True,
     "facts": True,                   # doc.json "facts": facts.md beside it; no key, no check
     "map_base": True,                # map_route with a base map: stops inside the crop, clear
@@ -439,6 +439,28 @@ def theme_streak(doc, eps):
 AI_NOTE = " (a reminder, not a failure)"   # printed after every ai_phrasing line: a first-time reader took the ⚠ for a failure (2026-11-16)
 
 
+# avatar_mix: the whole comic panel is for the opening, the close or the one heaviest point; the rest
+# peeks in. Two peeks in a row from one edge, or one face twice in a row, read as a loop. Reports, never failures.
+AVATAR_PANEL_MAX = 2
+
+
+def avatar_mix(doc):
+    ms = (doc.get("avatar") or {}).get("moments", [])
+    out = []
+    panels = [m for m in ms if m.get("show") == "panel"]
+    if len(panels) > AVATAR_PANEL_MAX:
+        out.append(f"avatar_mix: {len(panels)} whole panels (at most {AVATAR_PANEL_MAX}: opening, close or the heaviest "
+                   f"point; peek for the rest): {', '.join(m['beat'] for m in panels)}")
+    peeks = [m for m in ms if m.get("show") == "peek"]
+    for a, b in zip(peeks, peeks[1:]):
+        if a.get("pos") == b.get("pos"):
+            out.append(f"avatar_mix: {a['beat']} and {b['beat']} both peek from {b.get('pos')}: alternate the edge")
+    for a, b in zip(ms, ms[1:]):
+        if a.get("face") == b.get("face"):
+            out.append(f"avatar_mix: {a['beat']} and {b['beat']} both use {b.get('face')}: change the face")
+    return out
+
+
 def check(doc, rules=DEFAULT, prev=None, base=None):
     """make_doc.py's last step: stop with every problem listed; with prev (a doc.json path) also report vs_prev. base: the
     episode folder, for facts.md (make_doc runs inside it, so the default is the current folder)."""
@@ -447,7 +469,7 @@ def check(doc, rules=DEFAULT, prev=None, base=None):
         print(note)
     for w in ai_phrasing(doc) + peak_weight(doc):
         print("⚠ " + w + AI_NOTE)
-    for w in bare_compare(doc):
+    for w in bare_compare(doc) + avatar_mix(doc):
         print("⚠ " + w)
     problems = lint(doc, rules, base)
     if problems:

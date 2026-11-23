@@ -2,6 +2,19 @@
 
 ## Unreleased
 
+- **Comic avatar host** (`"avatar"` in doc.json): a narrator's comic sticker pack instead of a TalkingPhoto host. A
+  whole panel for the opening or the close, panels peeking in from an edge (depth worked out from the face, lower
+  peeks only from the two corners so the subtitles stay clear), and a corner badge that flips faces. Burned into the
+  `--render` film and, with `doc_cut.py --avatar-lane`, rendered alone as a transparent ProRes 4444 lane for Concat. `doc_avatar.py pack` / `check`
+  cut and check a sticker sheet; `doc_lint` reminds on more than two panels, the same edge or the same face twice in a
+  row (`avatar_mix`). Not allowed together with `pip`, `side` or a host clip beat. Concat projects with `side` or
+  `pills` now get one more (empty) layer lane for the avatar.
+- **The avatar talks:** with a second sheet of the same faces, mouths open (`doc_avatar.py open`), the avatar on
+  screen opens and closes its mouth with the narration's loudness. Only the mouth is taken from the second sheet, so
+  redrawn backgrounds do not flicker. `"talk": false` turns it off.
+  A face drawn mid-laugh gets a closed frame with its mouth squeezed to half height (`doc_avatar.py shut`), so it
+  still reads as talking in the small corner badge.
+
 ## 1.1.7 (2026-11-23)
 
 - **Three experimental ve-director rules** (`skills/ve-director/rules/07-experimental.md`): a trial batch of one shot

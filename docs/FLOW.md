@@ -193,6 +193,21 @@ Nothing here is tied to VideoExpress: the cut only needs clips in the right fold
 
 ## Optional B: host (TalkingPhoto)
 
+### Without a talking host: a comic avatar
+
+No TalkingPhoto account or wait: a comic sticker pack of the narrator pops in on the narrator's own lines
+(`"avatar"` in doc.json; format and rules in `skills/ve-director/doc/README.md`, "Comic avatar host").
+
+```bash
+python3 skills/ve-director/doc/scripts/doc_avatar.py pack sheet.png --grid 5x2 --names <faces> --out <pack>
+python3 skills/ve-director/doc/scripts/doc_avatar.py check <pack>
+python3 skills/ve-director/doc/scripts/doc_cut.py <doc.json> --render
+```
+
+For Optional D, run `doc_cut.py` with `--avatar-lane` (it renders the avatar alone as a transparent lane), then build
+the Concat project from `cut_<theme>/plan.json` with `--layers cut_<theme>/layers.json`; do not
+use `output.mp4` as the base, it already has the avatar burned in and it would show twice.
+
 `examples/brewing` has a host, with the finished take in `premade/` (its README shows how to use it without an account). The commands below are the author's usual flow and need a TalkingPhotos account; details in `tools/tp/README.md`.
 
 ### The look image

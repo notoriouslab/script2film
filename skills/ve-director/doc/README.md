@@ -48,6 +48,70 @@ Adding a palette (新增色票; checked by `tests/test_lecture.py` and `python3 
 4. Contrast (WCAG 2.1): `fg` on `bg`, `fg` on `panel` and `muted` on `bg` are each at least 4.5.
 5. `accent` on `bg` is printed, not gated (`light` is 2.78): the main colour is for big numbers and shapes, not body text.
 
+## Comic avatar host
+
+Instead of a talking host, a pack of comic panels of the narrator can pop in on the narrator's own lines (surprise, a
+question, "click the link", hello and goodbye). One avatar on screen at a time; not with `pip`, `side` or a
+`"source": "clip"` host beat in the same film (`doc_cut.py` stops). When to use which way is in
+`formats/vox-host/FORMAT.md` §7b.
+
+```json
+"avatar": {
+  "pack": "ahua",
+  "badge": {"pos": "lower-right", "d": 170, "from": "B2", "face": "cool"},
+  "moments": [
+    {"beat": "B1", "at": "Install Script2Film", "face": "shock", "show": "panel"},
+    {"beat": "B4", "at": "wait", "face": "think", "show": "peek", "pos": "right"},
+    {"beat": "B9", "at": "link below", "face": "point-down", "show": "peek", "pos": "lower-left", "hold": 2.0}
+  ]
+}
+```
+
+- `show`: `panel` (the whole panel slides in tilted; at most two per film), `peek` (peeks in from `left` / `right` /
+  `lower-left` / `lower-right` and goes back; how far is worked out from the face, so the face is always in), `badge`
+  (flips the corner badge to this face). `at` is a phrase in that beat's narration; `hold` seconds on screen (panel 1.8,
+  peek 1.4).
+- `badge` is optional: a round badge kept in a corner (`upper-left`, `upper-right`, `lower-left`, `lower-right`), from
+  beat `from` (default: when the first panel docks into it). It hides while a panel or a peek is up. The badge shows the
+  face only, so a hand gesture is cut off: flip it between faces whose expression differs (a laugh and a thumbs-up
+  laugh look the same in it) and keep gesture faces for peeks and panels.
+- The pack: `<project>/avatar/<pack>/`, else `avatar/<pack>` in the asset folders (`$S2F_ASSETS_LOCAL`, then
+  `$S2F_ASSETS`). Keep a pack of your own likeness in `$S2F_ASSETS_LOCAL`, not in a repository.
+  `faces.json` maps each face to its png and face centre: `{"shock": {"file": "01-shock.png", "cx": 0.48, "cy": 0.40}}`;
+  each png at least 400 px wide.
+
+```bash
+python3 scripts/doc_avatar.py pack sheet.png --grid 5x2 --names shock,think,point-you,point-down,cool,cry,cheer,wave,thumbs-up,angry --out <pack>
+python3 scripts/doc_avatar.py check <pack>   # after setting cx / cy from faces_check.png
+```
+
+`pack` cuts a sheet of framed panels (dark borders) and writes `faces_check.png`: the badge circle and the peek lines on
+every panel. Move `cx` / `cy` until each circle sits on the face, then run `check`.
+
+Talking (not lip sync): ask an image model for the same sheet with every mouth open, layout unchanged, then
+
+```bash
+python3 scripts/doc_avatar.py open <pack> open_sheet.png --grid 5x2
+```
+
+Each open panel must look like the face with the same number (it stops otherwise). Only a feathered ellipse around the
+mouth is taken from it (`<face>_open.<ext>`; `mx` / `my` in `faces.json`, the magenta ellipse in `faces_check.png`): a
+redrawn sheet changes background lines and confetti too, and swapping whole panels would flicker. Move a wrong `mx` /
+`my` and run it again with `--keep-mouth`. From then on every avatar on screen opens its mouth when the narration is
+loud and closes it in the pauses; `"talk": false` in `"avatar"` turns it off. Faces without an open panel stay still.
+A face drawn with its mouth already open (a laugh) barely changes in a small badge. Give it a closed frame with the drawn
+mouth squeezed to half its height, which the talking avatar then rests on (`<face>_shut.<ext>`, `shut` in `faces.json`):
+
+```bash
+python3 scripts/doc_avatar.py shut <pack> cheer thumbs-up
+```
+
+It refuses a face whose mouth runs into other lines (jaw, hand, hair). Pick the faces by eye after `open`.
+The `--render` film has the avatar burned in (z between the subtitle mist and the subtitles). For Concat, add `--avatar-lane`:
+`doc_cut.py` then also renders it alone to `cut_<theme>/avatar_lane/avatar.mov` (transparent ProRes 4444, 6–8 MB a
+second, minutes of rendering, so only when asked); `layers.json` lists it and `plan2concat_mcp.py --layers` puts it on
+its own lane.
+
 Charts colour a market move with `--up` / `--down`: `"rise": "red"` (default; Taiwan,
 China, Japan) or `"green"` (US stocks) in doc.json picks which colour means up (lecture-* themes only).
 

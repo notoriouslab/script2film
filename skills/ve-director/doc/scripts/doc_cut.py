@@ -5,6 +5,9 @@ VE clips: <project>/ve_<look>/shotK.mp4 (ve_collect.py --out; look = doc_themes.
 Builds shell_<theme>/ (subtitle page, narration, synthesized sound: one low impact on the climax word + a faint wind bed),
 cut_<theme>.json for <repo>/tools/assemble/assemble.py (cuts each clip to its beat window), then
 <repo>/tools/assemble/cut2plan.py writes cut_<theme>/plan.json (plan2concat_mcp.py reads it).
+--avatar-lane (doc.json "avatar" only): also render the avatar alone to cut_<theme>/avatar_lane/avatar.mov for its own
+Concat lane (6-8 MB a second of film, minutes of rendering, so only when asked). Without it the page is written and
+layers.json points at the mov; plan2concat_mcp.py --layers stops until it exists.
 --name is written to the config's timeline.name (default <title>_<theme>). --capcut (removed) only stops with a one-line
 pointer to --render and plan2concat_mcp.py.
 The joined visual track is deleted unless --render (plan.json reads the per-shot segments, keep those).
@@ -16,6 +19,7 @@ from doc_align import chunks, screen_text
 from doc_common import (MIN_SUB_FAIL_S, MIN_SUB_WARN_S, REPO, asset, gsap_file, hyperframes, load, log_tail, parse_srt, read_beats, series_of, sh, short_cues,
                         sub_lang, subs_problems, subtitle_plan, tokens)
 from doc_themes import CODE_THEMES, ve_look
+import doc_avatar
 
 sys.path.insert(0, str(REPO / "tools/concat"))
 from plan2concat_mcp import loudnorm  # noqa: E402  保底成片與 Concat 成片用同一個響度校正（s2f-1b D5）
@@ -73,7 +77,8 @@ def sfxbed_audio(doc, total, hits):
             f'data-volume="1.0" data-track-index="{12 + len(hits)}"></audio>\n')
 
 
-def shell(P, doc, beats, total, theme, hits, plan):
+def shell(P, doc, beats, total, theme, hits, plan, avatar=None):
+    """avatar: (events, faces, pack folder[, mouth flaps]) from doc_avatar, drawn into this page (doc.json \"avatar\")."""
     S = P / f"shell_{theme}"
     if S.exists():
         shutil.rmtree(S)
@@ -129,6 +134,12 @@ def shell(P, doc, beats, total, theme, hits, plan):
                   "#sub:empty { display: none; } .mist { display: none; }") if bg else ""
     hl = sub_highlight(doc)
     hl_css = f" #sub .hl {{ color: {hl['color']}; font-weight: 900; }}" if hl else ""
+    av_css = av_dom = av_js = ""
+    if avatar:
+        doc_avatar.copy_pack(avatar[2], avatar[1], S)
+        av_css, av_dom, av_js = doc_avatar.avatar_markup(avatar[0], avatar[1], "shell",
+                                                         mouth=avatar[3] if len(avatar) > 3 else None)
+        av_css, av_dom, av_js = f"\n  {av_css}", f"\n  {av_dom}", f"{av_js}\n  "   # no avatar: the page is unchanged
     (S / "index.html").write_text(f"""<!DOCTYPE html>
 <html lang="{html.escape(doc['lang'])}"><head><meta charset="UTF-8"><title>{html.escape(doc['title'])}</title>
 <script src="gsap.min.js"></script>
@@ -141,19 +152,19 @@ def shell(P, doc, beats, total, theme, hits, plan):
   .subs {{ position: absolute; left: 0; width: 1920px; top: 900px; text-align: center; z-index: 100; }}
   #sub {{ display: inline-block; white-space: pre-line; font-size: 48px; font-weight: 700; letter-spacing: 2px; color: {ink};
           text-shadow: 0 0 10px rgba({glow},.95), 0 0 22px rgba({glow},.85); }}
-  {sub_bg_css}{hl_css}
+  {sub_bg_css}{hl_css}{av_css}
 </style></head><body>
 <div id="root" data-composition-id="main" data-width="1920" data-height="1080" data-start="0" data-duration="{total}">
   <video id="visual" class="clip" src="visual.mp4" muted playsinline data-start="0" data-duration="{total}" data-track-index="1"
          style="position:absolute;left:0;top:0;width:1920px;height:1080px;object-fit:cover;z-index:20"></video>
-  <div class="mist"></div><div class="subs"><div id="sub"></div></div>
+  <div class="mist"></div><div class="subs"><div id="sub"></div></div>{av_dom}
   <audio id="voice" class="clip" src="voice.cleaned/audio.m4a" data-start="0" data-duration="{total}" data-volume="1.0" data-track-index="10"></audio>
 {bed_audio(doc, total)}
 {"".join(f'  <audio id="impact{k}" class="clip" src="sfx/impact.wav" data-start="{h}" data-duration="2.2" data-volume="0.9" data-track-index="{12 + k}"></audio>' + chr(10) for k, h in enumerate(hits))}{sfxbed_audio(doc, total, hits)}</div>
 <script>
   const main = gsap.timeline({{ paused: true }});
   {json.dumps([[t, sub_markup(txt, hl)] for t, txt in cues] if hl else cues, ensure_ascii=False)}.forEach(([t, txt]) => main.set("#sub", {{ {"innerHTML" if hl else "textContent"}: txt }}, t));
-  main.set({{}}, {{}}, {total});
+  {av_js}main.set({{}}, {{}}, {total});
   window.__timelines = window.__timelines || {{}}; window.__timelines["main"] = main;
 </script></body></html>
 """, encoding="utf-8")
@@ -189,6 +200,11 @@ def check_layers(doc):
     host = sorted(b["id"] for b in doc["beats"] if b.get("source") == "clip" and b["id"] in side)
     if host:
         sys.exit(f"✗ side lists full-frame host beats (they already show the host): {', '.join(host)}")
+    if doc.get("avatar"):   # one narrator, one face: a comic avatar and a talking host would read as two people
+        talk = (["pip"] if doc.get("pip") else []) + (["side"] if doc.get("side") else []) + \
+               [b["id"] for b in doc["beats"] if b.get("source") == "clip" and "host" in str(b.get("clip", ""))]
+        if talk:
+            sys.exit(f"✗ avatar and a talking host in one film ({', '.join(talk)}): keep one")
 
 
 PILL_FADE = 0.25
@@ -390,7 +406,7 @@ def write_caption_files(P, doc, out):
     return files
 
 
-def concat_layers(P, doc, beats, out, theme, plan):
+def concat_layers(P, doc, beats, out, theme, plan, avatar=None, total=None, lane=False):
     """doc.json "side" and "pills" → <out>/layers.json for tools/concat/plan2concat_mcp.py --layers, which lays
     them on their own lanes in Concat so they stay movable there (Concat does these, to depend less on
     CapCut). Nothing is burned in, so --render shows neither. Geometry is in Concat's own units:
@@ -406,7 +422,11 @@ def concat_layers(P, doc, beats, out, theme, plan):
     - "grain": film grain on the export, ffmpeg noise strength 1-20 (one approved episode used 7).
     - "en": English subtitles under the Chinese ones (en_subs); the Chinese screens move up to make room.
     - "zh" (with "lang": "en"): the Chinese line is the main subtitle (zh_screens, written in shell()) and the English
-      narration takes the second line."""
+      narration takes the second line.
+    - "avatar" (doc_avatar): the same avatar as the burned-in one, alone on a transparent page rendered to
+      <out>/avatar_lane/avatar.mov (ProRes 4444) for a lane of its own, only when lane (--avatar-lane); the page and
+      the layers.json entry are written either way. Lay it over plan.json's clips, not over output.mp4, which already
+      has the avatar."""
     sd, pills = doc.get("side"), doc.get("pills", [])
     by_id, layers = {b["id"]: b for b in beats}, {"side": [], "pills": []}
     if sd:
@@ -475,6 +495,19 @@ def concat_layers(P, doc, beats, out, theme, plan):
             corner_frame(P / out / "frame_corners.png")
             layers["chapters"]["frame"] = str((P / out / "frame_corners.png").resolve())
     layers["punch"] = punch_spans(doc, beats)
+    if avatar:
+        A = P / out / "avatar_lane"
+        A.mkdir(parents=True, exist_ok=True)
+        shutil.copy(gsap_file(), A / "gsap.min.js")
+        doc_avatar.copy_pack(avatar[2], avatar[1], A)
+        total = total if total is not None else beats[-1]["start"] + beats[-1]["duration"]
+        (A / "index.html").write_text(doc_avatar.alpha_page(avatar[0], avatar[1], round(total, 3),
+                                                            mouth=avatar[3] if len(avatar) > 3 else None), encoding="utf-8")
+        if lane:
+            r = hyperframes("render", A, "-o", A / "avatar.mov", "--format", "mov", "--fps", "30", stdout=open(A / "render.log", "w"))
+            if r.returncode:
+                sys.exit(f"✗ avatar lane render failed (exit {r.returncode}): {A / 'render.log'}\n{log_tail(A / 'render.log')}")
+        layers["avatar"] = {"clip": str((A / "avatar.mov").resolve()), "start": 0}
     if plan["second"]:   # the second line under the main subtitle (old rules only: "subs"."burn" burns one language)
         layers["en"] = en_subs(P, doc)
     if doc.get("grain"):
@@ -482,7 +515,8 @@ def concat_layers(P, doc, beats, out, theme, plan):
     (P / out / "layers.json").write_text(json.dumps(layers, ensure_ascii=False, indent=1), encoding="utf-8")
     print(f"layers.json: {len(layers['side'])} side spans, {len(layers['pills'])} pills, "
           f"{len(layers.get('chapters', {}).get('tags', []))} chapters, {len(layers['punch'])} punch-ins, "
-          f"{len(layers.get('en', {}).get('cues', []))} English lines → plan2concat_mcp.py --layers")
+          f"{len(layers.get('en', {}).get('cues', []))} English lines"
+          + (", avatar lane" if "avatar" in layers else "") + " → plan2concat_mcp.py --layers")
 
 
 def overlays(P, doc, beats, out, theme):
@@ -712,13 +746,25 @@ def main():
     B = read_beats(P / "beats.json")
     beats, total = B["beats"], B["total"]
     pill_times(doc, beats)   # stop on a bad phrase before any rendering
+    avatar = None
+    if doc.get("avatar"):   # a missing pack, face or phrase stops here, before any rendering
+        pack = doc_avatar.find_pack(P, doc["avatar"].get("pack", "avatar"))
+        bad = doc_avatar.check_pack(pack)
+        if bad:
+            sys.exit(f"✗ avatar pack {pack}:\n  " + "\n  ".join(bad))
+        faces = doc_avatar.load_pack(pack)
+        mouth = None
+        if doc["avatar"].get("talk", True) and any(f.get("open") for f in faces.values()):   # the mouth follows the voice
+            mouth = doc_avatar.flaps(doc_avatar.voice_env(P / "voice.cleaned/audio.m4a"))
+            faces = doc_avatar.talking(faces)   # a face drawn mid-laugh rests on its squeezed-mouth frame (doc_avatar shut)
+        avatar = (doc_avatar.resolve(doc, beats, faces, phrase_time), faces, pack, mouth)
     hits = []
     for burst in (b for b in doc["beats"] if b.get("scene") == "burst_title"):
         bb = next(b for b in beats if b["id"] == burst["id"])
         if not bb["tokens"]:
             sys.exit(f"✗ {bb['id']}: the climax line was not found in the transcript (no word timing)")
         hits.append(round(bb["start"] + bb["tokens"][0][1], 3))   # the climax word opens its line (doc_code checks)
-    S = shell(P, doc, beats, total, theme, hits, subs)
+    S = shell(P, doc, beats, total, theme, hits, subs, avatar)
     picks = P / f"picks_{theme}"
     if picks.exists():
         shutil.rmtree(picks)
@@ -749,7 +795,7 @@ def main():
         shutil.rmtree(P / out)
     cfg = {"clips": picks.name, "srt": "voice.cleaned/final.srt", "out": out, "stepped_fps": 0, "shots": shots,
            "max_stretch": max(1.0, min(float(doc.get("max_stretch", 1.2)), 1.5)),   # a VE clip a little short of its window slows down instead of freezing
-           "shell": {"dir": S.name, "copy": ["index.html", "gsap.min.js", "fonts", "sfx", "voice.cleaned"], "video_src": "visual.mp4"},
+           "shell": {"dir": S.name, "copy": ["index.html", "gsap.min.js", "fonts", "sfx", "voice.cleaned"] + (["avatar"] if avatar else []), "video_src": "visual.mp4"},
            "timeline": {"name": name, "lines": "tts/lines.json", "audio": "voice.cleaned/audio.m4a", "lead_s": 0.45,
                         "width": 1920, "height": 1080, "fps": 30,
                         **({"sub_bg": sub_bg(doc)} if sub_bg(doc) else {}),
@@ -762,8 +808,8 @@ def main():
     copy_beds(P, doc, P / out)
     if doc.get("pip") or doc.get("sticker") or doc.get("wipes"):
         overlays(P, doc, beats, out, theme)
-    if any(doc.get(k) for k in ("side", "pills", "chapters", "punch", "grain", "en", "zh")):
-        concat_layers(P, doc, beats, out, theme, subs)
+    if any(doc.get(k) for k in ("side", "pills", "chapters", "punch", "grain", "en", "zh", "avatar")):
+        concat_layers(P, doc, beats, out, theme, subs, avatar, total, "--avatar-lane" in args)
     write_caption_files(P, doc, out)
     sh("python3", REPO / "tools/assemble/cut2plan.py", cfg_path)   # 放在 overlays() 之後：它會改寫 .segments
     if "--render" in args:

@@ -69,7 +69,14 @@ def probe(p):
     return m
 
 
-LAYER_LANES = ("pills", "side", "plate")   # 字幕之下、草稿軌之上，由上往下
+LAYER_LANES = ("avatar", "pills", "side", "plate")   # 字幕之下、草稿軌之上，由上往下（avatar：doc.json 漫畫頭貼的透明 mov）
+
+
+def layer_need(L, have):
+    """(疊加層要幾條軌, 還沒匯入的素材路徑)。有 side、pills、avatar 任一就開全部 LAYER_LANES（沒用到的軌是空的）。"""
+    n = len(LAYER_LANES) if (L.get("side") or L.get("pills") or L.get("avatar")) else 0
+    paths = {s["clip"] for s in L.get("side", [])} | ({L["avatar"]["clip"]} if L.get("avatar") else set())
+    return n, [p for p in sorted(paths) if p not in have]
 
 
 def layer_cmds(L, lane):
@@ -101,6 +108,13 @@ def add_side(c, proj, L, lane, mid):
             {"op": "trimClip", "clipId": cid, "edge": "end", "delta": round(s["dur"] - (full - s["src"]), 4)},
             {"op": "updateClip", "clipId": cid, "patch": {"muted": True, "crop": s["crop"], "mask": s["mask"]}},
             {"op": "setClipTransform", "clipId": cid, "scale": s["scale"], "offsetX": s["offsetX"], "offsetY": s["offsetY"]}]})
+
+
+def add_avatar(c, proj, L, lane, mid):
+    """漫畫頭貼：整支片長的透明 mov（doc_cut 渲的 avatar_lane/avatar.mov），從 0 秒放在自己的軌上，可在 Concat 裡拖。"""
+    if L.get("avatar"):
+        c.tool("edit_apply", path=proj, command={"op": "addClip", "mediaId": mid[L["avatar"]["clip"]], "trackId": lane["avatar"],
+                                                 "start": L["avatar"].get("start", 0)})
 
 
 def layer_fix(L, lane, have):
@@ -287,7 +301,7 @@ def main():
     ap.add_argument("--bgm-gain-db", type=float, default=0, help="extra gain in dB for music clips")
     ap.add_argument("--bgm-match", default=r"^bgm", help="which audio clips count as music (file name regex)")
     ap.add_argument("--credit", default="", help="small credit line under the last shot (e.g. the CC BY credit for the music)")
-    ap.add_argument("--layers", default="", help="layers.json from PromptStudio doc_cut (side-frame host, keyword pills)")
+    ap.add_argument("--layers", default="", help="layers.json from PromptStudio doc_cut (side-frame host, keyword pills, comic avatar)")
     ap.add_argument("--photo-credits", default="", help="episode folder: small on-screen credits for photo beats (photo_credits.py)")
     ap.add_argument("--export", default="", help="after saving, export to this mp4 and run two-pass loudnorm to -14 LUFS / -2.5 dBTP")
     ap.add_argument("--ep", default="", help="episode folder for the film check (fingerprint base, skip log, series thresholds); "
@@ -297,8 +311,10 @@ def main():
     no_check = parse_no_check(ap, a.no_check)
     plan = json.load(open(a.plan, encoding="utf-8"))
     L = json.load(open(a.layers, encoding="utf-8")) if a.layers else {}
-    n_layer = len(LAYER_LANES) if (L.get("side") or L.get("pills")) else 0
-    layer_media = [probe(c) for c in sorted({s["clip"] for s in L.get("side", [])}) if c not in {m["path"] for m in plan["media"]}]
+    n_layer, need = layer_need(L, {m["path"] for m in plan["media"]})
+    if L.get("avatar") and not os.path.exists(L["avatar"]["clip"]):
+        sys.exit(f"✗ no avatar lane yet: {L['avatar']['clip']}; run doc_cut.py <doc.json> --avatar-lane first")
+    layer_media = [probe(p) for p in need]
     fam, fpath = a.font.split("=", 1)
     proj = os.path.join(os.path.abspath(a.location), a.name)
     if os.path.exists(proj):
@@ -345,6 +361,7 @@ def main():
     batch(cmds + (layer_cmds(L, lane) if n_layer else []))
     if n_layer:
         add_side(c, proj, L, lane, mid)
+        add_avatar(c, proj, L, lane, mid)
 
     # 3 修剪尾端、音量（一批）：以 (軌, 起點) 對回剛放的片段
     tl = c.tool("timeline_read", path=proj)
