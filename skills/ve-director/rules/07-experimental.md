@@ -36,3 +36,43 @@ Status: EXPERIMENTAL, see §1. Applies only to a plan row whose 景別 contains 
 5. `[NEGATIVES]`: start with `除上述一次硬切外不剪接、` and keep the style's list.
 
 Everything else (語言規則, Actor Alias, locks, the style's `[LIGHT AND IMAGE]` and `[NEGATIVES]`, sound convention) is unchanged. The check script enforces the shape (L8).
+
+## §3 Trial batch before the full run (run side)
+
+Status: EXPERIMENTAL · not yet tested as a step. Faults that repeat across shots (a room that drifts, a master that forces the framing, a kind of shot VE misreads) show up in the first few shots; finding them before the full run saves re-rolling the whole batch.
+
+**When.** A story film (SKILL.md, "Story films go through the flow above"), after the plan is approved and `lint.py` passes, before the whole storyboard goes to VE. Skip it when the film has 4 shots or fewer, or when it reuses a style, location and masters already run in an earlier film unchanged; say in one line that it was skipped and why. Sending the trial needs the same go-ahead as any VE run.
+
+**Pick the trial shots: one per kind of shot the plan uses**, from this list, usually 3-5 shots:
+- a wide or full shot that sets up the location;
+- a close shot (中近景 or closer) of a character in that location;
+- a shot with a spoken line;
+- a shot with no person in it (an object, an insert, a view of the ceiling);
+- a shot of a body part only (a hand, the back of a head);
+- in a two-character scene, a line and the cut to the other character's response (two consecutive shots).
+
+Where a kind has several shots, take the one the continuity review flagged as riskiest. Name the trial shots in the CP1 plan.
+
+**Run.** `python3 tools/ve-runner/ve_runner.py storyboard.md --shots <n …> --takes 2` with the film's masters. Collect the clips, put them in story order and watch at normal speed.
+
+**Judge each fault by its cause.**
+- The cause is shared with other shots in the plan (the same master, the same location wording, the same framing, the same kind of line or prop): fix the plan or the masters for every shot with that cause, run `plan_lint.py` and `lint.py` again, and re-trial only the shots that showed the fault.
+- The fault is a one-off of VE (an extra braid, burned-in text, one odd take): note it, pick around it at QC, and go on.
+
+Then run the rest with `--shots` for the remaining shots; trial takes that passed are kept, not re-made.
+
+**Record it** in the film's notes: the trial shots, each fault found (shared or one-off), what changed in the plan before the full run, and after the full run how many shots were re-rolled and why. Promote this section to the plan rules after two films where the trial caught at least one shared fault; delete it if two films show none and the full run needed as many re-rolls as before.
+
+## §4 Story chain — a premise built into a plot (plan side)
+
+Status: EXPERIMENTAL · not validated yet.
+
+Applies only when the plot is yours to build (the user gave a premise, not a source text). A source text's events stand: this rule never adds events to a source.
+
+1. **Dramatic question and decisive choice.** Before the shot table, decide one question the audience wants answered by the end, the protagonist's decisive choice (an act seen on screen, not a feeling), and what that choice costs or changes, shown in a later shot rather than stated.
+2. **Every beat follows from an earlier one.** Each shot after the opening exists because of an earlier shot: a choice someone made, something someone discovered, or the consequence of either. "And then" links (one event simply after another) are not allowed; "so" and "but" links are. An opening ESTABLISH shot is exempt.
+3. **What is set up pays off.** Every prop, line or piece of information the plan makes the audience notice (an insert, a close-up on it, a line about it) is used again later and changes something. Cut what is not paid off, or pay it off.
+4. **The ending answers the question.** The last beats answer it. A closing hook may open a new question only after the main one is answered.
+5. **Every link is on screen.** A link counts only when a shot shows it: the cause is seen before the effect, a state change (food eaten, a device charged, a door unlocked) has a shot where it happens or a shot that shows its result plainly, and an unusual action (holding a watch to the ear) has a shot before it that makes it the natural thing to do. A link that lives only in your reasoning is a gap.
+
+Checking: write the chain as a review-only line after `連戲檢查：` — `因果鏈：` with `N ← M（選擇／發現／後果）` for each shot after the first, then the setups with the shot where each pays off. The continuity review (or, without a subagent, your own re-read as that reviewer) checks each link against the table's cells only, not against this line, and lists a link with no shot as **阻斷**. When you use this rule, say so in one line at CP1.

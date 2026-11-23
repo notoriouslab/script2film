@@ -49,7 +49,7 @@ def main():
         + ["## FROM 00-operating-manual.md\n", "## Actor cap\n"] + sections("00-operating-manual.md", 3, ["### Step 1.6"])
         + ["## FROM 03-domains.md\n"] + sections("03-domains.md", 2,
             ["## narrative-character", "## narrative-scene", "## Tier 2", "## Tone axis"])
-        + ["## FROM 07-experimental.md\n"] + sections("07-experimental.md", 2, ["## §1 "])))
+        + ["## FROM 07-experimental.md\n"] + sections("07-experimental.md", 2, ["## §1 ", "## §3 ", "## §4 "])))
 
     built.append(write("render-rules.md", "Rendering rules (output contract, locks, VE v3.5 grammar, minimal format)",
         ["## FROM 00-operating-manual.md\n"] + sections("00-operating-manual.md", 2, ["## §2", "## §3", "## §4"])

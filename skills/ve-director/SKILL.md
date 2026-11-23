@@ -34,6 +34,8 @@ two of the author's acted pilots written this way all played right on the first 
   reference images in the slots, and run `ve_runner.py storyboard.md --masters <ids.json> --ref-folder Images`.
   An empty-room set master goes only on wide, full and medium shots: on a close-up it pulls the frame back to a wide.
   A shot with no character in it drops "shot on a cinema camera" from its style line (VE drew a camera into the room).
+- Experimental: before sending the whole storyboard, run a trial batch of one shot per kind of shot and fix shared
+  faults first (`references/plan-rules.md` § FROM 07-experimental.md §3); say at CP1 which shots, or why it is skipped.
 - Shots with a spoken lipsync line: after the plan passes the review, write those shots into `drama.json` and run
   `scripts/drama_sheet.py` on them (verbatim character and location lines, lines that start in the first second,
   line length per shot; format in its docstring, tests in `tests/`). Keep each shot as the reviewed plan has it.
