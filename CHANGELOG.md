@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+## 1.1.7 (2026-11-23)
+
+- **Three experimental ve-director rules** (`skills/ve-director/rules/07-experimental.md`): a trial batch of one shot
+  per kind before the full VideoExpress run (§3); for plots built from a premise, every shot follows from an earlier
+  one and every setup pays off on screen (§4); in two-character dialogue, keep the listener in frame with two-shots,
+  over-the-shoulder shots and one reaction cutaway (§5).
+- **drama_sheet listener:** a `listener` field writes who speaks, the listener's closed mouth and one reaction for a
+  two-person lipsync shot; a single that mentions someone off frame gets a warning.
+- **ve_runner fix:** picking the second image candidate no longer stops the run.
 - **Comparison cards carry pictures:** a `compare` card with no video under it and no host frame puts one still under
   each column from the start (`params.photos`, at 0.3 / 0.8). Words alone left a bare dividing line for seconds; with
   stills the user called it clearly better and made it the rule (`formats/vox-host/FORMAT.md` §7b). `doc_lint` lists
