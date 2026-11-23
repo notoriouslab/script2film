@@ -76,3 +76,17 @@ Applies only when the plot is yours to build (the user gave a premise, not a sou
 5. **Every link is on screen.** A link counts only when a shot shows it: the cause is seen before the effect, a state change (food eaten, a device charged, a door unlocked) has a shot where it happens or a shot that shows its result plainly, and an unusual action (holding a watch to the ear) has a shot before it that makes it the natural thing to do. A link that lives only in your reasoning is a gap.
 
 Checking: write the chain as a review-only line after `連戲檢查：` — `因果鏈：` with `N ← M（選擇／發現／後果）` for each shot after the first, then the setups with the shot where each pays off. The continuity review (or, without a subagent, your own re-read as that reviewer) checks each link against the table's cells only, not against this line, and lists a link with no shot as **阻斷**. When you use this rule, say so in one line at CP1.
+
+## §5 The listener stays in the scene (dialogue between two characters)
+
+Status: EXPERIMENTAL · not validated yet.
+
+A dialogue cut only from singles of each speaker reads as two people talking alone. Put the listener in frame for part of the exchange.
+
+- **Mix the framings.** In a two-character dialogue, use at least one two-shot or over-the-shoulder shot where the listener is visible, besides any singles. A silent reaction cutaway of the listener works too, but not on every line: in a short exchange, one reaction cutaway plus one over-the-shoulder reads better than a cutaway on each line.
+- **Two-shot with one spoken line (Lipsync).** The single line always goes to Actor 1's script, so the video prompt defines Actor 1 as the speaker, whichever reference slot that person is in: `Actor 1 is the man on the right; Actor 2 is the woman on the left.` The listener gets the mouth-lock sentence (`01-core.md` §11) and one small reaction with the eyes, head or hands while the line is spoken.
+- **Over-the-shoulder.** The listener is the out-of-focus back of the head and one shoulder in the foreground; write `exactly two people in the frame` in the image prompt.
+- **Singles.** Never write that the speaker looks at someone off frame: VE draws that someone. Give the eye direction (`eyes looking toward frame right`) and add `Only this one person is in the frame; the rest of the frame is the plain wall and the table, empty.` Check the head count in the first frame at QC.
+- **Edit.** Trim each dialogue clip to its speech window (`plan-rules.md` § Edit pass); full-length clips leave gaps between lines.
+
+`scripts/drama_sheet.py` does not write the Actor 1 line or the listener's lock and reaction; add them to the run sheet by hand for two-person shots.
