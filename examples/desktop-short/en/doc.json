@@ -1,0 +1,279 @@
+{
+ "title": "How to use Claude Code Desktop",
+ "lang": "en",
+ "theme": "lecture-tech",
+ "speaker": "Narrator",
+ "voice": {
+  "ref_wav": "refs/narrator.wav",
+  "ref_text": "refs/narrator.txt",
+  "seed": 11,
+  "tail_fade": 0.08
+ },
+ "gaps": {
+  "default": 0.6
+ },
+ "facts": "facts.md",
+ "lines": [
+  {
+   "text": "Rather not touch the terminal? Use Claude Code Desktop."
+  },
+  {
+   "text": "Download the Claude desktop app and sign in. The Code tab needs a paid plan."
+  },
+  {
+   "text": "Click Code at the top of the sidebar, pick Local, then open an empty folder."
+  },
+  {
+   "text": "Then ask in one sentence: clone Script2Film and follow docs/INSTALL.md."
+  },
+  {
+   "text": "It works through every step on its own, until it says you're ready."
+  },
+  {
+   "text": "Then just say: make a template into a film. See you!"
+  }
+ ],
+ "beats": [
+  {
+   "id": "B1",
+   "lines": [
+    1
+   ],
+   "source": "code",
+   "scene": "cover",
+   "params": {
+    "series": "Claude Code Desktop",
+    "title": "No terminal needed",
+    "at": 0.2,
+    "cx": 1300,
+    "size": 104
+   }
+  },
+  {
+   "id": "B2",
+   "lines": [
+    2
+   ],
+   "source": "code",
+   "scene": "ui_steps",
+   "params": {
+    "widgets": [
+     {
+      "kind": "card",
+      "text": "Claude",
+      "sub": "desktop app",
+      "icon": "app"
+     },
+     {
+      "kind": "button",
+      "text": "Download",
+      "press_at": "Download"
+     },
+     {
+      "kind": "button",
+      "text": "Sign in",
+      "press_at": "sign in"
+     },
+     {
+      "kind": "chips",
+      "items": [
+       {
+        "text": "Code tab: paid plan",
+        "at": "paid plan"
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "id": "B3",
+   "lines": [
+    3
+   ],
+   "source": "code",
+   "scene": "ui_steps",
+   "params": {
+    "widgets": [
+     {
+      "kind": "menu",
+      "label": "Chat",
+      "items": [
+       "Chat",
+       "Code"
+      ],
+      "pick": "Code",
+      "pick_at": "Click Code"
+     },
+     {
+      "kind": "toggle",
+      "options": [
+       "Cloud",
+       "Local"
+      ],
+      "picks": [
+       {
+        "pick": "Local",
+        "at": "pick Local"
+       }
+      ]
+     },
+     {
+      "kind": "button",
+      "text": "Open folder…",
+      "press_at": "open an"
+     },
+     {
+      "kind": "check",
+      "text": "an empty folder",
+      "check_at": "empty folder"
+     }
+    ]
+   }
+  },
+  {
+   "id": "B4",
+   "lines": [
+    4
+   ],
+   "source": "code",
+   "scene": "ui_steps",
+   "params": {
+    "title": "One request",
+    "widgets": [
+     {
+      "kind": "input",
+      "text": "Clone https://github.com/notoriouslab/script2film into this folder and follow docs/INSTALL.md to install it.",
+      "type_at": "one sentence",
+      "send_at": "follow docs"
+     }
+    ]
+   }
+  },
+  {
+   "id": "B5",
+   "lines": [
+    5
+   ],
+   "source": "code",
+   "scene": "flow",
+   "params": {
+    "look": "pipe",
+    "nodes": [
+     {
+      "id": "py",
+      "x": 330,
+      "y": 500,
+      "label": "Packages",
+      "icon": "container",
+      "at": "every step"
+     },
+     {
+      "id": "ft",
+      "x": 750,
+      "y": 500,
+      "label": "Fonts",
+      "icon": "stamp"
+     },
+     {
+      "id": "vm",
+      "x": 1170,
+      "y": 500,
+      "label": "Voice model",
+      "icon": "ai"
+     },
+     {
+      "id": "ok",
+      "x": 1590,
+      "y": 500,
+      "label": "✓ ready to go",
+      "icon": "shield",
+      "hot": true
+     }
+    ],
+    "links": [
+     {
+      "from": "py",
+      "to": "ft",
+      "at": "on its own"
+     },
+     {
+      "from": "ft",
+      "to": "vm",
+      "at": "until"
+     },
+     {
+      "from": "vm",
+      "to": "ok",
+      "at": "says"
+     }
+    ]
+   }
+  },
+  {
+   "id": "B6",
+   "lines": [
+    6
+   ],
+   "source": "code",
+   "scene": "cover",
+   "params": {
+    "series": "Next",
+    "title": "Your first film",
+    "sub": "make examples/sky/en into a film",
+    "sub_at": "make a",
+    "at": 0.2,
+    "cx": 720,
+    "size": 124
+   }
+  }
+ ],
+ "avatar": {
+  "pack": "ahua",
+  "moments": [
+   {
+    "beat": "B1",
+    "at": "terminal",
+    "face": "shock",
+    "show": "panel",
+    "pos": "left"
+   },
+   {
+    "beat": "B2",
+    "at": "paid plan",
+    "face": "think",
+    "show": "badge"
+   },
+   {
+    "beat": "B3",
+    "at": "empty folder",
+    "face": "point-down",
+    "show": "badge"
+   },
+   {
+    "beat": "B4",
+    "at": "one sentence",
+    "face": "point-you",
+    "show": "badge"
+   },
+   {
+    "beat": "B5",
+    "at": "on its own",
+    "face": "cool",
+    "show": "badge"
+   },
+   {
+    "beat": "B6",
+    "at": "See you",
+    "face": "wave",
+    "show": "panel",
+    "pos": "right"
+   }
+  ],
+  "badge": {
+   "pos": "lower-right",
+   "from": "B2",
+   "face": "cheer"
+  }
+ }
+}

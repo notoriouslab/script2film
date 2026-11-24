@@ -1,0 +1,84 @@
+{
+  "shock": {
+    "file": "01-shock.jpg",
+    "cx": 0.47,
+    "cy": 0.4,
+    "mx": 0.541,
+    "my": 0.487,
+    "open": "01-shock_open.jpg"
+  },
+  "think": {
+    "file": "02-think.jpg",
+    "cx": 0.5,
+    "cy": 0.38,
+    "mx": 0.52,
+    "my": 0.483,
+    "open": "02-think_open.jpg"
+  },
+  "point-you": {
+    "file": "03-point-you.jpg",
+    "cx": 0.5,
+    "cy": 0.36,
+    "mx": 0.522,
+    "my": 0.54,
+    "open": "03-point-you_open.jpg"
+  },
+  "point-down": {
+    "file": "04-point-down.jpg",
+    "cx": 0.5,
+    "cy": 0.36,
+    "mx": 0.586,
+    "my": 0.53,
+    "open": "04-point-down_open.jpg"
+  },
+  "cool": {
+    "file": "05-cool.jpg",
+    "cx": 0.5,
+    "cy": 0.37,
+    "mx": 0.487,
+    "my": 0.508,
+    "open": "05-cool_open.jpg"
+  },
+  "cry": {
+    "file": "06-cry.jpg",
+    "cx": 0.47,
+    "cy": 0.41,
+    "mx": 0.434,
+    "my": 0.595,
+    "open": "06-cry_open.jpg"
+  },
+  "cheer": {
+    "file": "07-cheer.jpg",
+    "cx": 0.5,
+    "cy": 0.4,
+    "mx": 0.459,
+    "my": 0.58,
+    "open": "07-cheer_open.jpg",
+    "shut": "07-cheer_shut.jpg"
+  },
+  "wave": {
+    "file": "08-wave.jpg",
+    "cx": 0.5,
+    "cy": 0.4,
+    "mx": 0.5,
+    "my": 0.531,
+    "open": "08-wave_open.jpg"
+  },
+  "thumbs-up": {
+    "file": "09-thumbs-up.jpg",
+    "cx": 0.5,
+    "cy": 0.4,
+    "mx": 0.462,
+    "my": 0.576,
+    "open": "09-thumbs-up_open.jpg",
+    "shut": "09-thumbs-up_shut.jpg"
+  },
+  "angry": {
+    "file": "10-angry.jpg",
+    "cx": 0.5,
+    "cy": 0.43,
+    "mx": 0.579,
+    "my": 0.585,
+    "open": "10-angry_open.jpg"
+  }
+}

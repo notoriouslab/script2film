@@ -1,0 +1,279 @@
+{
+ "title": "如何使用 Claude Code Desktop",
+ "lang": "zh",
+ "theme": "lecture-tech",
+ "speaker": "旁白",
+ "voice": {
+  "ref_wav": "refs/narrator.wav",
+  "ref_text": "refs/narrator.txt",
+  "seed": 11,
+  "tail_fade": 0.08
+ },
+ "gaps": {
+  "default": 0.65
+ },
+ "facts": "facts.md",
+ "lines": [
+  {
+   "text": "不想碰終端機？用 Claude Code Desktop 就好。"
+  },
+  {
+   "text": "下載 Claude 桌面版並登入，Code 分頁要付費方案。"
+  },
+  {
+   "text": "點側邊欄最上面的 Code，選 Local，再開一個空資料夾。"
+  },
+  {
+   "text": "接著用一句話交代：把 Script2Film 抓下來，照 docs/INSTALL.md 裝好。"
+  },
+  {
+   "text": "它會一步一步自己做完，跑到「可以開始了」。"
+  },
+  {
+   "text": "然後說：照文件把範本做成片。下次見！"
+  }
+ ],
+ "beats": [
+  {
+   "id": "B1",
+   "lines": [
+    1
+   ],
+   "source": "code",
+   "scene": "cover",
+   "params": {
+    "series": "Claude Code Desktop",
+    "title": "不用終端機",
+    "at": 0.2,
+    "cx": 1300,
+    "size": 104
+   }
+  },
+  {
+   "id": "B2",
+   "lines": [
+    2
+   ],
+   "source": "code",
+   "scene": "ui_steps",
+   "params": {
+    "widgets": [
+     {
+      "kind": "card",
+      "text": "Claude",
+      "sub": "桌面版",
+      "icon": "app"
+     },
+     {
+      "kind": "button",
+      "text": "下載",
+      "press_at": "下載"
+     },
+     {
+      "kind": "button",
+      "text": "登入",
+      "press_at": "登入"
+     },
+     {
+      "kind": "chips",
+      "items": [
+       {
+        "text": "Code 分頁：付費方案",
+        "at": "付費方案"
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "id": "B3",
+   "lines": [
+    3
+   ],
+   "source": "code",
+   "scene": "ui_steps",
+   "params": {
+    "widgets": [
+     {
+      "kind": "menu",
+      "label": "Chat",
+      "items": [
+       "Chat",
+       "Code"
+      ],
+      "pick": "Code",
+      "pick_at": "點側邊欄"
+     },
+     {
+      "kind": "toggle",
+      "options": [
+       "Cloud",
+       "Local"
+      ],
+      "picks": [
+       {
+        "pick": "Local",
+        "at": "選 Local"
+       }
+      ]
+     },
+     {
+      "kind": "button",
+      "text": "開啟資料夾…",
+      "press_at": "開一個"
+     },
+     {
+      "kind": "check",
+      "text": "一個空資料夾",
+      "check_at": "空資料夾"
+     }
+    ]
+   }
+  },
+  {
+   "id": "B4",
+   "lines": [
+    4
+   ],
+   "source": "code",
+   "scene": "ui_steps",
+   "params": {
+    "title": "一句話",
+    "widgets": [
+     {
+      "kind": "input",
+      "text": "把 https://github.com/notoriouslab/script2film 抓到這個資料夾，照 docs/INSTALL.md 裝好。",
+      "type_at": "一句話",
+      "send_at": "照 docs"
+     }
+    ]
+   }
+  },
+  {
+   "id": "B5",
+   "lines": [
+    5
+   ],
+   "source": "code",
+   "scene": "flow",
+   "params": {
+    "look": "pipe",
+    "nodes": [
+     {
+      "id": "py",
+      "x": 330,
+      "y": 500,
+      "label": "安裝套件",
+      "icon": "container",
+      "at": "一步一步"
+     },
+     {
+      "id": "ft",
+      "x": 750,
+      "y": 500,
+      "label": "字型",
+      "icon": "stamp"
+     },
+     {
+      "id": "vm",
+      "x": 1170,
+      "y": 500,
+      "label": "語音模型",
+      "icon": "ai"
+     },
+     {
+      "id": "ok",
+      "x": 1590,
+      "y": 500,
+      "label": "✓ 可以開始了",
+      "icon": "shield",
+      "hot": true
+     }
+    ],
+    "links": [
+     {
+      "from": "py",
+      "to": "ft",
+      "at": "自己"
+     },
+     {
+      "from": "ft",
+      "to": "vm",
+      "at": "做完"
+     },
+     {
+      "from": "vm",
+      "to": "ok",
+      "at": "跑到"
+     }
+    ]
+   }
+  },
+  {
+   "id": "B6",
+   "lines": [
+    6
+   ],
+   "source": "code",
+   "scene": "cover",
+   "params": {
+    "series": "下一步",
+    "title": "你的第一支片",
+    "sub": "照文件把 examples/sky/zh 做成片",
+    "sub_at": "照文件",
+    "at": 0.2,
+    "cx": 720,
+    "size": 124
+   }
+  }
+ ],
+ "avatar": {
+  "pack": "ahua",
+  "moments": [
+   {
+    "beat": "B1",
+    "at": "終端機",
+    "face": "shock",
+    "show": "panel",
+    "pos": "left"
+   },
+   {
+    "beat": "B2",
+    "at": "付費方案",
+    "face": "think",
+    "show": "badge"
+   },
+   {
+    "beat": "B3",
+    "at": "空資料夾",
+    "face": "point-down",
+    "show": "badge"
+   },
+   {
+    "beat": "B4",
+    "at": "一句話",
+    "face": "point-you",
+    "show": "badge"
+   },
+   {
+    "beat": "B5",
+    "at": "自己做完",
+    "face": "cool",
+    "show": "badge"
+   },
+   {
+    "beat": "B6",
+    "at": "下次見",
+    "face": "wave",
+    "show": "panel",
+    "pos": "right"
+   }
+  ],
+  "badge": {
+   "pos": "lower-right",
+   "from": "B2",
+   "face": "cheer"
+  }
+ }
+}
