@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.2.2 (2026-11-24)
+
+- **Film check, first 30 s:** each beat start counts as a new picture (FORMAT §4c). Collage beats that grow out of the
+  same blank paper were missed, so the longest gap read too long (15.8 s for the sky template; now 7.2 s). The same
+  measure feeds the `pace` gate.
+- The film check names FORMAT by its path (`skills/ve-director/doc/formats/vox-host/FORMAT.md`).
+- `doc_lint` shows the "Bible quotes are compared only with facts.md" note only when the script has a scripture
+  reference.
+
 ## 1.2.1 (2026-11-24)
 
 Fixes from running each template once more from a clean clone:
