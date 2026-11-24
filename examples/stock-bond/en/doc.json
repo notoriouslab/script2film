@@ -1,0 +1,224 @@
+{
+ "title": "The 60/40 Portfolio",
+ "lang": "en",
+ "theme": "lecture-finance",
+ "speaker": "Host",
+ "voice": {
+  "ref_wav": "refs/narrator.wav",
+  "ref_text": "refs/narrator.txt",
+  "seed": 11,
+  "tail_fade": 0.08
+ },
+ "gaps": {
+  "default": 0.55
+ },
+ "rise": "green",
+ "facts": "facts.md",
+ "lines": [
+  {
+   "text": "60/40: many call it the golden ratio of investing.",
+   "tts": "Sixty-forty: many call it the golden ratio of investing."
+  },
+  {
+   "text": "60% in stocks, 40% in bonds, rebalanced once a year.",
+   "tts": "Sixty percent in stocks, forty in bonds, rebalanced once a year."
+  },
+  {
+   "text": "In the 2008 crash, US stocks fell 37% in a year.",
+   "tts": "In the 2008 crash, US stocks fell thirty-seven percent in a year."
+  },
+  {
+   "text": "The same year, Treasury bonds rose 20%, and 60/40 lost only 14%.",
+   "tts": "The same year, Treasury bonds rose twenty percent, and sixty-forty lost only fourteen."
+  },
+  {
+   "text": "But in 2022 both fell together, and 60/40 lost 18%.",
+   "tts": "But in 2022 both fell together, and sixty-forty lost eighteen percent."
+  },
+  {
+   "text": "So it doesn't promise you won't lose. It makes most bad years a little shallower."
+  },
+  {
+   "text": "The numbers are from NYU's public data. This is not investment advice."
+  }
+ ],
+ "beats": [
+  {
+   "id": "B1",
+   "lines": [
+    1
+   ],
+   "source": "code",
+   "scene": "cover",
+   "params": {
+    "series": "Money in a minute",
+    "title": "The 60/40 Portfolio",
+    "sub": "60% stocks · 40% bonds",
+    "sub_at": "60/40",
+    "at": 0.2,
+    "cx": 1300,
+    "size": 116
+   }
+  },
+  {
+   "id": "B2",
+   "lines": [
+    2
+   ],
+   "source": "code",
+   "scene": "pie",
+   "params": {
+    "title": "Sixty-forty",
+    "items": [
+     {
+      "label": "Stocks",
+      "value": 60,
+      "at": "stocks"
+     },
+     {
+      "label": "Bonds",
+      "value": 40,
+      "at": "bonds"
+     }
+    ],
+    "center": {
+     "text": "Rebalance",
+     "sub": "once a year",
+     "at": "once a year"
+    },
+    "hot": 0
+   }
+  },
+  {
+   "id": "B3",
+   "lines": [
+    3
+   ],
+   "source": "code",
+   "scene": "stat_count",
+   "params": {
+    "value": 37,
+    "prefix": "−",
+    "suffix": "%",
+    "caption": "2008: US stocks (S&P 500, with dividends)",
+    "at": 0.3,
+    "hot": true
+   }
+  },
+  {
+   "id": "B4",
+   "lines": [
+    4
+   ],
+   "source": "code",
+   "scene": "bars",
+   "params": {
+    "title": "2008, change (%)",
+    "unit": "%",
+    "items": [
+     {
+      "label": "Stocks, down",
+      "value": 37,
+      "dir": "down",
+      "at": "same year"
+     },
+     {
+      "label": "Bonds, up",
+      "value": 20,
+      "dir": "up",
+      "at": "Treasury"
+     },
+     {
+      "label": "60/40, down",
+      "value": 14,
+      "dir": "down",
+      "at": "14%"
+     }
+    ],
+    "hot": 2
+   }
+  },
+  {
+   "id": "B5",
+   "lines": [
+    5
+   ],
+   "source": "code",
+   "scene": "bars",
+   "params": {
+    "title": "2022, change (%)",
+    "unit": "%",
+    "max": 37,
+    "items": [
+     {
+      "label": "Stocks, down",
+      "value": 18,
+      "dir": "down",
+      "at": "both"
+     },
+     {
+      "label": "Bonds, down",
+      "value": 18,
+      "dir": "down",
+      "at": "together"
+     },
+     {
+      "label": "60/40, down",
+      "value": 18,
+      "dir": "down",
+      "at": "18%"
+     }
+    ],
+    "hot": 2
+   }
+  },
+  {
+   "id": "B6",
+   "lines": [
+    6
+   ],
+   "source": "code",
+   "scene": "formula",
+   "params": {
+    "terms": [
+     {
+      "text": "never lose",
+      "at": 0.2
+     }
+    ],
+    "strike": [
+     {
+      "i": 0,
+      "at": "won't lose",
+      "to": "bad years, a little shallower",
+      "to_at": "It makes"
+     }
+    ],
+    "note": "Bonds = US 10-year Treasury; rebalanced to 60/40 each January"
+   }
+  },
+  {
+   "id": "B7",
+   "lines": [
+    7
+   ],
+   "source": "clip",
+   "clip": "host/tp_host.mp4",
+   "clip_sync": true
+  }
+ ],
+ "pip": {
+  "clip": "host/tp_host.mp4",
+  "beats": [
+   "B1",
+   "B2"
+  ],
+  "crop": [
+   680,
+   680,
+   620,
+   20
+  ],
+  "d": 280
+ }
+}

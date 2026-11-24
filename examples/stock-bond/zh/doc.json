@@ -1,0 +1,221 @@
+{
+ "title": "股債比的黃金比例",
+ "lang": "zh",
+ "theme": "lecture-finance",
+ "speaker": "主持人",
+ "voice": {
+  "ref_wav": "refs/narrator.wav",
+  "ref_text": "refs/narrator.txt",
+  "seed": 11,
+  "tail_fade": 0.08
+ },
+ "gaps": {
+  "default": 0.55,
+  "after": {
+   "6": 1.0
+  }
+ },
+ "facts": "facts.md",
+ "lines": [
+  {
+   "text": "股六債四，很多人叫它投資的黃金比例。"
+  },
+  {
+   "text": "六成放股票，四成放債券，每年調回這個比例。"
+  },
+  {
+   "text": "二〇〇八年金融海嘯，美國股市一年跌了三成七。"
+  },
+  {
+   "text": "同一年公債漲了兩成，股六債四只跌了一成四。"
+  },
+  {
+   "text": "但二〇二二年股債一起跌，股六債四也跌了一成八。"
+  },
+  {
+   "text": "所以它不保證不賠，而是讓大多數的壞年份跌得淺一點。"
+  },
+  {
+   "text": "數字來自紐約大學的公開資料。這不是投資建議。"
+  }
+ ],
+ "beats": [
+  {
+   "id": "B1",
+   "lines": [
+    1
+   ],
+   "source": "code",
+   "scene": "cover",
+   "params": {
+    "series": "一分鐘理財",
+    "title": "股債比的黃金比例",
+    "sub": "股六債四",
+    "sub_at": "股六債四",
+    "at": 0.2,
+    "cx": 1300,
+    "size": 116
+   }
+  },
+  {
+   "id": "B2",
+   "lines": [
+    2
+   ],
+   "source": "code",
+   "scene": "pie",
+   "params": {
+    "title": "股六債四",
+    "items": [
+     {
+      "label": "股票",
+      "value": 60,
+      "at": "股票"
+     },
+     {
+      "label": "債券",
+      "value": 40,
+      "at": "債券"
+     }
+    ],
+    "center": {
+     "text": "每年調回",
+     "sub": "一年一次",
+     "at": "每年"
+    },
+    "hot": 0
+   }
+  },
+  {
+   "id": "B3",
+   "lines": [
+    3
+   ],
+   "source": "code",
+   "scene": "stat_count",
+   "params": {
+    "value": 37,
+    "prefix": "−",
+    "suffix": "%",
+    "caption": "2008 年 美國股市（S&P 500，含股息）",
+    "at": 0.3,
+    "hot": true
+   }
+  },
+  {
+   "id": "B4",
+   "lines": [
+    4
+   ],
+   "source": "code",
+   "scene": "bars",
+   "params": {
+    "title": "2008 年漲跌（%）",
+    "unit": "%",
+    "items": [
+     {
+      "label": "股票 跌",
+      "value": 37,
+      "dir": "down",
+      "at": "同一年"
+     },
+     {
+      "label": "公債 漲",
+      "value": 20,
+      "dir": "up",
+      "at": "公債"
+     },
+     {
+      "label": "股六債四 跌",
+      "value": 14,
+      "dir": "down",
+      "at": "一成四"
+     }
+    ],
+    "hot": 2
+   }
+  },
+  {
+   "id": "B5",
+   "lines": [
+    5
+   ],
+   "source": "code",
+   "scene": "bars",
+   "params": {
+    "title": "2022 年漲跌（%）",
+    "unit": "%",
+    "max": 37,
+    "items": [
+     {
+      "label": "股票 跌",
+      "value": 18,
+      "dir": "down",
+      "at": "股債"
+     },
+     {
+      "label": "公債 跌",
+      "value": 18,
+      "dir": "down",
+      "at": "一起跌"
+     },
+     {
+      "label": "股六債四 跌",
+      "value": 18,
+      "dir": "down",
+      "at": "一成八"
+     }
+    ],
+    "hot": 2
+   }
+  },
+  {
+   "id": "B6",
+   "lines": [
+    6
+   ],
+   "source": "code",
+   "scene": "formula",
+   "params": {
+    "terms": [
+     {
+      "text": "不賠",
+      "at": 0.2
+     }
+    ],
+    "strike": [
+     {
+      "i": 0,
+      "at": "不保證不賠",
+      "to": "壞年份跌得淺一點",
+      "to_at": "而是"
+     }
+    ],
+    "note": "債券＝美國十年期公債；每年初調回 60/40"
+   }
+  },
+  {
+   "id": "B7",
+   "lines": [
+    7
+   ],
+   "source": "clip",
+   "clip": "host/tp_host.mp4",
+   "clip_sync": true
+  }
+ ],
+ "pip": {
+  "clip": "host/tp_host.mp4",
+  "beats": [
+   "B1",
+   "B2"
+  ],
+  "crop": [
+   680,
+   680,
+   620,
+   20
+  ],
+  "d": 280
+ }
+}
