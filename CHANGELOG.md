@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.2.1 (2026-11-24)
+
+Fixes from running each template once more from a clean clone:
+
+- **king:** the title card is dark brown instead of pure black, so `film_check.py` passes (it reads a black card as a
+  black gap); the README now runs `film_check.py` after `render`.
+- **sky:** the photos on beats 6 and 8 are smaller, so their credit labels stay clear of the subtitles.
+- **stock-bond:** the README says the host is in the circle for the first two lines (it said six).
+- `.gitignore` covers the `.sha256` marker copied up from `premade/` and `film_check.py`'s `*.check.json` report.
+
+The premade packs are unchanged and still come from the v1.2.0 release.
+
 ## 1.2.0 (2026-11-24)
 
 - **Comic avatar host** (`"avatar"` in doc.json): a narrator's comic sticker pack instead of a TalkingPhoto host. A
