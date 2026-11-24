@@ -31,6 +31,45 @@ with no account and no API key.
 - **Agents run it from the docs.** In basic trials, three different agents read only the docs in this repository and
   each made a film that passed the checks, including a local model on a laptop and DeepSeek on its free tier.
 
+## Your first film: pick a template, paste one sentence
+
+Verified so far on Apple Silicon Macs (tested on a MacBook Pro M3 Max). None of the four templates needs an account:
+the host and the drama come with premade clips.
+
+1. **Get the project** (not sure how? ask your AI):
+
+   ```bash
+   git clone https://github.com/notoriouslab/script2film.git
+   ```
+
+2. **Run the install check.** It only checks and installs nothing; it tells you what is missing and how to install
+   it. A first install takes about 30 minutes and about 7 GB of downloads, most of it the voice step
+   ([docs/INSTALL.md](./docs/INSTALL.md)).
+
+   ```bash
+   python3 tools/doctor/doctor.py
+   ```
+
+3. **Open your agent in this folder** and paste one of these:
+
+| Preview | Template | Paste to your agent |
+|---|---|---|
+| <img src="./docs/site/templates/sky-en.jpg" width="240" alt=""> | **Why is the sky blue?**<br>collage explainer, no host | `Follow the docs and make examples/sky/en into a film.` |
+| <img src="./docs/site/templates/desktop-short-en.jpg" width="240" alt=""> | **Claude Code Desktop in 35 seconds**<br>tutorial, comic avatar host | `Follow the docs and make examples/desktop-short/en into a film.` |
+| <img src="./docs/site/templates/stock-bond-en.jpg" width="240" alt=""> | **The 60/40 portfolio**<br>finance, talking host (premade) | `Follow the docs and make examples/stock-bond/en into a film.` |
+| <img src="./docs/site/templates/king-en.jpg" width="240" alt=""> | **An engineer wakes up as the King of France**<br>short drama, lip-synced actors (premade) | `Follow the docs and make examples/king/en into a film.` |
+
+Each template also has a Chinese version (`zh/` next to `en/`), and each folder has a README with the commands and
+what a right result looks like. The smallest example is still [examples/coffee/](./examples/coffee/), four lines of
+about 25 seconds: `Follow the docs and make examples/coffee into a film.`
+
+Agents load [AGENTS.md](./AGENTS.md) (the always-on rules) and the `script2film` skill
+([skills/script2film/SKILL.md](./skills/script2film/SKILL.md)) from the workspace root; the skills are linked into
+`.agents/skills/` and `.claude/skills/` (on Windows the links need git `core.symlinks`).
+
+Also there: [examples/brewing/](./examples/brewing/), five lines in Chinese with a generated shot and a lip-synced host,
+and [examples/install-desktop/](./examples/install-desktop/), an 88-second install guide with the comic avatar host.
+
 ## It is not another video editor
 
 Most AI editing tools trim footage you already shot and add subtitles. Script2Film starts from the idea: the film is
@@ -145,36 +184,6 @@ The author uses it every week on two channels. One film of each of four kinds; e
 
 Channels: [NotoriousLab](https://www.youtube.com/channel/UCut6SxDwtJHblGQgX6LuTgA) (English) ·
 [Jacob Mei](https://www.youtube.com/channel/UC7uSiyB1XIv71SPaWEzF3pw) (Chinese)
-
-## Your first film in three steps
-
-Verified so far on Apple Silicon Macs (tested on a MacBook Pro M3 Max). The first example is a four-line English film
-of about 25 seconds and needs no account.
-
-1. **Get the project** (not sure how? ask your AI):
-
-   ```bash
-   git clone https://github.com/notoriouslab/script2film.git
-   ```
-
-2. **Run the install check.** It only checks and installs nothing; it tells you what is missing and how to install
-   it. A first install takes about 30 minutes and about 7 GB of downloads, most of it the voice step
-   ([docs/INSTALL.md](./docs/INSTALL.md)).
-
-   ```bash
-   python3 tools/doctor/doctor.py
-   ```
-
-3. **Open your agent in this folder** and tell it:
-
-   > Follow the docs and make examples/coffee into a film.
-
-Agents load [AGENTS.md](./AGENTS.md) (the always-on rules) and the `script2film` skill
-([skills/script2film/SKILL.md](./skills/script2film/SKILL.md)) from the workspace root; the skills are linked into
-`.agents/skills/` and `.claude/skills/` (on Windows the links need git `core.symlinks`).
-
-Next: [examples/brewing/](./examples/brewing/), five lines in Chinese with a generated shot and a lip-synced host. Its
-`premade/` folder holds the generated files, so it also needs no account.
 
 ## Seven stages, and each one leaves a file behind
 

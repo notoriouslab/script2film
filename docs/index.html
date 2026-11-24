@@ -114,6 +114,51 @@
     </div>
   </header>
 
+  <section id="start">
+    <div class="wrap">
+      <div class="kicker">開始</div>
+      <h2>挑一個範本，貼一句話</h2>
+      <ol class="tpl-steps">
+        <li><b>抓專案</b><code id="clone-cmd">git clone https://github.com/notoriouslab/script2film.git</code></li>
+        <li><b>檢查安裝</b><code>python3 tools/doctor/doctor.py</code><span>只檢查、不安裝；新機器第一次約 30 分鐘、下載約 7 GB，步驟在 <a
+              href="https://github.com/notoriouslab/script2film/blob/main/docs/INSTALL.md" class="gh-doc"
+              data-path="docs/INSTALL.md" target="_blank" rel="noopener">安裝文件</a></span></li>
+        <li><b>打開 agent</b><span>在那個資料夾打開你的 agent，把下面卡片上的那一句貼給它</span></li>
+      </ol>
+      <p class="intro">目前在 Apple Silicon 的 Mac 上驗證過。</p>
+      <div class="tpls">
+        <div class="tpl">
+          <video src="site/templates/sky-zh.mp4" poster="site/templates/sky-zh.jpg" muted loop playsinline preload="none" width="960" height="540"></video>
+          <div class="body"><span class="tag">拼貼解說・不用帳號</span><b>天空為什麼是藍的？</b>
+            <p>剪紙拼貼風的科普短片：公有領域照片加程式畫的圖解，約 40 秒。</p>
+            <div class="say-chip"><span class="txt" id="say-sky">照文件把 examples/sky/zh 做成片</span><button class="copy" data-copy="say-sky" data-done="已複製">複製</button></div>
+            <small>英文版：<code>examples/sky/en</code></small></div>
+        </div>
+        <div class="tpl">
+          <video src="site/templates/desktop-short-zh.mp4" poster="site/templates/desktop-short-zh.jpg" muted loop playsinline preload="none" width="960" height="540"></video>
+          <div class="body"><span class="tag">教學・漫畫頭貼代主持</span><b>35 秒學會 Claude Code Desktop</b>
+            <p>操作步驟由程式畫，虛構角色阿華探頭、在角落掛小徽章，約 35 秒。</p>
+            <div class="say-chip"><span class="txt" id="say-desktop-short">照文件把 examples/desktop-short/zh 做成片</span><button class="copy" data-copy="say-desktop-short" data-done="已複製">複製</button></div>
+            <small>英文版：<code>examples/desktop-short/en</code></small></div>
+        </div>
+        <div class="tpl">
+          <video src="site/templates/stock-bond-zh.mp4" poster="site/templates/stock-bond-zh.jpg" muted loop playsinline preload="none" width="960" height="540"></video>
+          <div class="body"><span class="tag">財經・對嘴主持人</span><b>股六債四</b>
+            <p>圖表配 AI 主持人；主持人片段附在預製包裡，不用 TalkingPhotos 帳號，約 32 秒。</p>
+            <div class="say-chip"><span class="txt" id="say-stock-bond">照文件把 examples/stock-bond/zh 做成片</span><button class="copy" data-copy="say-stock-bond" data-done="已複製">複製</button></div>
+            <small>英文版：<code>examples/stock-bond/en</code></small></div>
+        </div>
+        <div class="tpl">
+          <video src="site/templates/king-zh.mp4" poster="site/templates/king-zh.jpg" muted loop playsinline preload="none" width="960" height="540"></video>
+          <div class="body"><span class="tag">短劇・演員對嘴</span><b>理工男重生法國國王</b>
+            <p>八個鏡頭的喜劇，台詞都由角色說出，配輕爵士；鏡頭附在預製包裡，不用 VideoExpress 帳號，約 33 秒。</p>
+            <div class="say-chip"><span class="txt" id="say-king">照文件把 examples/king/zh 做成片</span><button class="copy" data-copy="say-king" data-done="已複製">複製</button></div>
+            <small>英文版：<code>examples/king/en</code></small></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <section class="alt" id="facts">
     <div class="wrap">
       <div class="stats">
@@ -443,36 +488,6 @@ narration 23.7s, 4 lines; lowest 1.00; below 0.85: none</div>
       <p class="flow-note">每一家卡在哪、換別的 agent 怎麼排除，寫在 <a
           href="https://github.com/notoriouslab/script2film/blob/main/docs/AGENT-TRIALS.md" class="gh-doc"
           data-path="docs/AGENT-TRIALS.md" target="_blank" rel="noopener">試跑紀錄</a>（英文）。</p>
-    </div>
-  </section>
-
-  <section class="alt" id="start">
-    <div class="wrap">
-      <div class="kicker">開始</div>
-      <h2>三步，做出第一支片</h2>
-      <p class="intro">目前在 Apple Silicon 的 Mac 上驗證過（實測機型為 MacBook Pro M3 Max）。第一個範例是四句話、約 25 秒的英文片，不用任何帳號。</p>
-      <div class="start">
-        <div class="card">
-          <div class="n">1</div>
-          <h3>把專案抓下來（不懂怎麼做？問你的 AI）</h3>
-          <p>用 git 複製，或下載 ZIP 解開。</p>
-          <pre><code id="clone-cmd">git clone https://github.com/notoriouslab/script2film.git</code></pre>
-        </div>
-        <div class="card">
-          <div class="n">2</div>
-          <h3>跑安裝檢查</h3>
-          <p>它只檢查、不安裝，缺什麼會告訴你怎麼裝。新機器第一次安裝約 30 分鐘、下載約 7 GB，步驟在 <a
-              href="https://github.com/notoriouslab/script2film/blob/main/docs/INSTALL.md" class="gh-doc"
-              data-path="docs/INSTALL.md" target="_blank" rel="noopener">安裝文件</a>（英文）。</p>
-          <pre><code>python3 tools/doctor/doctor.py</code></pre>
-        </div>
-        <div class="card">
-          <div class="n">3</div>
-          <h3>在這個資料夾打開你的 agent</h3>
-          <p>然後跟它說：</p>
-          <div class="say">照文件把 examples/coffee 做成一支片。</div>
-        </div>
-      </div>
     </div>
   </section>
 

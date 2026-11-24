@@ -28,6 +28,42 @@
 - **AI agent 照文件就能跑。** 基本測試三家不同的 agent 只讀專案裡的文件，都做出通過檢查的片，包含一個在筆電上跑的本機模型，
   以及免費額度的 DeepSeek。
 
+## 挑一個範本，貼一句話，做出第一支片
+
+目前在 Apple Silicon 的 Mac 上驗證過（實測機型為 MacBook Pro M3 Max）。四個範本都不用任何帳號：主持人與短劇附了預製片段。
+
+1. **把專案抓下來**（不懂怎麼做？問你的 AI）：
+
+   ```bash
+   git clone https://github.com/notoriouslab/script2film.git
+   ```
+
+2. **跑安裝檢查。** 它只檢查、不安裝，缺什麼會告訴你怎麼裝。新機器第一次安裝約 30 分鐘、下載約 7 GB，大部分是配音那一步
+   （[docs/INSTALL.md](./docs/INSTALL.md)，英文）。
+
+   ```bash
+   python3 tools/doctor/doctor.py
+   ```
+
+3. **在這個資料夾打開你的 agent**，貼上其中一句：
+
+| 預覽 | 範本 | 貼給 agent |
+|---|---|---|
+| <img src="./docs/site/templates/sky-zh.jpg" width="240" alt=""> | **天空為什麼是藍的？**<br>拼貼解說，無主持人 | `照文件把 examples/sky/zh 做成片` |
+| <img src="./docs/site/templates/desktop-short-zh.jpg" width="240" alt=""> | **35 秒學會 Claude Code Desktop**<br>教學，漫畫頭貼代主持 | `照文件把 examples/desktop-short/zh 做成片` |
+| <img src="./docs/site/templates/stock-bond-zh.jpg" width="240" alt=""> | **股六債四**<br>財經，對嘴主持人（附預製） | `照文件把 examples/stock-bond/zh 做成片` |
+| <img src="./docs/site/templates/king-zh.jpg" width="240" alt=""> | **理工男重生法國國王**<br>短劇，演員對嘴（附預製） | `照文件把 examples/king/zh 做成片` |
+
+每個範本也有英文版（`en/` 在 `zh/` 旁邊），每個資料夾都有 README，寫了指令和做對了的樣子。最小的範例仍是
+[examples/coffee/](./examples/coffee/)，四句、約 25 秒的英文片：`照文件把 examples/coffee 做成一支片。`
+
+agent 從工作區根目錄載入 [AGENTS.md](./AGENTS.md)（每一輪都生效的規則）與 `script2film` skill
+（[skills/script2film/SKILL.md](./skills/script2film/SKILL.md)）；skill 用符號連結接到 `.agents/skills/` 與 `.claude/skills/`，
+Windows 要開 git 的 `core.symlinks`。
+
+另外還有：[examples/brewing/](./examples/brewing/)，五句中文旁白，有一個生成鏡頭與對嘴的主持人；
+[examples/install-desktop/](./examples/install-desktop/)，88 秒的安裝教學，由漫畫頭貼代主持。
+
 ## 它不是另一個剪輯軟體
 
 一般的 AI 剪輯工具幫你把拍好的素材剪短、上字幕。Script2Film 從想法出發：作品是照著你的想法做出來的。
@@ -122,34 +158,6 @@
 
 頻道：[NotoriousLab](https://www.youtube.com/channel/UCut6SxDwtJHblGQgX6LuTgA)（英文）・
 [Jacob Mei](https://www.youtube.com/channel/UC7uSiyB1XIv71SPaWEzF3pw)（中文）
-
-## 三步，做出第一支片
-
-目前在 Apple Silicon 的 Mac 上驗證過（實測機型為 MacBook Pro M3 Max）。第一個範例是四句話、約 25 秒的英文片，不用任何帳號。
-
-1. **把專案抓下來**（不懂怎麼做？問你的 AI）：
-
-   ```bash
-   git clone https://github.com/notoriouslab/script2film.git
-   ```
-
-2. **跑安裝檢查。** 它只檢查、不安裝，缺什麼會告訴你怎麼裝。新機器第一次安裝約 30 分鐘、下載約 7 GB，大部分是配音那一步
-   （[docs/INSTALL.md](./docs/INSTALL.md)，英文）。
-
-   ```bash
-   python3 tools/doctor/doctor.py
-   ```
-
-3. **在這個資料夾打開你的 agent**，然後跟它說：
-
-   > 照文件把 examples/coffee 做成一支片。
-
-agent 從工作區根目錄載入 [AGENTS.md](./AGENTS.md)（每一輪都生效的規則）與 `script2film` skill
-（[skills/script2film/SKILL.md](./skills/script2film/SKILL.md)）；skill 用符號連結接到 `.agents/skills/` 與 `.claude/skills/`，
-Windows 要開 git 的 `core.symlinks`。
-
-下一支：[examples/brewing/](./examples/brewing/)，五句中文旁白，有一個生成鏡頭與對嘴的主持人。生成好的檔附在 `premade/`，
-所以同樣不用帳號。
 
 ## 七個環節，凡走過的必留下痕跡
 

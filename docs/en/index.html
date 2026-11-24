@@ -114,6 +114,51 @@
     </div>
   </header>
 
+  <section id="start">
+    <div class="wrap">
+      <div class="kicker">Start</div>
+      <h2>Pick a template, paste one sentence</h2>
+      <ol class="tpl-steps">
+        <li><b>Get the project</b><code id="clone-cmd">git clone https://github.com/notoriouslab/script2film.git</code></li>
+        <li><b>Check the install</b><code>python3 tools/doctor/doctor.py</code><span>It only checks and installs nothing; a first install on a new machine takes about 30 minutes and about 7 GB of downloads, steps in the <a
+              href="https://github.com/notoriouslab/script2film/blob/main/docs/INSTALL.md" class="gh-doc"
+              data-path="docs/INSTALL.md" target="_blank" rel="noopener">install guide</a></span></li>
+        <li><b>Open your agent</b><span>Open your agent in that folder and paste it the sentence on a card below</span></li>
+      </ol>
+      <p class="intro">Verified so far on Apple Silicon Macs.</p>
+      <div class="tpls">
+        <div class="tpl">
+          <video src="../site/templates/sky-en.mp4" poster="../site/templates/sky-en.jpg" muted loop playsinline preload="none" width="960" height="540"></video>
+          <div class="body"><span class="tag">Collage explainer · no account</span><b>Why is the sky blue?</b>
+            <p>A science short in a cut-paper collage look: public-domain photos and diagrams drawn by code, about 46 seconds.</p>
+            <div class="say-chip"><span class="txt" id="say-sky">Follow the docs and make examples/sky/en into a film.</span><button class="copy" data-copy="say-sky" data-done="Copied">Copy</button></div>
+            <small>Chinese version: <code>examples/sky/zh</code></small></div>
+        </div>
+        <div class="tpl">
+          <video src="../site/templates/desktop-short-en.mp4" poster="../site/templates/desktop-short-en.jpg" muted loop playsinline preload="none" width="960" height="540"></video>
+          <div class="body"><span class="tag">Tutorial · comic avatar host</span><b>Claude Code Desktop in 35 seconds</b>
+            <p>The app steps are drawn by code, and a made-up character peeks in and keeps a badge in the corner. About 34 seconds.</p>
+            <div class="say-chip"><span class="txt" id="say-desktop-short">Follow the docs and make examples/desktop-short/en into a film.</span><button class="copy" data-copy="say-desktop-short" data-done="Copied">Copy</button></div>
+            <small>Chinese version: <code>examples/desktop-short/zh</code></small></div>
+        </div>
+        <div class="tpl">
+          <video src="../site/templates/stock-bond-en.mp4" poster="../site/templates/stock-bond-en.jpg" muted loop playsinline preload="none" width="960" height="540"></video>
+          <div class="body"><span class="tag">Finance · talking host</span><b>The 60/40 portfolio</b>
+            <p>Charts with an AI host. The host clips come premade, so no TalkingPhotos account is needed. About 40 seconds.</p>
+            <div class="say-chip"><span class="txt" id="say-stock-bond">Follow the docs and make examples/stock-bond/en into a film.</span><button class="copy" data-copy="say-stock-bond" data-done="Copied">Copy</button></div>
+            <small>Chinese version: <code>examples/stock-bond/zh</code></small></div>
+        </div>
+        <div class="tpl">
+          <video src="../site/templates/king-en.mp4" poster="../site/templates/king-en.jpg" muted loop playsinline preload="none" width="960" height="540"></video>
+          <div class="body"><span class="tag">Short drama · lip-synced actors</span><b>An engineer wakes up as the King of France</b>
+            <p>A comedy in eight shots: the characters speak every line, over light jazz. The shots come premade, so no VideoExpress account is needed. About 33 seconds.</p>
+            <div class="say-chip"><span class="txt" id="say-king">Follow the docs and make examples/king/en into a film.</span><button class="copy" data-copy="say-king" data-done="Copied">Copy</button></div>
+            <small>Chinese version: <code>examples/king/zh</code></small></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <section class="alt" id="facts">
     <div class="wrap">
       <div class="stats">
@@ -442,36 +487,6 @@ narration 23.7s, 4 lines; lowest 1.00; below 0.85: none</div>
       <p class="flow-note">Where each one got stuck, and how to get past it with another agent, is in the <a
           href="https://github.com/notoriouslab/script2film/blob/main/docs/AGENT-TRIALS.md" class="gh-doc"
           data-path="docs/AGENT-TRIALS.md" target="_blank" rel="noopener">trial notes</a>.</p>
-    </div>
-  </section>
-
-  <section class="alt" id="start">
-    <div class="wrap">
-      <div class="kicker">Start</div>
-      <h2>Your first film in three steps</h2>
-      <p class="intro">Verified so far on Apple Silicon Macs (tested on a MacBook Pro M3 Max). The first example is a four-line English film of about 25 seconds and needs no account.</p>
-      <div class="start">
-        <div class="card">
-          <div class="n">1</div>
-          <h3>Get the project (not sure how? ask your AI)</h3>
-          <p>Clone it with git, or download the ZIP and unpack it.</p>
-          <pre><code id="clone-cmd">git clone https://github.com/notoriouslab/script2film.git</code></pre>
-        </div>
-        <div class="card">
-          <div class="n">2</div>
-          <h3>Run the install check</h3>
-          <p>It only checks and installs nothing, and tells you what is missing and how to install it. A first install on a new machine takes about 30 minutes and about 7 GB of downloads; the steps are in the <a
-              href="https://github.com/notoriouslab/script2film/blob/main/docs/INSTALL.md" class="gh-doc"
-              data-path="docs/INSTALL.md" target="_blank" rel="noopener">install guide</a>.</p>
-          <pre><code>python3 tools/doctor/doctor.py</code></pre>
-        </div>
-        <div class="card">
-          <div class="n">3</div>
-          <h3>Open your agent in this folder</h3>
-          <p>Then tell it:</p>
-          <div class="say">Follow the docs and make examples/coffee into a film.</div>
-        </div>
-      </div>
     </div>
   </section>
 

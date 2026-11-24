@@ -19,6 +19,19 @@
   no account on screen, and it follows the theme's colours. The install-desktop example now uses it for the Desktop
   steps and ends with two lines on adding VideoExpress shots.
 
+- **Four templates, each in Chinese and English** (`examples/<template>/<zh|en>/`): why the sky is blue (Vox-style
+  collage), Claude Code Desktop in 35 seconds (comic avatar host), the 60/40 portfolio (talking host) and an engineer
+  waking up as the King of France (short drama with light jazz). Paste one sentence to the agent; the narration, host
+  clips and drama shots come from the v1.2.0 release through `tools/examples/fetch_premade.py` (SHA-256 checked), so
+  none needs an account. `tools/examples/pack_premade.py` packs them.
+- **Website and README:** the start section now comes right after the opening: three steps, then four template cards
+  with an 8-second preview each. The English pages again carry the Google Flow text in English.
+- **photo `color`:** `true` keeps a photo's own colours in the `collage` theme.
+- **drama_cut:** `sub_size` and `font_weight` (a weight of a variable font); `check` counts Arabic digits in a Chinese
+  line, so "1789" is no longer read as a cut-off line.
+- **Fixes:** `tp_multi.py` finds uploads whose name has `_` (TP shows it with spaces); `doc_avatar` also finds a
+  sticker pack one folder up (shared by a template's two languages); optional fonts download under their manifest names.
+
 ## 1.1.7 (2026-11-23)
 
 - **Three experimental ve-director rules** (`skills/ve-director/rules/07-experimental.md`): a trial batch of one shot

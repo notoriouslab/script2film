@@ -25,8 +25,8 @@
     f.referrerPolicy = "strict-origin-when-cross-origin";
     box.innerHTML = ""; box.appendChild(f); play.style.display = "none";
   });
-  // 展示頁的小格：捲到畫面裡才載入並播放，離開就停（27 支不會一次全載）
-  var tiles = document.querySelectorAll(".tile video");
+  // 展示頁的小格與首頁的範本卡：捲到畫面裡才載入並播放，離開就停（不會一次全載）
+  var tiles = document.querySelectorAll(".tile video, .tpl video");
   if (tiles.length && "IntersectionObserver" in window) {
     var io = new IntersectionObserver(function (es) {
       es.forEach(function (e) {
