@@ -212,7 +212,7 @@ def main():
     for x in base["listed"]:
         print("·", x["item"], x["value"])
     if not paced:
-        print("· pace check off (no pace in doc.json; turn it on for episodes made per FORMAT §4e)")
+        print("· pace check off (no pace in doc.json; turn it on for episodes made per skills/ve-director/doc/formats/vox-host/FORMAT.md §4e)")
     print(f"· frozen picture ≥{FREEZE_S:g}s (nothing above the subtitle band changes; listed, not blocking): "
           + (", ".join(f"{f['beat']} from {f['at']}s for {f['seconds']}s" for f in frozen) or "none"))
     print(f"· sparse cards (content share < {SPARSE:g}; listed, not blocking): " + (", ".join(f"{x['beat']} {x['share']:.2f}" for x in sparse) or "none"))

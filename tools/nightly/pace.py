@@ -6,7 +6,8 @@
   python3 tools/nightly/pace.py <集>/doc.json <成片.mp4> [<稿.md>]
 
 門檻與量法（出處：FORMAT.md §4c 與 §4e；量法沒有和 check.py 的停住段統一，兩邊的門檻各自是用自己的量法定的）：
-  1 前 30 秒相鄰兩次換畫面最長間隔 ≤ 5 秒      ffmpeg scene 0.15，去掉下方 22% 字幕帶
+  1 前 30 秒相鄰兩次換畫面最長間隔 ≤ 5 秒      ffmpeg scene 0.15，去掉下方 22% 字幕帶；再加上 beats.json 每拍的開頭（§4c：換拍就算
+                                               新畫面。拼貼的拍從空白紙面長出來，開頭那一格變化小於 0.15，只靠 scene 會漏）
   2 最長靜止 ≤ 6 秒                            每秒 2 格、縮到 160x90、去掉下方 22%，相鄰兩格平均差 < 2 算靜止
   3 每拍畫面字：標籤 ≤ 5 字、出處小字 ≤ 4 字    doc.json 各拍 params 的文字欄；只數英文與數字（數字算一個字），
                                                中文標籤沒有定過上限，不數；引言卡與截圖的內文只列不擋
@@ -37,9 +38,22 @@ def scene_cuts(mp4, seconds=None):
     return [float(m) for m in re.findall(r"pts_time:([\d.]+)", err)]
 
 
-def first30_gap(mp4):
-    """(longest stretch without a picture change in the first 30 s, [cut times])."""
-    cuts = scene_cuts(mp4, 30)
+MERGE_S = 0.5   # 拍的開頭離偵測到的換畫面點不到這麼久：算同一次，不另外加
+
+
+def beat_starts(ep):
+    """集資料夾 beats.json 裡每拍的開頭秒數；缺檔或讀不了：[]。"""
+    try:
+        return [float(b["start"]) for b in json.loads((Path(ep) / "beats.json").read_text(encoding="utf-8"))["beats"]]
+    except (OSError, ValueError, KeyError, TypeError):
+        return []
+
+
+def first30_gap(mp4, starts=()):
+    """(longest stretch without a picture change in the first 30 s, [cut times]).
+    starts: beat start times (beat_starts); each one counts as a change too (FORMAT §4c)."""
+    seen = scene_cuts(mp4, 30)
+    cuts = sorted(seen + [s for s in starts if 0 < s < 30 and all(abs(s - c) >= MERGE_S for c in seen)])
     edges = [0.0] + cuts + [30.0]
     return max(b - a for a, b in zip(edges, edges[1:])), cuts
 
@@ -112,7 +126,7 @@ def pace(P, doc, mp4, script, dur):
     if not plan.exists():
         sys.exit(f"✗ the pace check needs {plan} (run doc_sfx.py first)")
     mins = dur / 60
-    gap, cuts = first30_gap(mp4)
+    gap, cuts = first30_gap(mp4, beat_starts(P))
     still, at, share = longest_static(mp4)
     over, listed = text_over(doc)
     kept = len(json.loads(plan.read_text(encoding="utf-8"))["kept"])

@@ -29,9 +29,10 @@
                  配樂沒讓開，可能蓋過人聲。依據（2026-11-20 量 57 支已上架片）：唯一被聽出配樂蓋人聲的一集（-20、沒 duck）
                  -26.4；刻意熱鬧的時事解說 11 支（-20＋duck 6）-29.8～-31.7；其他系列 -34～-46。正例只有一支、和時事只差
                  3.4 dB，所以只列不擋，門檻取兩者中點。
-  first30    列  前 30 秒最長不換畫面（量法與上限 5 秒照 pace.py 的 first30_gap，FORMAT §4c／§4e）。集資料夾有 doc.json＋beats.json 時，
-                 封面拍（scene "cover"）那段不算（2026-11-20 定：系列固定開場的封面可以停久一點）。§4c 寫所有長片都適用，但擋片
-                 只在開了 pace 的片；2026-11-20 量 22 支（封面扣掉）：開了 pace 的 4.5 秒，其他 5.7–16.4 秒，使用者都收了，所以這裡先列。
+  first30    列  前 30 秒最長不換畫面（量法與上限 5 秒照 pace.py 的 first30_gap，FORMAT §4c／§4e；集資料夾有 beats.json 時每拍
+                 開頭也算換畫面）。集資料夾有 doc.json＋beats.json 時，封面拍（scene "cover"）那段不算（2026-11-20 定：系列固定開場
+                 的封面可以停久一點）。§4c 寫所有長片都適用，但擋片只在開了 pace 的片；2026-11-20 量 22 支（封面扣掉，當時還沒算
+                 拍的開頭）：開了 pace 的 4.5 秒，其他 5.7–16.4 秒，使用者都收了，所以這裡先列。
 系列門檻：系列資料夾（集資料夾的上一層）放 film_check.json，例
   {"lufs": -14, "lufs_tol": 0.8, "max_tp": -1.0, "skip": [{"item": "black_mid", "why": "刻意用黑場轉場"}]}
   缺鍵用預設；skip 的 item 不在代號表或 why 空白：設定錯誤（exit 2）。
@@ -195,10 +196,10 @@ def cover_spans(ep):
     return [(float(b["start"]), float(b["end"])) for b in beats if b.get("id") in covers]
 
 
-def first30(mp4, covers=()):
-    """前 30 秒最長不換畫面的秒數，封面那段扣掉。換畫面點照 pace.first30_gap 的量法。"""
+def first30(mp4, covers=(), starts=()):
+    """前 30 秒最長不換畫面的秒數，封面那段扣掉。換畫面點照 pace.first30_gap 的量法（starts：每拍開頭）。"""
     from pace import first30_gap
-    _, cuts = first30_gap(str(mp4))
+    _, cuts = first30_gap(str(mp4), starts)
     edges = [0.0] + cuts + [30.0]
     return max((b - a) - sum(max(0.0, min(b, ce) - max(a, cs)) for cs, ce in covers) for a, b in zip(edges, edges[1:]))
 
@@ -269,10 +270,10 @@ def basic(mp4, *, standard=None, skip=(), sfx_bed=None, ep=None):
                            "value": f"{q:.1f} dB" + (f"; louder than {qmax}: music may be covering the voice between lines"
                                                       if q > qmax else "")})
     if "first30" not in skipped and p["v"] is not None:
-        from pace import GAP_S
-        g = first30(mp4, cover_spans(ep) if ep else [])
+        from pace import GAP_S, beat_starts
+        g = first30(mp4, cover_spans(ep) if ep else [], beat_starts(ep) if ep else [])
         listed.append({"code": "first30", "item": "longest stretch without a new picture in the first 30 s, cover left out "
-                       "(listed, not blocking)", "value": f"{g:.1f}s" + (f"; over {GAP_S:.0f}s (FORMAT §4c)" if g > GAP_S else "")})
+                       "(listed, not blocking)", "value": f"{g:.1f}s" + (f"; over {GAP_S:.0f}s (skills/ve-director/doc/formats/vox-host/FORMAT.md §4c)" if g > GAP_S else "")})
     return {"ok": all(x["ok"] for x in items), "items": items, "listed": listed,
             "size": Path(mp4).stat().st_size, "sha256": sha256(mp4), "skipped": sorted(skipped)}
 

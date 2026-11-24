@@ -104,12 +104,21 @@ def test_lint_rule_switch_and_paths(tmp_path):
 
 
 def test_scripture_note(tmp_path, monkeypatch):
-    assert "not with a full Bible text" in doc_facts.scripture_note({"facts": "facts.md"})
-    assert doc_facts.scripture_note({}) is None
+    zh = {"facts": "facts.md", "beats": [{"params": {"by": "出埃及記 14:13"}}]}
+    assert "not with a full Bible text" in doc_facts.scripture_note(zh)
+    assert doc_facts.scripture_note({"facts": "facts.md", "lines": [{"text": "as Exodus 14:13 says"}]}) is not None
+    assert doc_facts.scripture_note({"beats": zh["beats"]}) is None          # no facts list
     monkeypatch.setenv("S2F_ASSETS_LOCAL", str(tmp_path))          # a file in the asset layer does not silence the note
     (tmp_path / "bible").mkdir(parents=True)
     (tmp_path / "bible/cuv.json").write_text("{}")
-    assert doc_facts.scripture_note({"facts": "facts.md"}) is not None
+    assert doc_facts.scripture_note(zh) is not None
+
+
+def test_no_scripture_note_without_a_reference():
+    """A physics or finance film with a facts list: no Bible note. A chapter range or a time is not a reference."""
+    doc = {"facts": "facts.md", "lines": [{"text": "Rayleigh worked it out in 1871."}, {"text": "出埃及記 13–21 章"}],
+           "beats": [{"params": {"value": "−37%", "cap": "Sunset | Wikimedia Commons, CC0"}}]}
+    assert doc_facts.scripture_note(doc) is None
 
 
 FACTS_HEAD = "| 畫面 | 等級 | 出處 | 原文摘錄 | 備註 |\n|---|---|---|---|---|\n"

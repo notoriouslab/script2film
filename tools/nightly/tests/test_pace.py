@@ -40,6 +40,25 @@ def test_subtitle_band_does_not_count_as_a_change(tmp_path):
     assert gap == 30.0 and cuts == []
 
 
+def test_beat_starts_count_as_changes(tmp_path):
+    """A collage beat grows out of the same blank paper, so scene misses the cut; the beat start still counts (FORMAT §4c)."""
+    f = film(tmp_path, [(30, "gray")])
+    gap, cuts = pace.first30_gap(f, [0.0, 4.0, 8.0, 12.0, 16.0, 20.0, 24.0, 28.0, 33.0])
+    assert gap == 4.0 and cuts == [4.0, 8.0, 12.0, 16.0, 20.0, 24.0, 28.0]   # 0 and past 30 s left out
+
+
+def test_a_beat_start_next_to_a_detected_cut_is_one_change(tmp_path):
+    f = film(tmp_path, [(4, "red"), (26, "blue")])
+    gap, cuts = pace.first30_gap(f, [0.0, 4.2])
+    assert len(cuts) == 1 and abs(cuts[0] - 4.0) < 0.1
+
+
+def test_beat_starts_from_the_episode(tmp_path):
+    (tmp_path / "beats.json").write_text(json.dumps({"beats": [{"id": "B1", "start": 0, "end": 3}, {"id": "B2", "start": 3.5, "end": 9}]}))
+    assert pace.beat_starts(tmp_path) == [0.0, 3.5]
+    assert pace.beat_starts(tmp_path / "nowhere") == []
+
+
 def test_longest_static(tmp_path):
     still, at, share = pace.longest_static(film(tmp_path, [(2, "move"), (5, "gray"), (2, "move")], "a.mp4"))
     assert 4.5 <= still <= 5.5 and 1.5 <= at <= 2.5 and still <= pace.STATIC_S
@@ -90,7 +109,7 @@ def episode(tmp, kept, md=MD):
 
 def test_pace_items_and_rates(tmp_path, monkeypatch):
     mp4 = episode(tmp_path, kept=3)
-    monkeypatch.setattr(pace, "first30_gap", lambda m: (4.0, [4.0]))   # a 12 s film: the 30 s window is tested above
+    monkeypatch.setattr(pace, "first30_gap", lambda m, starts=(): (4.0, [4.0]))   # a 12 s film: the 30 s window is tested above
     items = pace.pace(tmp_path, {"beats": []}, mp4, "稿.md", 60.0)     # one minute: 3 sounds, 2 citations
     assert [x["ok"] for x in items] == [True, True, True, True, False]
     items = pace.pace(tmp_path, {"beats": []}, mp4, "稿.md", 120.0)    # two minutes: 1.5 and 1.0 a minute

@@ -118,10 +118,14 @@ def strings(v):
             yield from strings(x)
 
 
+REF_EN = re.compile(r"\b(?:[1-3] )?[A-Z][a-z]+ \d+:\d+")   # Exodus 14:13, 1 John 4:8 (only to decide on the note below)
+
+
 def scripture_note(doc):
-    """One line for a doc with a facts list: quotes are compared with the excerpts in facts.md only. Nothing here reads a
-    full Bible text, so the excerpts themselves are trusted."""
-    if doc.get("facts"):
+    """One line for a doc with a facts list and a scripture reference anywhere in it (narration, on-screen text): quotes
+    are compared with the excerpts in facts.md only. Nothing here reads a full Bible text, so the excerpts themselves are
+    trusted. A doc with no reference (a physics or finance film) gets no note."""
+    if doc.get("facts") and any(refs(t) or REF_EN.search(t) for t in strings(doc)):
         return ("facts: Bible quotes are compared only with the excerpts in facts.md, not with a full Bible text "
                 "(copy the excerpts from the Bible and have someone check them)")
     return None
