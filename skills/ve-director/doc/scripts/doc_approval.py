@@ -26,15 +26,16 @@ def fingerprint(doc):
 
 
 def bundled(examples=EXAMPLES):
-    """{fingerprint: example name} from examples/*/expected.json "script_approved"."""
+    """{fingerprint: example name} from examples/*/expected.json "script_approved", and from the templates one folder
+    down (examples/<template>/<lang>/expected.json; the name is then "<template>/<lang>")."""
     out = {}
-    for f in sorted(Path(examples).glob("*/expected.json")):
+    for f in sorted([*Path(examples).glob("*/expected.json"), *Path(examples).glob("*/*/expected.json")]):
         try:
             h = json.loads(f.read_text(encoding="utf-8")).get("script_approved")
         except (OSError, ValueError, AttributeError):
             continue
         if isinstance(h, str) and h:
-            out[h] = f.parent.name
+            out[h] = f.parent.relative_to(Path(examples)).as_posix()
     return out
 
 

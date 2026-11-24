@@ -65,6 +65,69 @@ examples/*/checklist_answers.json
 examples/*/script_approval.json
 examples/*/preview/
 examples/*/avatar/*/faces_check.png
+# templates: examples/<template>/{zh,en}/ are projects one level down; premade/ comes from a GitHub Release (fetch_premade.py)
+examples/*/zh/tts/
+examples/*/zh/tts_lines/
+examples/*/zh/voice.cleaned/
+examples/*/zh/beats.json
+examples/*/zh/beats_est.json
+examples/*/zh/code_*/
+examples/*/zh/shell_*/
+examples/*/zh/picks_*/
+examples/*/zh/cut_*/
+examples/*/zh/cut_*.json
+examples/*/zh/frames/
+examples/*/zh/concat_list.txt
+examples/*/zh/nightly/
+examples/*/zh/ve_*/
+examples/*/zh/ve-runs/
+examples/*/zh/host/
+examples/*/zh/storyboard_*.md
+examples/*/zh/checklist_answers.json
+examples/*/zh/script_approval.json
+examples/*/zh/preview/
+examples/*/zh/avatar/*/faces_check.png
+examples/*/zh/premade/
+examples/*/en/tts/
+examples/*/en/tts_lines/
+examples/*/en/voice.cleaned/
+examples/*/en/beats.json
+examples/*/en/beats_est.json
+examples/*/en/code_*/
+examples/*/en/shell_*/
+examples/*/en/picks_*/
+examples/*/en/cut_*/
+examples/*/en/cut_*.json
+examples/*/en/frames/
+examples/*/en/concat_list.txt
+examples/*/en/nightly/
+examples/*/en/ve_*/
+examples/*/en/ve-runs/
+examples/*/en/host/
+examples/*/en/storyboard_*.md
+examples/*/en/checklist_answers.json
+examples/*/en/script_approval.json
+examples/*/en/preview/
+examples/*/en/avatar/*/faces_check.png
+examples/*/en/premade/
+# drama templates (tools/drama): the VE clips and music come with premade/; drama_cut.py writes .<cut stem>/ and <name>.mp4/.srt
+examples/*/zh/clips/
+examples/*/en/clips/
+examples/*/zh/music.wav
+examples/*/en/music.wav
+examples/*/zh/.cut/
+examples/*/en/.cut/
+examples/*/zh/*.mp4
+examples/*/en/*.mp4
+examples/*/zh/*.srt
+examples/*/en/*.srt
+examples/*/score/
+# logs of the TalkingPhoto runs and the host-look candidates
+examples/*/tp_multi*.log
+examples/*/*/tp_host.log
+examples/*/look/
+# VideoExpress actor ids belong to one account; the README says how to make your own
+examples/*/masters.json
 
 # 規格與每一期的紀錄：只留在本機，不公開
 openspec/

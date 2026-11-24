@@ -10,20 +10,20 @@ import lexicon  # noqa: E402
 CASES = [("姪兒來了", "侄兒來了"), ("不要罣慮", "不要掛慮"), ("徬徨的時候", "彷徨的時候"), ("仇敵常藉環境", "仇敵常借環境"),
          ("眾人唱和散那", "眾人唱，和散那"), ("什一奉獻", "十一奉獻"), ("使徒行傳十八章", "使徒行撰十八章"),
          ("一他連得銀子", "一「他連得」銀子"), ("讓應許成為禱告", "讓硬許成為禱告"), ("白髮為老年人的尊榮", "白法為老年人的尊榮"),
-         ("帶著孩子", "帶着孩子")]
+         ("帶著孩子", "帶着孩子"), ("照 docs/INSTALL.md 裝好", "照 docs 斜線 install 點 M D 裝好")]
 
 
 EN_CASES = [("follow docs/INSTALL.md.", "follow docs slash install dot M D.")]
 
 
-def test_table_has_these_twelve_rules():
-    assert len(lexicon.load()) == len(CASES) + len(EN_CASES) == 12 and lexicon.problems(lexicon.load()) == []
+def test_table_has_these_thirteen_rules():
+    assert len(lexicon.load()) == len(CASES) + len(EN_CASES) == 13 and lexicon.problems(lexicon.load()) == []
 
 
 @pytest.mark.parametrize("text,want", EN_CASES)
 def test_each_english_rule(text, want):
     assert lexicon.spoken(text, "en") == want and lexicon.spoken(want, "en") == want
-    assert lexicon.spoken(text, "zh") == text            # an English rule leaves Chinese narration alone
+    assert "slash" not in lexicon.spoken(text, "zh")     # an English rule leaves Chinese narration alone (zh has its own rule for the path)
 
 
 @pytest.mark.parametrize("text,want", CASES)

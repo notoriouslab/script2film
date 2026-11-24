@@ -74,13 +74,15 @@ function torn(n = 9, j = 1.4) {
   for (let i = n; i >= 0; i--) pts.push([rnd() * j, i / n * 100]);
   seed = s; return `polygon(${pts.map(([x, y]) => `${x.toFixed(2)}% ${y.toFixed(2)}%`).join(",")})`;
 }
-function photo({ src, rect, rot = 0, cap = null, fg = null, leak = false }) {
+function photo({ src, rect, rot = 0, cap = null, fg = null, leak = false, color = false }) {
   const [x, y, w, h] = rect, wrap = document.createElement("div"); wrap.className = "phwrap";
   Object.assign(wrap.style, { left: x + "px", top: y + "px", width: w + "px", height: h + "px" });
   if (TORN) wrap.style.filter = "drop-shadow(5px 8px 0 rgba(40,28,14,.28))";
   const ph = document.createElement("div"); ph.className = "ph"; if (TORN) ph.style.clipPath = torn();
   const inner = document.createElement("div"); inner.className = "inner"; inner.style.backgroundImage = `url("${src}")`;
-  ph.appendChild(inner); if (TORN) { const t = document.createElement("div"); t.className = "tone"; ph.appendChild(t); }
+  // color: keep the photo's own colours where the theme would grey it (collage), for a film about colour itself
+  if (color) inner.style.filter = "none";
+  ph.appendChild(inner); if (TORN && !color) { const t = document.createElement("div"); t.className = "tone"; ph.appendChild(t); }
   if (fg) { const f = document.createElement("div"); f.className = "inner"; f.style.backgroundImage = `url("${fg}")`; f.style.filter = "none";
     ph.appendChild(f); wrap.fg = f; }
   if (leak) { const l = document.createElement("div");

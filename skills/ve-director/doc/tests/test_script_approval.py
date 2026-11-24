@@ -17,7 +17,8 @@ sys.path.insert(0, str(SCRIPTS))
 import doc_approval  # noqa: E402
 from doc_common import lines_hash  # noqa: E402
 
-EXAMPLES = sorted(p.parent for p in (REPO / "examples").glob("*/expected.json"))
+EXAMPLES = sorted(p.parent for p in [*(REPO / "examples").glob("*/expected.json"), *(REPO / "examples").glob("*/*/expected.json")])
+NAMES = [p.relative_to(REPO / "examples").as_posix() for p in EXAMPLES]   # "coffee", "sky/zh"
 
 
 def project(tmp_path, example="coffee", edit=None):
@@ -82,14 +83,14 @@ def test_unreadable_record_counts_as_not_approved(tmp_path):
     assert tts(P).returncode == 4
 
 
-@pytest.mark.parametrize("example", [p.name for p in EXAMPLES])
+@pytest.mark.parametrize("example", NAMES)
 def test_bundled_example_passes_by_its_fingerprint(tmp_path, example):
     P, doc = project(tmp_path, example)                       # a copy without expected.json, as check-standalone's P4
     assert doc_approval.check(doc, P, flag=False) == (True, f"bundled example {example}")
     assert not (P / doc_approval.RECORD).exists()
 
 
-@pytest.mark.parametrize("example", [p.name for p in EXAMPLES])
+@pytest.mark.parametrize("example", NAMES)
 def test_bundled_example_with_a_changed_line_is_stopped(tmp_path, example):
     P, doc = project(tmp_path, example)
     doc["lines"][-1]["text"] += " (changed)"
@@ -99,7 +100,7 @@ def test_bundled_example_with_a_changed_line_is_stopped(tmp_path, example):
     assert r.returncode == 4 and not (P / "tts_lines").exists(), r.stderr
 
 
-@pytest.mark.parametrize("ex", EXAMPLES, ids=lambda p: p.name)
+@pytest.mark.parametrize("ex", EXAMPLES, ids=lambda p: p.relative_to(REPO / "examples").as_posix())
 def test_example_fingerprint_matches_its_doc_json(ex):
     """Changed an example's narration? Have it reviewed, then put the new lines_hash in its expected.json."""
     want = json.loads((ex / "expected.json").read_text(encoding="utf-8")).get("script_approved")

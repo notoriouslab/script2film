@@ -28,19 +28,20 @@ missing.
 
 ### Optional fonts
 
-Four more OFL 1.1 fonts are listed in `fonts/manifest.json` with `"optional": true`, each with the `url` of its
-original release (checked 2026-11-20). Nothing requires them yet and the doctor does not ask for them; download the ones
-you want into `assets/fonts/`:
+Five more OFL 1.1 fonts are listed in `fonts/manifest.json` with `"optional": true`, each with the `url` of its
+original release (checked 2026-11-20). The doctor does not ask for them; `examples/king` uses the last two. Download the
+ones you want into `assets/fonts/`:
 
 | File | Font | Use |
 |---|---|---|
 | `LXGWWenKaiTC-Regular.ttf`, `LXGWWenKaiTC-Medium.ttf` | LXGW WenKai TC 霞鶩文楷 TC | scripture and quote cards |
 | `LXGWWenKai-Regular.ttf` | LXGW WenKai 霞鶩文楷 | the same design for Simplified Chinese |
-| `jf-openhuninn-2.1.ttf` | jf open-huninn 粉圓 | rounded title cards for vertical videos; Traditional Chinese only, no Simplified edition |
+| `jf-openhuninn-2.1.ttf` | jf open-huninn 粉圓 | rounded title cards for vertical videos, the subtitles of `examples/king/zh`; Traditional Chinese only, no Simplified edition |
+| `CormorantGaramond-Variable.ttf` | Cormorant Garamond | the period subtitles of `examples/king/en` |
 
 ```bash
-python3 -c "import json;[print(f['url']) for f in json.load(open('assets/fonts/manifest.json')) if f.get('optional')]" \
-  | while read u; do curl -fL -o "assets/fonts/${u##*/}" "$u"; done
+python3 -c "import json;[print(f['file'],f['url']) for f in json.load(open('assets/fonts/manifest.json')) if f.get('optional')]" \
+  | while read f u; do curl -fL -o "assets/fonts/$f" "$u"; done
 ```
 
 Fonts under other licences (for example the IPA Font License, which LXGW ZhiSong and I.Ming use) are not listed here;

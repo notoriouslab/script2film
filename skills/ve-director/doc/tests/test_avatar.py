@@ -554,3 +554,16 @@ def test_talking_rests_on_the_shut_frame_and_copies_it(tmp_path):
 def test_shut_keep_outside_its_range_stops(tmp_path, keep):
     with pytest.raises(SystemExit, match="--keep must be between"):
         A.shut_faces(tmp_path, ["cheer"], keep)
+
+
+def test_find_pack_looks_in_the_parent_folder_and_prefers_the_project_s_own(tmp_path):
+    proj = tmp_path / "tpl" / "zh"
+    proj.mkdir(parents=True)
+    shared = tmp_path / "tpl" / "avatar" / "ahua"
+    shared.mkdir(parents=True)
+    (shared / "faces.json").write_text("{}")
+    assert A.find_pack(proj, "ahua") == shared
+    own = proj / "avatar" / "ahua"
+    own.mkdir(parents=True)
+    (own / "faces.json").write_text("{}")
+    assert A.find_pack(proj, "ahua") == own

@@ -36,3 +36,11 @@ def test_queue_runs_episodes_in_given_order_then_part_number(tmp_path):
     assert [it[2] for it in q] == ["B part1", "B part2", "A part1", "A part2", "A part3"]
     assert q[0][5] == "Host bible" and q[2][5] is None
     assert q[2][3] == tmp_path / "001/host/parts/part1.mp3" and q[2][4].name == "part1.mp4"
+
+
+def test_queue_labels_use_the_name_tp_shows(tmp_path):
+    # a prefix with "_" uploads as "S2f sb3 zh part1"; looking for "S2f_sb3_zh part1" never found it (2026-11-24)
+    P = tmp_path / "zh"
+    (P / "host").mkdir(parents=True)
+    (P / "host/parts.json").write_text(json.dumps([{"k": 1}]))
+    assert build_queue([(P, "s2f_sb3_zh", None)])[0][2] == "S2f sb3 zh part1"

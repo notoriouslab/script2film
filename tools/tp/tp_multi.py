@@ -16,7 +16,7 @@
 import argparse, json, sys, time
 from pathlib import Path
 
-from tp_host import MAX_ACTIVE, TOL_DEFAULT, busy, card, close_modal, duration, ensure_serve, ev, go, leaf_texts, TP_LOGIN, streams, submit, tp, upload
+from tp_host import MAX_ACTIVE, TOL_DEFAULT, busy, card, close_modal, duration, ensure_serve, ev, go, leaf_texts, TP_LOGIN, streams, submit, tp, tp_name, upload
 
 sys.stdout.reconfigure(line_buffering=True)   # nohup 寫 log 時逐行出現（不設的話整批跑完前 log 都是空的）
 
@@ -39,7 +39,8 @@ def build_queue(jobs):
     for i, (P, prefix, look) in enumerate(jobs):
         for p in json.loads((P / "host/parts.json").read_text()):
             k = p["k"]
-            q.append((i, k, f"{prefix} part{k}", P / f"host/parts/part{k}.mp3", P / f"host/parts/part{k}.mp4", look))
+            # the label is the name TP shows (underscores become spaces), as in tp_host
+            q.append((i, k, f"{tp_name(prefix)} part{k}", P / f"host/parts/part{k}.mp3", P / f"host/parts/part{k}.mp4", look))
     return q
 
 

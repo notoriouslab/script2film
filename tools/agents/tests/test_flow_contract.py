@@ -60,10 +60,10 @@ def test_examples_named_in_the_documents_exist_and_premade_files_are_tracked():
     import subprocess
     names = set()
     for doc in ("docs/FLOW.md", "README.md", "README.zh-TW.md", "AGENTS.md", "skills/script2film/SKILL.md"):
-        names |= set(re.findall(r"examples/([a-z][a-z0-9_-]*)", (REPO / doc).read_text(encoding="utf-8")))
+        names |= set(re.findall(r"(?<![\w/])examples/([a-z][a-z0-9_-]*(?:/(?:zh|en)\b)?)", (REPO / doc).read_text(encoding="utf-8")))
     assert {"coffee", "brewing"} <= names
-    for name in names:
-        assert (REPO / "examples" / name / "doc.json").exists(), name
+    for name in names:   # a template is a project one folder down: examples/<template>/<zh|en>/doc.json, or cut.json for a drama
+        assert any((REPO / "examples" / name / f).exists() for f in ("doc.json", "cut.json")), name
     for path in ("examples/brewing/premade/tts/voice.wav", "examples/brewing/premade/tts/lines.json",
                  "examples/brewing/premade/ve_flat/shot1.mp4", "examples/brewing/premade/host/parts.json",
                  "examples/brewing/premade/host/parts/part1.mp4"):

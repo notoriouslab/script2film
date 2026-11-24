@@ -46,5 +46,14 @@
   "url": "https://github.com/justfont/open-huninn-font/releases/download/v2.1/jf-openhuninn-2.1.ttf",
   "use": "rounded title cards for vertical videos (Traditional Chinese only)",
   "optional": true
+ },
+ {
+  "id": "CormorantGaramond-Variable",
+  "file": "CormorantGaramond-Variable.ttf",
+  "license": "OFL 1.1",
+  "source": "google/fonts (Cormorant Garamond)",
+  "url": "https://github.com/google/fonts/raw/main/ofl/cormorantgaramond/CormorantGaramond%5Bwght%5D.ttf",
+  "use": "period-drama subtitles in English (examples/king/en, font_weight 600)",
+  "optional": true
  }
 ]

@@ -16,6 +16,9 @@ kitchen beside the wall; a street seen through a dissolve was not a cover).
 import subprocess
 import sys
 
+import sys as _sys, pathlib as _pl   # 設定檔：tools/config/s2f_config.py
+_sys.path.insert(0, str(_pl.Path(__file__).resolve().parents[2] / "tools/config"))
+import s2f_config; s2f_config.load()
 import numpy as np
 
 LOW = 0.25        # sharpness below this share of the clip's median counts as covered

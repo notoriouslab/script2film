@@ -269,3 +269,10 @@ def test_pull_keeps_subs_form():
     a, b = new["shots"]
     assert a["subs"] == [{"text": "一", "from": 0.3, "to": 1.1}, {"text": "二", "from": 2.5, "to": 3.5}] and "sub" not in a
     assert b["sub"] == {"text": "三", "from": 0.2, "to": 0.7} and "subs" not in b
+
+
+def test_line_status_counts_arabic_digits_in_a_chinese_line():
+    # the recognizer writes 一七八九年七月十三日 as 1789年7月13日: each digit is one spoken character, not a cut-off line
+    words = [{"word": "陛下今天是1789年7月13日", "start": 0.2, "end": 4.0}]
+    st = dl.line_status("陛下，今天是一七八九年七月十三日。", words, 4.04)
+    assert st["ok"] and st["got"] == st["want"] == 15

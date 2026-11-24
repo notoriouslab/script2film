@@ -46,6 +46,7 @@ import re
 
 CJK = re.compile(r"[一-鿿]")
 WORD = re.compile(r"[A-Za-z0-9']+")
+DIGIT = re.compile(r"[0-9]")
 W, H = 1920, 1080
 
 
@@ -273,7 +274,8 @@ def line_status(expected: str, words: list[dict], clip_end: float) -> dict:
     頭尾空白只是建議修剪量，剪接就能處理。同音字不算錯（只比字數）。"""
     want = units(expected)
     cjk = bool(CJK.search(expected))
-    got = sum(len(CJK.findall(w["word"])) if cjk else len(WORD.findall(w["word"])) for w in words)
+    # 中文台詞：辨識常把數字寫成阿拉伯數字（一七八九→1789、十三→13），一位數字算一個字，才不會誤判成截斷
+    got = sum(len(CJK.findall(w["word"])) + len(DIGIT.findall(w["word"])) if cjk else len(WORD.findall(w["word"])) for w in words)
     if not words:
         return {"ok": False, "reason": "no speech recognized", "want": want, "got": 0}
     first, last = float(words[0]["start"]), float(words[-1]["end"])

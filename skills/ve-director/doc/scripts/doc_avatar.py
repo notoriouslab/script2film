@@ -345,10 +345,11 @@ def load_pack(pack):
 
 
 def find_pack(project, name):
-    """<project>/avatar/<name>/ first (a film's own pack, e.g. an example's), then the asset layers."""
-    own = Path(project) / "avatar" / name
-    if (own / "faces.json").is_file():
-        return own
+    """<project>/avatar/<name>/ first (a film's own pack), then <project>/../avatar/<name>/ (one pack shared by the
+    films in a folder, e.g. a template's zh and en), then the asset layers."""
+    for own in (Path(project) / "avatar" / name, Path(project).parent / "avatar" / name):
+        if (own / "faces.json").is_file():
+            return own
     from doc_common import asset
     return asset("avatar", name)
 

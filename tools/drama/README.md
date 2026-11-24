@@ -69,6 +69,8 @@ Paths are relative to the folder holding `cut.json` (absolute paths are used as 
 | `fps` | `30` | frame rate of cards and of every shot's picture file |
 | `lang` | `"zh"` | `"zh"` or `"en"`; language passed to speech recognition in `check` |
 | `font` | `<S2F_ASSETS or repo assets>/fonts/NotoSerifTC-Variable.ttf` | subtitle and card font |
+| `sub_size` | `50` | subtitle text height in pixels (`render`) |
+| `font_weight` | none | weight of a variable `font` (e.g. `600`); a static font ignores it |
 | `sfx_dir` | `"sfx"` | sound effects are `<sfx_dir>/<name>.mp3` or `.wav` |
 | `roomtone` | none | `{"name", "db"}`: one file from `sfx_dir` looped under the whole film (older, single-bed form) |
 | `grade` | none | `"old_photo"`: `concat --export` also writes a colour-graded copy |

@@ -88,6 +88,18 @@ class Cut:
         assets = Path(os.environ["S2F_ASSETS"]) if os.environ.get("S2F_ASSETS") else REPO / "assets"
         return assets / "fonts/NotoSerifTC-Variable.ttf"
 
+    def load_font(self, path: Path, size: int):
+        """Pillow font at size; "font_weight" (e.g. 600) picks that weight of a variable font (a static font ignores it)."""
+        from PIL import ImageFont
+        f = ImageFont.truetype(str(path), size)
+        w = self.cfg.get("font_weight")
+        if w:
+            try:
+                f.set_variation_by_axes([float(w)])
+            except OSError:   # not a variable font
+                pass
+        return f
+
     def sfx(self, name: str) -> Path:
         d = self.p(self.cfg.get("sfx_dir", "sfx"))
         for ext in (".mp3", ".wav"):
@@ -162,10 +174,10 @@ def color_arg(c: str) -> str:
 
 def text_png(cut: Cut, name: str, text: str, size: int) -> Path:
     """字卡文字：Pillow 畫成透明 PNG 再 overlay（ffmpeg 不一定有 drawtext）。"""
-    from PIL import Image, ImageDraw, ImageFont
+    from PIL import Image, ImageDraw
     img = Image.new("RGBA", (1920, 1080), (0, 0, 0, 0))
     d = ImageDraw.Draw(img)
-    f = ImageFont.truetype(str(cut.font()), size)
+    f = cut.load_font(cut.font(), size)
     x0, y0, x1, y1 = d.textbbox((0, 0), text, font=f)
     d.text(((1920 - (x1 - x0)) // 2 - x0, (1080 - (y1 - y0)) // 2 - y0), text, font=f, fill=(232, 220, 196, 255))
     out = cut.work / f"{name}.png"
@@ -175,11 +187,11 @@ def text_png(cut: Cut, name: str, text: str, size: int) -> Path:
 
 def lines_png(cut: Cut, name: str, lines: list[dict], shadow: bool) -> Path:
     """多行白字（各行水平置中、y＝上緣像素、可各自指定字型）畫成透明 PNG；shadow＝疊在畫面上時加兩層陰影。"""
-    from PIL import Image, ImageDraw, ImageFont
+    from PIL import Image, ImageDraw
     img = Image.new("RGBA", (1920, 1080), (0, 0, 0, 0))
     d = ImageDraw.Draw(img)
     for ln in lines:
-        f = ImageFont.truetype(str(cut.p(ln["font"]) if ln.get("font") else cut.font()), int(ln["size"]))
+        f = cut.load_font(cut.p(ln["font"]) if ln.get("font") else cut.font(), int(ln["size"]))
         x, y = (1920 - d.textlength(ln["text"], font=f)) / 2, float(ln["y"])
         if shadow:
             for dx, dy in ((3, 3), (2, 2)):
@@ -339,8 +351,8 @@ def bus_of(track: str) -> str:
 
 
 def sub_png(cut: Cut, text: str, path: Path):
-    from PIL import Image, ImageDraw, ImageFont
-    f = ImageFont.truetype(str(cut.font()), SUB_STYLE["size"])
+    from PIL import Image, ImageDraw
+    f = cut.load_font(cut.font(), int(cut.cfg.get("sub_size", SUB_STYLE["size"])))
     im = Image.new("RGBA", (1920, 1080), (0, 0, 0, 0))
     d = ImageDraw.Draw(im)
     x, y = (1920 - d.textlength(text, font=f)) / 2, 1080 - SUB_STYLE["bottom"]
