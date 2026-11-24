@@ -1,0 +1,298 @@
+{
+ "title": "天空為什麼是藍的？",
+ "lang": "zh",
+ "theme": "collage",
+ "speaker": "旁白",
+ "voice": {
+  "ref_wav": "refs/narrator.wav",
+  "ref_text": "refs/narrator.txt",
+  "seed": 11,
+  "tail_fade": 0.08
+ },
+ "gaps": {
+  "default": 0.45
+ },
+ "facts": "facts.md",
+ "lines": [
+  {
+   "text": "太陽光明明是白的，天空為什麼是藍的？"
+  },
+  {
+   "text": "白光其實混著彩虹的每一種顏色。"
+  },
+  {
+   "text": "陽光射進大氣，撞上空氣裡的氮和氧分子，往四面八方彈開，這叫散射。"
+  },
+  {
+   "text": "波長越短，彈開得越多。"
+  },
+  {
+   "text": "藍光的波長比紅光短，散射大約是紅光的五倍多。"
+  },
+  {
+   "text": "所以不管往哪裡看，滿天都是被彈開的藍光。"
+  },
+  {
+   "text": "紫光更短，為什麼不是紫的？陽光裡紫光比較少，眼睛對紫光也不敏感。"
+  },
+  {
+   "text": "到了傍晚，陽光斜穿過更厚的大氣，藍光在半路就散光了，剩下紅和橙。"
+  },
+  {
+   "text": "這個答案，叫做瑞利散射。"
+  }
+ ],
+ "beats": [
+  {
+   "id": "B1",
+   "lines": [
+    1
+   ],
+   "source": "code",
+   "scene": "cover",
+   "params": {
+    "series": "為什麼？",
+    "title": "天空為什麼是藍的？",
+    "at": 0.2,
+    "cx": 960,
+    "size": 124
+   }
+  },
+  {
+   "id": "B2",
+   "lines": [
+    2
+   ],
+   "source": "code",
+   "scene": "photo",
+   "params": {
+    "photos": [
+     {
+      "src": "assets/prism.jpg",
+      "rect": [
+       580,
+       80,
+       760,
+       731
+      ],
+      "rot": -1.5,
+      "cap": "白光經過稜鏡分成彩虹｜Wikimedia Commons, CC0",
+      "at": 0.05,
+      "cap_at": {
+       "w": "彩虹",
+       "d": 0.2
+      },
+      "push": 1.06,
+      "color": true
+     }
+    ]
+   }
+  },
+  {
+   "id": "B3",
+   "lines": [
+    3
+   ],
+   "source": "code",
+   "scene": "flow",
+   "params": {
+    "look": "web",
+    "nodes": [
+     {
+      "id": "sun",
+      "x": 300,
+      "y": 430,
+      "label": "陽光",
+      "src": "assets/sun.png",
+      "at": "陽光"
+     },
+     {
+      "id": "air",
+      "x": 900,
+      "y": 430,
+      "label": "氮、氧分子",
+      "src": "assets/air.png"
+     },
+     {
+      "id": "all",
+      "x": 1520,
+      "y": 250,
+      "label": "四面八方",
+      "src": "assets/burst.png",
+      "hot": true
+     },
+     {
+      "id": "eye",
+      "x": 1520,
+      "y": 650,
+      "label": "你的眼睛",
+      "src": "assets/eye.png"
+     }
+    ],
+    "links": [
+     {
+      "from": "sun",
+      "to": "air",
+      "at": "氮和氧"
+     },
+     {
+      "from": "air",
+      "to": "all",
+      "at": "四面八方"
+     },
+     {
+      "from": "air",
+      "to": "eye",
+      "at": "散射"
+     }
+    ]
+   }
+  },
+  {
+   "id": "B4",
+   "lines": [
+    4
+   ],
+   "source": "code",
+   "scene": "formula",
+   "params": {
+    "terms": [
+     {
+      "text": "波長 ÷ 2",
+      "sub": "波長短一半",
+      "at": "波長越短"
+     },
+     {
+      "text": "散射 × 16",
+      "sub": "2⁴ = 16",
+      "at": "彈開得越多",
+      "hot": true
+     }
+    ],
+    "ops": [
+     "→"
+    ]
+   }
+  },
+  {
+   "id": "B5",
+   "lines": [
+    5
+   ],
+   "source": "code",
+   "scene": "bars",
+   "params": {
+    "title": "散射多少（紅光＝1）",
+    "items": [
+     {
+      "label": "紅光 700 nm",
+      "value": 1,
+      "at": "紅光"
+     },
+     {
+      "label": "藍光 450 nm",
+      "value": 5.9,
+      "at": "散射大約",
+      "dir": "up"
+     }
+    ],
+    "hot": 1
+   }
+  },
+  {
+   "id": "B6",
+   "lines": [
+    6
+   ],
+   "source": "code",
+   "scene": "photo",
+   "params": {
+    "photos": [
+     {
+      "src": "assets/earth_limb.jpg",
+      "rect": [
+       360,
+       90,
+       1200,
+       800
+      ],
+      "rot": 1,
+      "cap": "從國際太空站看大氣的藍邊｜NASA",
+      "at": 0.05,
+      "cap_at": {
+       "w": "滿天",
+       "d": 0.2
+      },
+      "push": 1.07,
+      "color": true
+     }
+    ]
+   }
+  },
+  {
+   "id": "B7",
+   "lines": [
+    7
+   ],
+   "source": "code",
+   "scene": "list_reveal",
+   "params": {
+    "title": "為什麼不是紫色",
+    "big": true,
+    "items": [
+     {
+      "text": "陽光裡紫光比較少",
+      "at": "比較少"
+     },
+     {
+      "text": "眼睛對紫光不敏感",
+      "at": "不敏感"
+     }
+    ]
+   }
+  },
+  {
+   "id": "B8",
+   "lines": [
+    8
+   ],
+   "source": "code",
+   "scene": "photo",
+   "params": {
+    "photos": [
+     {
+      "src": "assets/sunset.jpg",
+      "rect": [
+       420,
+       80,
+       1080,
+       810
+      ],
+      "rot": -1,
+      "cap": "傍晚的太平洋｜Wikimedia Commons, CC0",
+      "at": 0.05,
+      "cap_at": {
+       "w": "傍晚",
+       "d": 0.2
+      },
+      "push": 1.06,
+      "color": true
+     }
+    ]
+   }
+  },
+  {
+   "id": "B9",
+   "lines": [
+    9
+   ],
+   "source": "code",
+   "scene": "burst_title",
+   "params": {
+    "word": "這個答案",
+    "big": "瑞利散射",
+    "term": "Rayleigh scattering"
+   }
+  }
+ ]
+}

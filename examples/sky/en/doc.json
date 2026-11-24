@@ -1,0 +1,299 @@
+{
+ "title": "Why Is the Sky Blue?",
+ "lang": "en",
+ "theme": "collage",
+ "speaker": "Narrator",
+ "voice": {
+  "ref_wav": "refs/narrator.wav",
+  "ref_text": "refs/narrator.txt",
+  "seed": 11,
+  "tail_fade": 0.08,
+  "post": "atempo=1.06"
+ },
+ "gaps": {
+  "default": 0.35
+ },
+ "facts": "facts.md",
+ "lines": [
+  {
+   "text": "Sunlight looks white. So why is the sky blue?"
+  },
+  {
+   "text": "White light is every colour of the rainbow, mixed."
+  },
+  {
+   "text": "When it enters the air, it hits nitrogen and oxygen molecules and bounces off in every direction. That's scattering."
+  },
+  {
+   "text": "The shorter the wave, the more it scatters."
+  },
+  {
+   "text": "Blue light has a shorter wave than red, so it scatters more than five times as much."
+  },
+  {
+   "text": "So wherever you look, the sky is full of scattered blue."
+  },
+  {
+   "text": "Violet is even shorter. Why not a violet sky? Sunlight has less violet, and our eyes barely notice it."
+  },
+  {
+   "text": "At sunset, light crosses much more air. The blue is scattered away on the way, leaving red and orange."
+  },
+  {
+   "text": "The answer has a name: Rayleigh scattering."
+  }
+ ],
+ "beats": [
+  {
+   "id": "B1",
+   "lines": [
+    1
+   ],
+   "source": "code",
+   "scene": "cover",
+   "params": {
+    "series": "Why?",
+    "title": "Why Is the Sky Blue?",
+    "at": 0.2,
+    "cx": 960,
+    "size": 124
+   }
+  },
+  {
+   "id": "B2",
+   "lines": [
+    2
+   ],
+   "source": "code",
+   "scene": "photo",
+   "params": {
+    "photos": [
+     {
+      "src": "assets/prism.jpg",
+      "rect": [
+       580,
+       80,
+       760,
+       731
+      ],
+      "rot": -1.5,
+      "cap": "White light split by a prism | Wikimedia Commons, CC0",
+      "at": 0.05,
+      "cap_at": {
+       "w": "rainbow",
+       "d": 0.2
+      },
+      "push": 1.06,
+      "color": true
+     }
+    ]
+   }
+  },
+  {
+   "id": "B3",
+   "lines": [
+    3
+   ],
+   "source": "code",
+   "scene": "flow",
+   "params": {
+    "look": "web",
+    "nodes": [
+     {
+      "id": "sun",
+      "x": 300,
+      "y": 430,
+      "label": "Sunlight",
+      "src": "assets/sun.png",
+      "at": "enters"
+     },
+     {
+      "id": "air",
+      "x": 900,
+      "y": 430,
+      "label": "N₂ and O₂",
+      "src": "assets/air.png"
+     },
+     {
+      "id": "all",
+      "x": 1520,
+      "y": 250,
+      "label": "Every direction",
+      "src": "assets/burst.png",
+      "hot": true
+     },
+     {
+      "id": "eye",
+      "x": 1520,
+      "y": 650,
+      "label": "Your eyes",
+      "src": "assets/eye.png"
+     }
+    ],
+    "links": [
+     {
+      "from": "sun",
+      "to": "air",
+      "at": "nitrogen"
+     },
+     {
+      "from": "air",
+      "to": "all",
+      "at": "every direction"
+     },
+     {
+      "from": "air",
+      "to": "eye",
+      "at": "scattering"
+     }
+    ]
+   }
+  },
+  {
+   "id": "B4",
+   "lines": [
+    4
+   ],
+   "source": "code",
+   "scene": "formula",
+   "params": {
+    "terms": [
+     {
+      "text": "wave ÷ 2",
+      "sub": "half the wavelength",
+      "at": "shorter"
+     },
+     {
+      "text": "scatter × 16",
+      "sub": "2⁴ = 16",
+      "at": "more it scatters",
+      "hot": true
+     }
+    ],
+    "ops": [
+     "→"
+    ]
+   }
+  },
+  {
+   "id": "B5",
+   "lines": [
+    5
+   ],
+   "source": "code",
+   "scene": "bars",
+   "params": {
+    "title": "How much it scatters (red = 1)",
+    "items": [
+     {
+      "label": "Red 700 nm",
+      "value": 1,
+      "at": "red"
+     },
+     {
+      "label": "Blue 450 nm",
+      "value": 5.9,
+      "at": "scatters more",
+      "dir": "up"
+     }
+    ],
+    "hot": 1
+   }
+  },
+  {
+   "id": "B6",
+   "lines": [
+    6
+   ],
+   "source": "code",
+   "scene": "photo",
+   "params": {
+    "photos": [
+     {
+      "src": "assets/earth_limb.jpg",
+      "rect": [
+       360,
+       90,
+       1200,
+       800
+      ],
+      "rot": 1,
+      "cap": "Earth's blue edge from the space station | NASA",
+      "at": 0.05,
+      "cap_at": {
+       "w": "sky",
+       "d": 0.2
+      },
+      "push": 1.07,
+      "color": true
+     }
+    ]
+   }
+  },
+  {
+   "id": "B7",
+   "lines": [
+    7
+   ],
+   "source": "code",
+   "scene": "list_reveal",
+   "params": {
+    "title": "Why not violet",
+    "big": true,
+    "items": [
+     {
+      "text": "Less violet in sunlight",
+      "at": "less violet"
+     },
+     {
+      "text": "Our eyes barely see it",
+      "at": "barely"
+     }
+    ]
+   }
+  },
+  {
+   "id": "B8",
+   "lines": [
+    8
+   ],
+   "source": "code",
+   "scene": "photo",
+   "params": {
+    "photos": [
+     {
+      "src": "assets/sunset.jpg",
+      "rect": [
+       420,
+       80,
+       1080,
+       810
+      ],
+      "rot": -1,
+      "cap": "Sunset over the Pacific | Wikimedia Commons, CC0",
+      "at": 0.05,
+      "cap_at": {
+       "w": "sunset",
+       "d": 0.2
+      },
+      "push": 1.06,
+      "color": true
+     }
+    ]
+   }
+  },
+  {
+   "id": "B9",
+   "lines": [
+    9
+   ],
+   "source": "code",
+   "scene": "burst_title",
+   "params": {
+    "word": "The answer",
+    "big": "Rayleigh",
+    "term": "scattering"
+   }
+  }
+ ]
+}
