@@ -1,0 +1,132 @@
+{
+  "name": "king_zh",
+  "fps": 30,
+  "lang": "zh",
+  "dialogue": {
+    "stem": "original",
+    "db": -18
+  },
+  "shots": [
+    {
+      "id": "S0",
+      "card": {
+        "lines": [
+          {
+            "text": "理工男重生法國國王",
+            "size": 96,
+            "y": 420
+          },
+          {
+            "text": "1789 年 7 月 13 日，凡爾賽宮",
+            "size": 48,
+            "y": 560
+          }
+        ],
+        "bg": "#000000"
+      },
+      "dur": 2.6
+    },
+    {
+      "id": "S1",
+      "src": "clips/shot1.mp4",
+      "in": 0.15,
+      "dur": 3.45,
+      "speaker": "KING",
+      "sub": {
+        "text": "這是哪裡？我的假髮？",
+        "from": 0.25,
+        "to": 3.18
+      }
+    },
+    {
+      "id": "S2",
+      "src": "clips/shot2.mp4",
+      "in": 0,
+      "dur": 3.9,
+      "speaker": "MINISTER",
+      "sub": {
+        "text": "陛下，今天是一七八九年七月十三日。",
+        "from": 0,
+        "to": 3.65
+      }
+    },
+    {
+      "id": "S3",
+      "src": "clips/shot3.mp4",
+      "in": 0.28,
+      "dur": 3.76,
+      "speaker": "KING",
+      "sub": {
+        "text": "一七八九…明天巴士底監獄就要被攻破了！",
+        "from": 0.25,
+        "to": 3.76
+      }
+    },
+    {
+      "id": "S4",
+      "src": "clips/shot4.mp4",
+      "in": 0.25,
+      "dur": 3.6,
+      "speaker": "MINISTER",
+      "sub": {
+        "text": "陛下，今天還要繼續修鎖嗎？",
+        "from": 0.26,
+        "to": 3.24
+      }
+    },
+    {
+      "id": "S5",
+      "src": "clips/shot5.mp4",
+      "in": 0,
+      "dur": 3.4,
+      "speaker": "KING",
+      "sub": {
+        "text": "不修鎖了，先修財政。把帳本拿來！",
+        "from": 0,
+        "to": 3.13
+      }
+    },
+    {
+      "id": "S6",
+      "src": "clips/shot6.mp4",
+      "in": 0.2,
+      "dur": 4.35,
+      "speaker": "KING",
+      "sub": {
+        "text": "赤字這麼大…宮裡的開銷先砍一半。",
+        "from": 0.23,
+        "to": 4.12
+      }
+    },
+    {
+      "id": "S7",
+      "src": "clips/shot7.mp4",
+      "in": 0,
+      "dur": 2.6,
+      "speaker": "MINISTER",
+      "sub": {
+        "text": "可是王后的舞會…",
+        "from": 0,
+        "to": 2.47
+      }
+    },
+    {
+      "id": "S8",
+      "src": "clips/shot8.mp4",
+      "in": 0,
+      "dur": 5.04,
+      "speaker": "KING",
+      "sub": {
+        "text": "舞會取消。改辦一場…全國工程師大會！",
+        "from": 0,
+        "to": 5.04
+      }
+    }
+  ],
+  "font": "../../../assets/fonts/jf-openhuninn-2.1.ttf",
+  "sub_size": 58,
+  "music": {
+    "file": "music.wav",
+    "db": -31
+  }
+}

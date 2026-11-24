@@ -1,0 +1,133 @@
+{
+  "name": "king_en",
+  "fps": 30,
+  "lang": "en",
+  "dialogue": {
+    "stem": "original",
+    "db": -18
+  },
+  "shots": [
+    {
+      "id": "S0",
+      "card": {
+        "lines": [
+          {
+            "text": "The Engineer Who Woke Up King",
+            "size": 88,
+            "y": 420
+          },
+          {
+            "text": "Versailles, 13 July 1789",
+            "size": 48,
+            "y": 560
+          }
+        ],
+        "bg": "#000000"
+      },
+      "dur": 2.6
+    },
+    {
+      "id": "S1",
+      "src": "clips/shot1.mp4",
+      "in": 0,
+      "dur": 2.3,
+      "speaker": "KING",
+      "sub": {
+        "text": "Where am I? Is this a wig?",
+        "from": 0,
+        "to": 1.99
+      }
+    },
+    {
+      "id": "S2",
+      "src": "clips/shot2.mp4",
+      "in": 0,
+      "dur": 3.6,
+      "speaker": "MINISTER",
+      "sub": {
+        "text": "Your Majesty, today is the thirteenth of July, 1789.",
+        "from": 0,
+        "to": 3.35
+      }
+    },
+    {
+      "id": "S3",
+      "src": "clips/shot3.mp4",
+      "in": 0,
+      "dur": 4.04,
+      "speaker": "KING",
+      "sub": {
+        "text": "1789… Tomorrow they storm the Bastille!",
+        "from": 0,
+        "to": 4.04
+      }
+    },
+    {
+      "id": "S4",
+      "src": "clips/shot4.mp4",
+      "in": 0,
+      "dur": 3.45,
+      "speaker": "MINISTER",
+      "sub": {
+        "text": "Shall Your Majesty keep working on the locks today?",
+        "from": 0,
+        "to": 3.22
+      }
+    },
+    {
+      "id": "S5",
+      "src": "clips/shot5.mp4",
+      "in": 0.25,
+      "dur": 4.2,
+      "speaker": "KING",
+      "sub": {
+        "text": "No more locks. We fix the budget. Bring me the books!",
+        "from": 0.21,
+        "to": 3.97
+      }
+    },
+    {
+      "id": "S6",
+      "src": "clips/shot6.mp4",
+      "in": 0.6,
+      "dur": 5.4,
+      "speaker": "KING",
+      "sub": {
+        "text": "A deficit this size… Cut the palace spending in half.",
+        "from": 0.29,
+        "to": 5.25
+      }
+    },
+    {
+      "id": "S7",
+      "src": "clips/shot7.mp4",
+      "in": 0.1,
+      "dur": 2.3,
+      "speaker": "MINISTER",
+      "sub": {
+        "text": "But the Queen's ball…",
+        "from": 0.23,
+        "to": 1.76
+      }
+    },
+    {
+      "id": "S8",
+      "src": "clips/shot8.mp4",
+      "in": 0,
+      "dur": 5.04,
+      "speaker": "KING",
+      "sub": {
+        "text": "Cancel the ball. We'll hold… a national engineering fair!",
+        "from": 0,
+        "to": 5.04
+      }
+    }
+  ],
+  "font": "../../../assets/fonts/CormorantGaramond-Variable.ttf",
+  "font_weight": 600,
+  "sub_size": 64,
+  "music": {
+    "file": "music.wav",
+    "db": -31
+  }
+}

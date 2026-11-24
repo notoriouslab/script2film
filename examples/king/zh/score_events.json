@@ -1,0 +1,28 @@
+{
+ "name": "king-zh",
+ "duration": 32.7,
+ "style": "lounge",
+ "under_voice": true,
+ "sections": [
+  {
+   "t": 0,
+   "role": "intro"
+  },
+  {
+   "t": 2.6,
+   "role": "verse"
+  },
+  {
+   "t": 13.7,
+   "role": "body"
+  },
+  {
+   "t": 25.067,
+   "role": "pause"
+  },
+  {
+   "t": 27.667,
+   "role": "outro"
+  }
+ ]
+}

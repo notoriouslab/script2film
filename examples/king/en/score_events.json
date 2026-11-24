@@ -1,0 +1,28 @@
+{
+ "name": "king-en",
+ "duration": 32.93,
+ "style": "lounge",
+ "under_voice": true,
+ "sections": [
+  {
+   "t": 0,
+   "role": "intro"
+  },
+  {
+   "t": 2.6,
+   "role": "verse"
+  },
+  {
+   "t": 12.533,
+   "role": "body"
+  },
+  {
+   "t": 25.599,
+   "role": "pause"
+  },
+  {
+   "t": 27.899,
+   "role": "outro"
+  }
+ ]
+}
