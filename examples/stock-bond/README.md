@@ -1,7 +1,7 @@
 # Template: the 60/40 portfolio
 
 A finance explainer with a talking host: seven narration lines over charts drawn by code, the host in a corner circle
-and full screen for the last line. The host clips are premade, so no TalkingPhoto account is needed.
+for the first two lines and full screen for the last. The host clips are premade, so no TalkingPhoto account is needed.
 
 | Language | Folder | Paste to your agent |
 |---|---|---|

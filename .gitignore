@@ -126,6 +126,9 @@ examples/*/score/
 examples/*/tp_multi*.log
 examples/*/*/tp_host.log
 examples/*/look/
+# the marker fetch_premade.py leaves in premade/ is copied up with premade/. (README quick way); film_check.py's report
+examples/*/*/.sha256
+examples/*/*/*.check.json
 # VideoExpress actor ids belong to one account; the README says how to make your own
 examples/*/masters.json
 

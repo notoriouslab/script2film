@@ -212,10 +212,10 @@
      {
       "src": "assets/earth_limb.jpg",
       "rect": [
-       360,
-       90,
-       1200,
-       800
+       400,
+       80,
+       1110,
+       740
       ],
       "rot": 1,
       "cap": "Earth's blue edge from the space station | NASA",
@@ -264,10 +264,10 @@
      {
       "src": "assets/sunset.jpg",
       "rect": [
-       420,
-       80,
-       1080,
-       810
+       460,
+       70,
+       1000,
+       750
       ],
       "rot": -1,
       "cap": "Sunset over the Pacific | Wikimedia Commons, CC0",

@@ -6,7 +6,7 @@ Paste this sentence to your agent:
 Follow the docs and make examples/king/en into a film.
 ```
 
-A comedy of eight shots, about 33 seconds: a black title card, then two made-up characters (the king and his minister)
+A comedy of eight shots, about 33 seconds: a dark brown title card, then two made-up characters (the king and his minister)
 speak every line on screen, with English subtitles and a light-jazz score under them. No narrator.
 
 ## Two ways
@@ -19,13 +19,14 @@ cp -R examples/king/en/premade/. examples/king/en/
 curl -fL -o assets/fonts/CormorantGaramond-Variable.ttf 'https://github.com/google/fonts/raw/main/ofl/cormorantgaramond/CormorantGaramond%5Bwght%5D.ttf'
 python3 tools/drama/drama_cut.py check examples/king/en/cut.json
 python3 tools/drama/drama_cut.py render examples/king/en/cut.json
+python3 tools/nightly/film_check.py examples/king/en/king_en.mp4
 ```
 
 - The first line downloads the eight clips and the score from the GitHub Release, checks them against the SHA-256 in
   `premade.json` and unpacks them into `premade/`; the second puts `clips/` and `music.wav` next to `cut.json`.
 - The subtitle font is optional in this repository (OFL 1.1; `assets/README.md`, "Optional fonts"). Skip the `curl`
   if `assets/fonts/CormorantGaramond-Variable.ttf` is already there.
-- `check` transcribes each line with local whisper.cpp and compares it with the subtitles; it must end with
+- `check` transcribes each line with local whisper.cpp and compares it with the subtitles; its last line must say
   `✓ passed`. Burned-in text is only a reminder.
 
 ### The full way: your own story, your own actors
@@ -47,6 +48,7 @@ python3 tools/drama/drama_cut.py render examples/king/en/cut.json
 - Title card → the king wakes in a wig → "Your Majesty, today is the thirteenth of July, 1789." → "Tomorrow they
   storm the Bastille!" → the locks → "No more locks. We fix the budget." → cutting the palace spending in half → "But
   the Queen's ball…" → "We'll hold… a national engineering fair!"
+- `film_check.py` ends with `film check passed`.
 - The music sits about 13 dB under the dialogue (`cut.json`: dialogue `db` −18, music `db` −31).
 
 Everything the run makes is in `.gitignore`. To clear it: `git clean -ndX examples/king/en` (look first),

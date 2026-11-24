@@ -6,7 +6,7 @@
 照文件把 examples/king/zh 做成片
 ```
 
-八個鏡頭、約 33 秒的喜劇：黑底片名卡之後，兩個虛構角色（國王與大臣）在畫面上說出每一句台詞，配中文字幕，底下墊一段輕爵士。沒有旁白。
+八個鏡頭、約 33 秒的喜劇：深褐底片名卡之後，兩個虛構角色（國王與大臣）在畫面上說出每一句台詞，配中文字幕，底下墊一段輕爵士。沒有旁白。
 
 ## 兩條路
 
@@ -18,11 +18,12 @@ cp -R examples/king/zh/premade/. examples/king/zh/
 curl -fL -o assets/fonts/jf-openhuninn-2.1.ttf 'https://github.com/justfont/open-huninn-font/releases/download/v2.1/jf-openhuninn-2.1.ttf'
 python3 tools/drama/drama_cut.py check examples/king/zh/cut.json
 python3 tools/drama/drama_cut.py render examples/king/zh/cut.json
+python3 tools/nightly/film_check.py examples/king/zh/king_zh.mp4
 ```
 
 - 第一行從 GitHub Release 下載八個鏡頭與配樂，比對 `premade.json` 裡的 SHA-256 後解到 `premade/`；第二行把 `clips/` 與 `music.wav` 放到 `cut.json` 旁邊。
 - 字幕字型（粉圓）在本倉庫是選用字型（OFL 1.1，見 `assets/README.md` 的 Optional fonts）。`assets/fonts/jf-openhuninn-2.1.ttf` 已經在就跳過 `curl`。
-- `check` 用本機 whisper.cpp 逐句轉錄、跟字幕比對，最後一行要是 `✓ passed`；畫面上的字只是提醒。
+- `check` 用本機 whisper.cpp 逐句轉錄、跟字幕比對，最後一行要出現 `✓ passed`；畫面上的字只是提醒。
 
 ### 自己做的路：換故事、換演員
 
@@ -35,6 +36,7 @@ python3 tools/drama/drama_cut.py render examples/king/zh/cut.json
 
 - `cut.json` 旁邊出現 `king_zh.mp4` 與 `king_zh.srt`（已經有了，`render` 會寫成 `king_zh_v2`⋯）。
 - 片名卡 → 國王醒來摸假髮 →「陛下，今天是一七八九年七月十三日。」→「明天巴士底監獄就要被攻破了！」→ 修鎖 →「不修鎖了，先修財政。」→ 宮裡開銷砍一半 →「可是王后的舞會⋯」→「改辦一場⋯全國工程師大會！」
+- `film_check.py` 最後印出 `film check passed`。
 - 配樂比台詞小約 13 dB（`cut.json`：對白 `db` −18、配樂 `db` −31）。
 
 做片的產出都在 `.gitignore` 裡。要清掉：`git clean -ndX examples/king/zh`（先看），`git clean -fdX examples/king/zh`（刪）。
