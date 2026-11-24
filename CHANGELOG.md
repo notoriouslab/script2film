@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 1.2.0 (2026-11-24)
 
 - **Comic avatar host** (`"avatar"` in doc.json): a narrator's comic sticker pack instead of a TalkingPhoto host. A
   whole panel for the opening or the close, panels peeking in from an edge (depth worked out from the face, lower
