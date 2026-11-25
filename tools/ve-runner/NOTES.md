@@ -129,6 +129,20 @@ Chrome runs without a window by default (2026-11-12; `ve_runner.py`, and `ve_voi
    dialog, and a picture uploaded after narration audio in the same run landed in the Audio folder (the upload dialog
    keeps the folder of the page's first upload; `upload_file` now loads the page again when the folder changes).
 
+11. Lipsync Video (Old Algorithm, up to 5 minutes), a card of its own in Create with AI (tried 2026-11-24 as a host
+   instead of TalkingPhotos; `ve_host.py` sends it, see the end of this item). The dialog takes an image (Create Image or Use from Library), a Video
+   Prompt and four boxes: `auto_enhance_prompt` (on by default), `shared`, `talking_video_singing`,
+   `talking_video_loop_forward` ("Reverse for smoother video", on by default). Create Video opens "Create Talking Video -
+   Create Audio" with the same four tabs as Narration; Import Audio takes up to 300 s; the submit button is
+   **Create Talking Video**. Unlike Narration Video, the mouth follows the imported audio: the clip is the audio's length
+   (39.02 s for 39.00 s, 30.76 s for 30.75 s) and its sound is that audio (correlation 0.994, 1 % residual), so a whole
+   host narration goes in one piece. Three clips, one look image, the same plain English prompt (head and body steady,
+   hands low and moving a little, no text): ready 4.5 to 6 minutes after submit; no captions, no drift. With
+   `auto_enhance_prompt` on the hand stayed fixed at the chest for the whole clip; off, both hands gestured naturally.
+   The user's verdict, after a whole film with it: good enough for an English host in the small circle; a full-screen
+   host and any Chinese host are clearly better from TalkingPhotos.
+   `ve_host.py` sends `doc_host.py split` parts this way (docs/FLOW.md, "VideoExpress Lipsync Video").
+
 ## Known gaps
 - `Start: image <file>` (2026-10-22): a frame made outside VE (a candidate retouched by hand: a nail wound VE would not draw
   in three text re-rolls) is uploaded to Media Library > Images (`upload_file`; the name must contain the file stem) and

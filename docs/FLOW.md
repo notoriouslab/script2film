@@ -249,6 +249,27 @@ python3 skills/ve-director/doc/scripts/doc_host.py join <project>/doc.json
 - `doc_host.py join` works as before.
 - The portrait is whatever that tool takes; it has to be the user, or a likeness the user has the right to use. Ask the user before spending their credits there too.
 
+### VideoExpress Lipsync Video (English host in the small circle)
+
+For an English narration, VideoExpress's Lipsync Video (Old Algorithm) is a faster host than TalkingPhotos: the whole
+narration goes in one piece (up to 300 s), a 40 s take is ready in about 5 minutes, the clip is exactly as long as the
+narration and its sound is the narration itself. Use it only for the small circle (`"pip"`): a full-screen host and
+any Chinese host look clearly better from TalkingPhotos, so `ve_host.py` stops on a doc whose `lang` is not English or
+whose host also fills the screen (a `"source": "clip"` beat playing `host/…`).
+
+```bash
+python3 skills/ve-director/doc/scripts/doc_host.py split <project>/doc.json --max 290
+python3 tools/ve-runner/ve_host.py <project> --prefix <code> --look <look image> --who "<person, clothes>"
+python3 skills/ve-director/doc/scripts/doc_host.py join <project>/doc.json
+```
+
+- The look image follows the rules above (the user picks it; the user, or a likeness the user has the right to use).
+- It uses the VideoExpress login of the shots (`tools/ve-runner`, headless). Ask the user before sending.
+- `ve_host.py` waits and downloads (`host/parts/partK.mp4`), so run it in the background with its output in a file;
+  the last line is `all done`. Run the same command again to collect parts still processing; it does not send twice.
+- The prompt asks for a steady head and body and small natural hand movement, with VideoExpress's prompt rewrite off
+  (on, the hands froze for the whole clip).
+
 ### MiniMax H3 on Colab (host)
 
 `tools/h3/README.md`. H3 locks the narration audio into the clip: the lips follow the recording and the sound is the narration itself. The person comes from the look image (the same rules as above: the user picks it, it has to be the user or a likeness the user has the right to use), and the prompt can make them gesture, walk along a counter or film a handheld selfie.

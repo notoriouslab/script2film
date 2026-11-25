@@ -1,5 +1,14 @@
 # Changelog
 
+## Unreleased
+
+- **English host in the small circle from VideoExpress:** `tools/ve-runner/ve_host.py` sends `doc_host.py split`
+  parts through VideoExpress Lipsync Video (Old Algorithm) instead of TalkingPhotos, downloads and checks the takes;
+  `doc_host.py join` works as before. It stops on a non-English doc or a full-screen host (TalkingPhotos looks better
+  there). Usage in docs/FLOW.md.
+- `doc_host.py split --max` goes up to 290 s (VideoExpress takes 300 s of audio); `tp_host.py` stops on a part over
+  60 s, the most TalkingPhotos takes.
+
 ## 1.2.2 (2026-11-24)
 
 - **Film check, first 30 s:** each beat start counts as a new picture (FORMAT §4c). Collage beats that grow out of the

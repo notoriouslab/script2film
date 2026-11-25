@@ -2,7 +2,8 @@
 
   python3 doc_host.py split <project>/doc.json [--max 58] [--min 10]
       tts/voice.wav → host/parts/part1.mp3 … cut in the pause between two lines, each part ≤ --max s and ≥ --min s
-      (TP takes at least 10 s; MiniMax H3 takes at most 15 s: --max 15 --min 4);
+      (TP takes at least 10 s and at most 60; MiniMax H3 takes at most 15 s: --max 15 --min 4; VideoExpress Lipsync
+      Video takes up to 300 s: --max 290, see tools/ve-runner/ve_host.py);
       host/parts.json keeps where each part sits in voice.wav. Render every part in TP on the same character.
   python3 doc_host.py join <project>/doc.json [--out host/tp_host.mp4]
       host/parts/partK.mp4 (the downloaded TP takes) → one take on the subtitle timeline (voice.cleaned/audio.m4a), so
@@ -83,7 +84,7 @@ def main():
         if not 1.0 <= least <= MIN_PART:
             sys.exit(f"✗ --min must be between 1 and {MIN_PART:g} s")
         cap = float(args[args.index("--max") + 1]) if "--max" in args else 58.0
-        split(doc, P, max(2 * least, min(cap, 60.0)), least)
+        split(doc, P, max(2 * least, min(cap, 290.0)), least)
     elif cmd == "join":
         join(doc, P, args[args.index("--out") + 1] if "--out" in args else "host/tp_host.mp4")
     else:

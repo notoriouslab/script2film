@@ -29,6 +29,7 @@ import checklist  # noqa: E402
 
 AUDIO_DIR = os.environ.get("TP_AUDIO_DIR", "Audio")   # 媒體庫音檔資料夾（tp_submit.sh 讀同一個變數）
 TOL_DEFAULT = 0.3   # 提議值（規範沒有）；首跑實測差 0.02 秒
+TP_MAX = 60.0      # High Quality: 10 s to 1 minute a part
 MAX_ACTIVE = 5      # TP 同時渲染上限：第 6 段會停在 Human Video 送不出去（實測）
 
 
@@ -206,6 +207,10 @@ def main():
     P = Path(a.project).resolve()
     checklist.gate(P, "start", a.skip_checklist, "tp")   # 送 TP 花渲染：開工清單不過就停
     parts = a.parts or [p["k"] for p in json.loads((P / "host/parts.json").read_text())]
+    long = [f"part{k} {duration(P / f'host/parts/part{k}.mp3'):.1f}s" for k in parts
+            if (P / f"host/parts/part{k}.mp3").exists() and duration(P / f"host/parts/part{k}.mp3") > TP_MAX]
+    if long:   # doc_host.py split allows up to 290 s for VideoExpress; High Quality takes at most a minute
+        sys.exit(f"✗ TalkingPhotos takes at most {TP_MAX:g}s a part: {', '.join(long)}; run doc_host.py split again with --max 58")
     tmp = P / "host/tp_upload"
     tmp.mkdir(exist_ok=True)
     ensure_serve()
