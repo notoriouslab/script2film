@@ -171,9 +171,10 @@ class Frames:
                        && Math.abs(i.naturalWidth/i.naturalHeight - ar) < 0.05*ar).map(i=>i.src); }}""", self.ratio)
 
     def js_click(self, js: str, what: str):
-        if not self.page.evaluate(js):
+        if not self.page.evaluate(js.replace(".click(); return true;", ".setAttribute('data-s2f-click','1'); return true;")):
             self.ve.shot_png(f"fail_{what.replace(' ', '_')}")
             raise RuntimeError(f"{what}: button not found")
+        self.ve.click_marked()  # real click: VE ignores a scripted el.click() on several controls since 2026-11-25
         self.ve.log(what)
 
     def open_modal(self, aspect: str):
@@ -197,7 +198,7 @@ class Frames:
         self.ve.open_folder("My AI Images")
         sel = f'.library-item[data-ident="{lib_id}"]'
         self.page.wait_for_selector(sel, state="attached", timeout=20_000)
-        self.page.locator(sel).first.evaluate("el => el.click()")
+        self.page.locator(sel).first.click(force=True)
         self.page.wait_for_timeout(500)
         self.js_click("""() => { const b=[...document.querySelectorAll('button')].filter(b=>b.textContent.trim()==='Choose'
             && b.getBoundingClientRect().width>0).pop(); if(!b) return false; b.click(); return true; }""", f"first frame = {lib_id}")

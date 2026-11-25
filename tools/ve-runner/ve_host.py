@@ -129,11 +129,17 @@ def send(ve, part: dict, look_id: int, audio_id: int, prompt: str, aspect: str, 
     p.locator("text=Lipsync Video(Old Algorithm").first.click()
     p.wait_for_selector("text=Reverse for smoother video", state="visible", timeout=15_000)
     p.evaluate(modal_js("const b=[...m.querySelectorAll('button')].find(e=>e.innerText.trim().replace(/\\s+/g,' ')===arg);"
-                        " if(b) b.click();"), "Landscape 16:9" if aspect == "16:9" else "Vertical 9:16")
+                        " if(b) b.setAttribute('data-s2f-click','1');"), "Landscape 16:9" if aspect == "16:9" else "Vertical 9:16")
+    if p.locator("[data-s2f-click]").count():
+        ve.click_marked()
     ve.use_from_library(look_id, "Images")
     for name, on in BOXES:
-        got = p.evaluate(modal_js("const e=m.querySelector('input[name='+arg[0]+']'); if(!e) return null;"
-                                  " if(e.checked!==arg[1]) e.click(); return e.checked;"), [name, on])
+        state = modal_js("const e=m.querySelector('input[name='+arg[0]+']'); if(!e) return null;"
+                         " if(arg[1]!==null&&e.checked!==arg[1]) e.setAttribute('data-s2f-click','1'); return e.checked;")
+        if p.evaluate(state, [name, on]) is not on and p.locator("[data-s2f-click]").count():
+            ve.click_marked()  # real click: VE ignores a scripted el.click() on several controls since 2026-11-25
+            p.wait_for_timeout(300)
+        got = p.evaluate(state, [name, None])
         if got is not on:
             ve.shot_png(f"part{part['k']}_box_{name}")
             raise RuntimeError(f"checkbox {name} is {got}, wanted {on}")
@@ -141,17 +147,19 @@ def send(ve, part: dict, look_id: int, audio_id: int, prompt: str, aspect: str, 
                         " t.dispatchEvent(new Event('input',{bubbles:true})); t.dispatchEvent(new Event('change',{bubbles:true}));"),
                prompt)
     p.evaluate(modal_js("const b=[...m.querySelectorAll('button')].filter(e=>e.getBoundingClientRect().width>0"
-                        "&&e.innerText.trim()==='Create Video').pop(); if(!b) throw new Error('no Create Video'); b.click();"))
+                        "&&e.innerText.trim()==='Create Video').pop(); if(!b) throw new Error('no Create Video'); b.setAttribute('data-s2f-click','1');"))
+    ve.click_marked()
     p.wait_for_selector("text=Create Talking Video - Create Audio", state="visible", timeout=15_000)
     p.locator("a:visible:text-is('Import Audio')").first.click()     # tabs switch only on a real mouse click
     p.locator("button.button-select-file:visible").first.click()
     ve.open_folder("Audio")
     sel = f'.library-item[data-ident="{audio_id}"]'
     p.wait_for_selector(sel, state="attached", timeout=15_000)
-    p.locator(sel).first.evaluate("el => el.click()")
+    p.locator(sel).first.click(force=True)
     p.wait_for_timeout(500)
     p.evaluate("""() => { const b=[...document.querySelectorAll('button')].filter(b=>b.textContent.trim()==='Choose'
-                          &&b.getBoundingClientRect().width>0).pop(); if(!b) throw new Error('no Choose'); b.click(); }""")
+                          &&b.getBoundingClientRect().width>0).pop(); if(!b) throw new Error('no Choose'); b.setAttribute('data-s2f-click','1'); }""")
+    ve.click_marked()
     p.wait_for_timeout(2500)
     ve.shot_png(f"part{part['k']}_audio_chosen")
     if dry:
@@ -161,7 +169,8 @@ def send(ve, part: dict, look_id: int, audio_id: int, prompt: str, aspect: str, 
     ve.wait_for_slot()
     p.evaluate(modal_js("const b=[...m.querySelectorAll('button')].filter(e=>e.getBoundingClientRect().width>0"
                         "&&e.innerText.trim()==='Create Talking Video').pop(); if(!b) throw new Error('no Create Talking Video');"
-                        " b.click();"))
+                        " b.setAttribute('data-s2f-click','1');"))
+    ve.click_marked()
     for _ in range(12):
         time.sleep(5)
         new = [x for x in ve.library(V.VID_CAT, "", 20) if x["id"] not in before]

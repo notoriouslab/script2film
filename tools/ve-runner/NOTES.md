@@ -143,6 +143,15 @@ Chrome runs without a window by default (2026-11-12; `ve_runner.py`, and `ve_voi
    host and any Chinese host are clearly better from TalkingPhotos.
    `ve_host.py` sends `doc_host.py split` parts this way (docs/FLOW.md, "VideoExpress Lipsync Video").
 
+12. Real clicks only (2026-11-25): VideoExpress stopped reacting to a scripted `el.click()` on several controls. Use
+   Consistent Character ticked but its Reference Photo slots stayed hidden; Reference Photo, Create Image and Save Image
+   did nothing. Every click in ve_runner, ve_host, ve_frames, ve_voice and gen_sfx_ve is now a real mouse click: the
+   page script finds the element and marks it `data-s2f-click`, `VE.click_marked()` clicks it. Tested live: image with
+   a reference photo, save to My AI Images, Create Video, collect, Voice Changer up to Apply, ve_host up to the last
+   button. Not yet run live: ve_frames, gen_sfx_ve, lipsync and narration shots in ve_runner, Save Last Frame.
+   Voice Changer on a clip with no sound is refused ("The source media does not contain an audio track."); ve_voice
+   now stops on such a message instead of waiting out its timeout.
+
 ## Known gaps
 - `Start: image <file>` (2026-10-22): a frame made outside VE (a candidate retouched by hand: a nail wound VE would not draw
   in three text re-rolls) is uploaded to Media Library > Images (`upload_file`; the name must contain the file stem) and

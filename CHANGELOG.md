@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- **VideoExpress tools click like a person:** since 2026-11-25 VideoExpress ignores scripted clicks on several
+  controls (reference photos, Create Image, Save Image), so every VideoExpress tool now uses real mouse clicks.
+  `ve_voice.py` stops at once when Voice Changer refuses a clip. Details in tools/ve-runner/NOTES.md item 12.
 - **English host in the small circle from VideoExpress:** `tools/ve-runner/ve_host.py` sends `doc_host.py split`
   parts through VideoExpress Lipsync Video (Old Algorithm) instead of TalkingPhotos, downloads and checks the takes;
   `doc_host.py join` works as before. It stops on a non-English doc or a full-screen host (TalkingPhotos looks better

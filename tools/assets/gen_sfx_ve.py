@@ -222,9 +222,10 @@ class SoundMaker:
               if (!h) throw new Error('AI Sound Maker card not found');
               h.scrollIntoView();
               for (let e = h.parentElement; e; e = e.parentElement) {
-                const b = e.querySelector('button.btn-circle-big'); if (b) { b.click(); return; } }
+                const b = e.querySelector('button.btn-circle-big'); if (b) { b.setAttribute('data-s2f-click','1'); return; } }
               throw new Error('AI Sound Maker card button not found');
             }""")
+        self.ve.click_marked()  # real click: VE ignores scripted clicks on several controls since 2026-11-25
         self.page.locator("button.button-submit-create-sound:visible").first.wait_for(timeout=15_000)
         self.log("AI Sound Maker open")
 
@@ -245,7 +246,7 @@ class SoundMaker:
             raise RuntimeError("the prompt box did not take the text")
         self.set_duration(p["duration"])
         with self.page.expect_response(lambda r: CREATE_API in r.url and r.request.method == "POST", timeout=60_000) as info:
-            self.page.locator("button.button-submit-create-sound:visible").first.evaluate("el => el.click()")
+            self.page.locator("button.button-submit-create-sound:visible").first.click(force=True)
         resp = info.value
         sent = resp.request.post_data or ""
         try:

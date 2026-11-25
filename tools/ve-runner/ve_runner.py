@@ -342,16 +342,29 @@ class VE:
                     return a[0]
                 self.log(f"ignored decision {a!r}")
 
-    # -- DOM primitives (DOM click is what the modal buttons reliably accept)
+    # -- DOM primitives (real mouse clicks: VE ignores a scripted el.click() on several controls since 2026-11-25)
+    def click_marked(self):
+        """real mouse click on the element a page.evaluate just marked with data-s2f-click. Since 2026-11-25 VE ignores a
+        scripted el.click() on several controls (Use Consistent Character, Reference Photo, Create Image, Save Image):
+        the script finds the element, the click itself is a real one, as a person would make."""
+        loc = self.page.locator("[data-s2f-click]")
+        try:
+            loc.first.click(force=True)
+        finally:
+            self.page.evaluate("() => document.querySelectorAll('[data-s2f-click]').forEach(e=>e.removeAttribute('data-s2f-click'))")
+
     def dom_click(self, selector: str):
         self.pause(f"click {selector}")
-        self.page.locator(selector).first.evaluate("el => el.click()")
+        self.page.locator(selector).first.click()  # real click: VE ignores a scripted el.click() since 2026-11-25
 
     def set_checkbox(self, name: str, on: bool):
         loc = self.page.locator(f"input[name={name}]").first
         if loc.is_checked() != on:
             self.pause(f"toggle {name} -> {on}")
-            loc.evaluate("el => el.click()")
+            # a real mouse click: since 2026-11-25 a scripted el.click() flips Use Consistent Character but VE keeps
+            # the Reference Photo slots hidden, and pick_reference then waits on a folder list that never opens
+            loc.click(force=True)
+            self.page.wait_for_timeout(300)
         if loc.is_checked() != on:
             raise RuntimeError(f"checkbox {name} refused state {on}")
 
@@ -377,7 +390,7 @@ class VE:
                                    "Run once with S2F_VE_HEADED=1, log in by hand, then run again.") from None
         close = self.page.locator("button:text-is('Close')")
         if close.count() and close.first.is_visible():
-            close.first.evaluate("el => el.click()")
+            close.first.click(force=True)
         self.log("editor ready")
 
     def dismiss_news(self):
@@ -392,10 +405,11 @@ class VE:
                   if(/Latest News and Updates/.test(e.textContent)) return true;
                 }
                 return false;});
-              if(b){b.click();return true;} return false;
+              if(b){b.setAttribute('data-s2f-click','1');return true;} return false;
             }"""
         )
         if hit:
+            self.click_marked()
             self.log("news panel dismissed")
             self.page.wait_for_timeout(500)
 
@@ -412,9 +426,10 @@ class VE:
                 .filter(d=>d.children.length<8 && /Create Video From Prompt/.test(d.textContent))
                 .map(d=>d.querySelector('button.btn-circle-big')).find(Boolean);
               if(!el) throw new Error('generator card button not found');
-              el.click();
+              el.setAttribute('data-s2f-click','1');
             }"""
         )
+        self.click_marked()
         self.page.wait_for_selector("#opt_prompt", state="visible", timeout=15_000)
         # gallery share must be OFF (re-verify on every modal open)
         self.set_checkbox("shared", False)
@@ -568,10 +583,11 @@ class VE:
             """src => { const img=[...document.querySelectorAll('img')].find(i=>i.src===src);
                        if(!img) throw new Error('candidate img vanished');
                        for(let e=img.parentElement;e;e=e.parentElement){
-                         const b=e.querySelector('.button-save-image'); if(b){b.click();return;} }
+                         const b=e.querySelector('.button-save-image'); if(b){b.setAttribute('data-s2f-click','1');return;} }
                        throw new Error('no Save Image button near candidate'); }""",
             src,
         )
+        self.click_marked()
 
     def save_to_library(self, src: str, prompt: str) -> dict:
         """Save Image on this candidate and return its My AI Images item.
@@ -613,7 +629,7 @@ class VE:
 
     def clear_slot(self, k: int):
         self.page.locator(".consistent-character-image-container .button-select-image-clear").nth(k) \
-            .evaluate("el => el.click()")
+            .click(force=True)
         self.page.wait_for_timeout(800)
         if self.slots()[k]["filled"]:
             raise RuntimeError(f"Reference Photo {k + 1} did not clear")
@@ -623,12 +639,13 @@ class VE:
         """Reference Photo k+1 -> Select Image -> self.ref_folder (My AI Images, or Images for an uploaded photo,
         --ref-folder) -> item lib_id -> Choose; verify the thumbnail."""
         self.pause(f"pick library image {lib_id} into Reference Photo {k + 1}")
-        self.page.locator("button.button-reference-photo2").nth(k).evaluate("el => el.click()")
+        self.page.locator("button.button-reference-photo2").nth(k).click()  # real click (see set_checkbox)
         self.page.wait_for_function(  # folders are listed a few seconds after the dialog opens
             "n => [...document.querySelectorAll('.library-folder-title')].some(e=>e.textContent.trim()===n)",
             arg=self.ref_folder, timeout=20_000)
         self.page.evaluate("""n => [...document.querySelectorAll('.library-folder-title')]
-                                .find(e=>e.textContent.trim()===n).click()""", self.ref_folder)
+                                .find(e=>e.textContent.trim()===n).setAttribute('data-s2f-click','1')""", self.ref_folder)
+        self.click_marked()
         sel = f'.library-item[data-ident="{lib_id}"]'
         for _ in range(6):  # older items sit behind "More"
             try:
@@ -638,15 +655,16 @@ class VE:
                 more = self.page.locator("button:has-text('More'):visible")
                 if not more.count():
                     break
-                more.first.evaluate("el => el.click()")
+                more.first.click(force=True)
         if not self.page.locator(sel).count():
             self.shot_png(f"ref{k + 1}_not_found")
             raise RuntimeError(f"library image {lib_id} not found in {self.ref_folder}")
-        self.page.locator(sel).first.evaluate("el => el.click()")
+        self.page.locator(sel).first.click(force=True)
         self.page.wait_for_timeout(500)
         self.page.evaluate("""() => { const b=[...document.querySelectorAll('button')]
                                 .filter(b=>b.textContent.trim()==='Choose'&&b.getBoundingClientRect().width>0).pop();
-                              if(!b) throw new Error('Choose button not found'); b.click(); }""")
+                              if(!b) throw new Error('Choose button not found'); b.setAttribute('data-s2f-click','1'); }""")
+        self.click_marked()
         for _ in range(20):
             self.page.wait_for_timeout(500)
             s = self.slots()[k]
@@ -698,9 +716,10 @@ class VE:
         self.page.evaluate(
             """src => { const img=[...document.querySelectorAll('img')].find(i=>i.src===src);
                        if(!img) throw new Error('candidate img vanished');
-                       img.click(); }""",
+                       img.setAttribute('data-s2f-click','1'); }""",
             src,
         )
+        self.click_marked()
         # 2026-11-19 (three times in one short film): the wait in create_image saw one candidate, but a second one
         # landed after the pick and took the active slide, and the 5 s here ran out while it was still loading.
         # Now a late candidate is waited out (up to 90 s), and the pick counts only once it holds for 1 s.
@@ -824,7 +843,8 @@ class VE:
             """t => { const els=[...document.querySelectorAll('*')].filter(e=>e.children.length===0&&(e.innerText||'').trim()===t);
                 if(!els.length) throw new Error('no sidebar item '+t); let el=els[els.length-1];
                 for(let i=0;i<4&&el;i++){ if(el.tagName==='A'||el.tagName==='BUTTON'||el.getAttribute('data-target')) break; el=el.parentElement; }
-                (el||els[0]).click(); }""", name)
+                (el||els[0]).setAttribute('data-s2f-click','1'); }""", name)
+        self.click_marked()
         self.page.wait_for_timeout(2000)
 
     def open_folder(self, name: str):
@@ -832,7 +852,8 @@ class VE:
             "n => [...document.querySelectorAll('.library-folder-title')].some(e=>e.textContent.trim()===n&&e.getBoundingClientRect().width>0)",
             arg=name, timeout=20_000)
         self.page.evaluate("""n => [...document.querySelectorAll('.library-folder-title')]
-                                .filter(e=>e.textContent.trim()===n&&e.getBoundingClientRect().width>0)[0].click()""", name)
+                                .filter(e=>e.textContent.trim()===n&&e.getBoundingClientRect().width>0)[0].setAttribute('data-s2f-click','1')""", name)
+        self.click_marked()
         self.page.wait_for_timeout(3000)
 
     def library_items(self) -> list[dict]:
@@ -851,8 +872,9 @@ class VE:
                 let root=ta, b=null;
                 for(let i=0;i<8&&root.parentElement&&!b;i++){ root=root.parentElement;
                   b=[...root.querySelectorAll('button.button-close')].find(vis); }
-                if(!b) throw new Error('dialog Close button not found'); b.click();
+                if(!b) throw new Error('dialog Close button not found'); b.setAttribute('data-s2f-click','1');
                 return tas.length+' #opt_prompt, clicked '+b.className; }""")
+            self.click_marked()
             self.log(f"close dialog: {hit}")
             try:
                 self.page.wait_for_selector("#opt_prompt", state="hidden", timeout=5_000)
@@ -874,7 +896,7 @@ class VE:
             more = self.page.locator("button:has-text('More'):visible")
             if not more.count():
                 break
-            more.first.evaluate("el => el.click()")
+            more.first.click(force=True)
             self.page.wait_for_timeout(3000)
         if not self.page.locator(sel).count():
             raise RuntimeError(f"video {item['id']} not found in My AI Videos")
@@ -883,7 +905,8 @@ class VE:
         self.page.wait_for_timeout(1500)
         self.page.evaluate("""t => { const e=[...document.querySelectorAll('a')]
             .filter(e=>e.getBoundingClientRect().width>0&&(e.innerText||'').trim()===t).pop();
-            if(!e) throw new Error('video menu has no '+t); e.click(); }""", entry)
+            if(!e) throw new Error('video menu has no '+t); e.setAttribute('data-s2f-click','1'); }""", entry)
+        self.click_marked()
 
     def save_last_frame(self, item: dict, title: str) -> int:
         """the clip's menu > Save Last Frame > Title (#modalFieldName) > Save: VE's own last frame (PNG 1920x1080) lands in
@@ -894,7 +917,8 @@ class VE:
         self.page.fill("#modalFieldName", title)
         self.page.evaluate("""() => { const m=document.querySelector('#modalFieldName').closest('.bbm-modal')||document;
                                     const b=[...m.querySelectorAll('button.button-submit')].find(e=>e.getBoundingClientRect().width>0);
-                                    if(!b) throw new Error('Save Last Frame: Save button not found'); b.click(); }""")
+                                    if(!b) throw new Error('Save Last Frame: Save button not found'); b.setAttribute('data-s2f-click','1'); }""")
+        self.click_marked()
         for _ in range(24):
             time.sleep(5)
             new = [x for x in self.library(IMG_CAT, "", 30)
@@ -921,12 +945,14 @@ class VE:
         self.open_folder(folder)
         before = {x["id"] for x in self.library_items()}
         self.page.evaluate("""() => { const b=[...document.querySelectorAll('button')].find(e=>/button-upload/.test(e.className)&&e.getBoundingClientRect().width>0);
-                                    if(!b) throw new Error('no Upload file button'); b.click(); }""")
+                                    if(!b) throw new Error('no Upload file button'); b.setAttribute('data-s2f-click','1'); }""")
+        self.click_marked()
         self.page.wait_for_selector("input.dz-hidden-input", state="attached", timeout=15_000)
         self.page.set_input_files("input.dz-hidden-input", str(path))
         self.page.wait_for_timeout(2000)
         self.page.evaluate("""() => { const b=[...document.querySelectorAll('button')].find(e=>(e.innerText||'').trim()==='Upload files'&&e.getBoundingClientRect().width>0);
-                                    if(!b) throw new Error('no Upload files button'); b.click(); }""")
+                                    if(!b) throw new Error('no Upload files button'); b.setAttribute('data-s2f-click','1'); }""")
+        self.click_marked()
         key = path.stem.lower()
         for _ in range(60):
             self.page.wait_for_timeout(3000)
@@ -943,14 +969,15 @@ class VE:
     def use_from_library(self, lib_id: int, folder: str = "Images") -> str:
         """main dialog > Use from Library > folder > item > Choose: the image becomes the frame to animate."""
         before = set(self.all_modal_srcs())
-        self.page.evaluate("() => document.querySelector('button.button-image-from-library').click()")
+        self.page.locator('button.button-image-from-library').first.click(force=True)
         self.open_folder(folder)
         sel = f'.library-item[data-ident="{lib_id}"]'
         self.page.wait_for_selector(sel, state="attached", timeout=15_000)
-        self.page.locator(sel).first.evaluate("el => el.click()")
+        self.page.locator(sel).first.click(force=True)
         self.page.wait_for_timeout(500)
         self.page.evaluate("""() => { const b=[...document.querySelectorAll('button')].filter(b=>b.textContent.trim()==='Choose'&&b.getBoundingClientRect().width>0).pop();
-                                    if(!b) throw new Error('Choose button not found'); b.click(); }""")
+                                    if(!b) throw new Error('Choose button not found'); b.setAttribute('data-s2f-click','1'); }""")
+        self.click_marked()
         for _ in range(20):
             self.page.wait_for_timeout(500)
             shown = [s for s in self.modal_images() if s not in before]
@@ -1058,7 +1085,7 @@ class VE:
         btn = self.page.locator("button.button-generate-video-submit")
         if btn.count():
             self.pause("click Create Video")
-            btn.first.evaluate("el => el.click()")
+            btn.first.click(force=True)
         else:
             self.dom_click("button:has-text('Create Video')")
         self.log(f"Create Video sent ({'plain, with speech' if speech else 'plain'})")
@@ -1076,7 +1103,8 @@ class VE:
         self.page.wait_for_timeout(500)
         self.pause("click Create Video (lipsync)")
         self.page.evaluate("""() => { const b=[...document.querySelectorAll('button.button-generate-talking-video')].find(e=>e.getBoundingClientRect().width>0);
-                                    if(!b) throw new Error('lipsync Create Video button not found'); b.click(); }""")
+                                    if(!b) throw new Error('lipsync Create Video button not found'); b.setAttribute('data-s2f-click','1'); }""")
+        self.click_marked()
         try:
             self.page.wait_for_selector("#opt_prompt_actor1", state="visible", timeout=15_000)
         except PWTimeout:
@@ -1088,7 +1116,8 @@ class VE:
                                     if(!t) throw new Error('lipsync Video Prompt not found'); t.setAttribute('data-ve','lipsync-prompt'); }""")
         if scripts[2] and not self.page.locator("#opt_prompt_actor2").is_visible():
             self.page.evaluate("""() => { const b=[...document.querySelectorAll('button,a')].find(e=>/Add Actor 2/.test(e.innerText||'')&&e.getBoundingClientRect().width>0);
-                                        if(!b) throw new Error('Add Actor 2 not found'); b.click(); }""")
+                                        if(!b) throw new Error('Add Actor 2 not found'); b.setAttribute('data-s2f-click','1'); }""")
+            self.click_marked()
             self.page.wait_for_selector("#opt_prompt_actor2", state="visible", timeout=5_000)
         self.page.locator('textarea[data-ve="lipsync-prompt"]').fill(i2v)
         self.page.locator("#opt_prompt_actor1").fill(scripts[1])
@@ -1103,7 +1132,8 @@ class VE:
         self.pause("submit lipsync video")
         self.page.evaluate("""() => { const m=document.querySelector('#opt_prompt_actor1').closest('.modal')||document;
                                     const b=[...m.querySelectorAll('button')].find(e=>e.innerText.trim()==='Create'&&e.getBoundingClientRect().width>0);
-                                    if(!b) throw new Error('lipsync Create button not found'); b.click(); }""")
+                                    if(!b) throw new Error('lipsync Create button not found'); b.setAttribute('data-s2f-click','1'); }""")
+        self.click_marked()
         self.log("Create Video sent (lipsync): " + " / ".join(f'Actor {k}: "{v}"' for k, v in scripts.items() if v))
 
     def create_video_narration(self, i2v: str, audio_id: int, enhance_video: bool):
@@ -1122,7 +1152,8 @@ class VE:
         self.fill("#opt_video_prompt", i2v)
         self.pause("click Create Video (narration)")
         self.page.evaluate("""() => { const b=[...document.querySelectorAll('button.button-generate-talking-video')].find(e=>e.getBoundingClientRect().width>0);
-                                    if(!b) throw new Error('narration Create Video button not found'); b.click(); }""")
+                                    if(!b) throw new Error('narration Create Video button not found'); b.setAttribute('data-s2f-click','1'); }""")
+        self.click_marked()
         try:
             self.page.wait_for_selector("text=Create Narration Video - Create Audio", state="visible", timeout=15_000)
         except PWTimeout:
@@ -1133,10 +1164,11 @@ class VE:
         self.open_folder("Audio")
         sel = f'.library-item[data-ident="{audio_id}"]'
         self.page.wait_for_selector(sel, state="attached", timeout=15_000)
-        self.page.locator(sel).first.evaluate("el => el.click()")
+        self.page.locator(sel).first.click(force=True)
         self.page.wait_for_timeout(500)
         self.page.evaluate("""() => { const b=[...document.querySelectorAll('button')].filter(b=>b.textContent.trim()==='Choose'&&b.getBoundingClientRect().width>0).pop();
-                                    if(!b) throw new Error('Choose button not found'); b.click(); }""")
+                                    if(!b) throw new Error('Choose button not found'); b.setAttribute('data-s2f-click','1'); }""")
+        self.click_marked()
         self.page.wait_for_timeout(2000)
         self.shot_png("narration_audio_chosen")
         self.pause("click Create Narration Video")

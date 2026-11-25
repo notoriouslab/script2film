@@ -27,7 +27,9 @@ import ve_runner as v
 def click_text(page, text: str, tags: str = "button"):
     page.evaluate("""([t, tags]) => { const e=[...document.querySelectorAll(tags)]
         .filter(e=>e.getBoundingClientRect().width>0&&(e.innerText||'').trim()===t).pop();
-        if(!e) throw new Error('not found: '+t); e.click(); }""", [text, tags])
+        if(!e) throw new Error('not found: '+t); e.setAttribute('data-s2f-click','1'); }""", [text, tags])
+    page.locator("[data-s2f-click]").first.click(force=True)  # real click: VE ignores scripted clicks since 2026-11-25
+    page.evaluate("() => document.querySelectorAll('[data-s2f-click]').forEach(e=>e.removeAttribute('data-s2f-click'))")
 
 
 def voice_change(ve: v.VE, video: dict, ref_id: int, timeout: float = 600) -> dict:
@@ -37,18 +39,23 @@ def voice_change(ve: v.VE, video: dict, ref_id: int, timeout: float = 600) -> di
     ve.video_menu(video, "Voice Changer")
     page.wait_for_timeout(3000)
     page.evaluate("""() => { const b=[...document.querySelectorAll('button')].find(e=>/Choose Sample Audio/.test(e.innerText)&&e.getBoundingClientRect().width>0);
-                            if(!b) throw new Error('no Choose Sample Audio'); b.click(); }""")
+                            if(!b) throw new Error('no Choose Sample Audio'); b.setAttribute('data-s2f-click','1'); }""")
+    ve.click_marked()
     ve.open_folder("Audio")
     s2 = f'.library-item[data-ident="{ref_id}"]'
     page.wait_for_selector(s2, state="attached", timeout=15_000)
-    page.locator(s2).first.evaluate("el => el.click()")
+    page.locator(s2).first.click(force=True)
     page.wait_for_timeout(500)
     click_text(page, "Choose")
     page.wait_for_timeout(2000)
+    seen = set(ve.alerts())
     click_text(page, "Apply")
     deadline = time.time() + timeout
     while time.time() < deadline:
         time.sleep(10)
+        refused = [a for a in ve.alerts() if a not in seen and ("does not" in a or "error" in a.lower())]
+        if refused:  # e.g. "The source media does not contain an audio track." (2026-11-25): no job is made, do not wait
+            raise RuntimeError(f"Voice Changer refused: {refused[-1]}")
         new = [x for x in ve.library(v.VID_CAT, "", 30) if x["id"] not in before]
         if new and new[0].get("status") == "completed":
             return new[0]
