@@ -31,7 +31,7 @@
   "typing":  {"files": ["ve-sfx-26-typing"], "volume": 0.59, "hold": 2.0},
   "chime":   {"files": ["ve-sfx-27-chime", "kenney-impact-sounds-impact-bell-heavy-002"], "volume": 0.59},
   "success": {"files": ["ve-sfx-28-success", "kenney-interface-confirmation_002"], "volume": 0.59},
-  "pop":     {"files": ["ve-sfx-29-pop", "kenney-interface-drop_001"], "volume": 0.59},
+  "pop":     {"files": ["kenney-rpg-audio-book-place-1", "self-paper"], "volume": 0.45},
   "heart":   {"files": ["ve-sfx-30-heart"], "volume": 0.48, "hold": 3.0},
   "clock":   {"files": ["ve-sfx-31-clock"], "volume": 0.59, "hold": 3.0},
   "sparkle": {"files": ["ve-sfx-32-sparkle", "kenney-impact-sounds-impact-glass-light-000"], "volume": 0.59},
