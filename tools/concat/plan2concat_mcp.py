@@ -129,6 +129,15 @@ def layer_fix(L, lane, have):
     return cmds
 
 
+def chapter_offset_x(text, ch, right=60):
+    """章節膠囊的 offsetX：照設定的位置，但字長到右緣超出畫面時往內推，讓膠囊右緣離畫面右邊 right px。
+    寬度用字數估：全形字 1 個字級、半形 0.55 個（長章節名原本會超出畫面右緣）。"""
+    em = ch["size"] * 1080
+    w = sum(em if ord(k) > 0x2E7F else em * 0.55 for k in text) + 2 * ch.get("padX", 0.03) * 1080
+    edge = round((1920 - right - w / 2) / 1920 - 0.5, 4)
+    return min(ch["offsetX"], edge)
+
+
 def add_chapters(c, proj, ch, total, fam):
     """整支片最上層的外框圖（透明 PNG，四角括號）＋章節標籤（右上角深色膠囊，換章淡入）。使用者想要
     「加一個邊框在整個影片的上層」，選了四角括號＋章節標籤（畫面不縮，全版照片照樣滿版）。
@@ -153,7 +162,7 @@ def add_chapters(c, proj, ch, total, fam):
     for t in ch["tags"]:
         x = have[round(t["start"], 3)]["id"]
         fix += [{"op": "updateClip", "clipId": x, "patch": {"fadeIn": ch["fade"], "fadeOut": ch["fade"]}},
-                {"op": "setClipTransform", "clipId": x, "offsetX": ch["offsetX"]}]
+                {"op": "setClipTransform", "clipId": x, "offsetX": chapter_offset_x(t["text"], ch)}]
     c.tool("edit_apply", path=proj, command={"op": "batch", "commands": fix})
 
 

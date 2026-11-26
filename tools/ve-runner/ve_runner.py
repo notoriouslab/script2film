@@ -1333,6 +1333,9 @@ def _run(args, run_dir: Path):
                 # the upload happens in Media Library, so the dialog closes first (closing resets options and slots)
                 ve.close_modal()
                 lib_id = ve.upload_file(Path(shot.start_image), "Images")
+                # the sidebar no longer brings the generator cards back after an upload (2026-11-26, three runs);
+                # loading the page again does
+                ve.open_app()
                 ve.open_modal()
                 ve.set_duration(shot.duration)
                 ve.ensure_cast([])

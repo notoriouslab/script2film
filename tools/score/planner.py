@@ -1,5 +1,6 @@
 """自動編曲器：events JSON → 分段計畫 JSON。"""
 import random
+import re
 import zlib
 
 from styles import PC_NAME, ROLES, STYLES, degree_chord, parse_chord, role_table
@@ -181,6 +182,8 @@ def make_plan(raw: dict) -> dict:
         if i == len(segs) - 1:
             degs[-1][0] = st["final"]
         chords = [[degree_chord(tonic % 12, g, st.get("mode", "minor")), nb] for g, nb in degs]
+        if st.get("triads"):   # 大調七和弦去掉七音（聖誕頌歌式的三和弦，不要爵士味）
+            chords = [[re.sub(r"(maj7|m7|7)$", lambda m: "m" if m.group(1) == "m7" else "", c), nb] for c, nb in chords]
         _, layers, g_voice, g_free = role_table(ev["style"])[s["role"]]
         layers = list(layers) + (["shaker"] if s["role"] in st["shaker_roles"] else []) \
             + (["drums"] if s["role"] in st.get("drum_roles", ()) else [])

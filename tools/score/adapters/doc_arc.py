@@ -4,7 +4,7 @@
 
 用法：uv run python adapters/doc_arc.py <專案>/doc.json [--name <名>] [--out <wav>] [--work <資料夾>] [--render]
 doc.json "bgm"：
-  "arc": [{"from": 拍, "style": story|scifi|devotion|lounge|bazaar, "gain": LU（預設 0；起伏大的那段給 +2）}]，第一段的 from 要是第一拍；
+  "arc": [{"from": 拍, "style": story|scifi|devotion|lounge|bazaar|christmas, "gain": LU（預設 0；起伏大的那段給 +2）}]，第一段的 from 要是第一拍；
          沒寫 arc＝整支一段 story
   "roles": {拍: 角色}  覆寫自動判的角色（角色只能用 ROLES 那八個）
 沒覆寫的拍照畫面判角色（SCENE_ROLE）；bgm.drops 的拍＝pause；第一拍 intro、最後一拍 outro。

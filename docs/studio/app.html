@@ -3209,7 +3209,8 @@ ${tagRule(zh)}${media.faceLock ? `\n\n${faceLockRule(media)}` : "" /* no closeUp
             // anywhere except the provider the user picked.
             const OLLAMA_BASE = "http://localhost:11434";
             const LOCAL_MODEL_PREF = /qwen/i;
-            const LLM_DEFAULT_MODELS = { gemini: "gemini-2.5-flash", openai: "" };
+            // "gemini-flash-latest" is Google's rolling alias for the newest Flash model, so a retired version never breaks the default
+            const LLM_DEFAULT_MODELS = { gemini: "gemini-flash-latest", openai: "" };
             let localAbort = null;
             let ollamaAvailable = false;
 
@@ -3658,6 +3659,9 @@ Hard rules:
                     els.localOutput.innerHTML = renderLocalMd(localRaw);
                     if (e.name === "AbortError") setLocalStatus("local.status.stopped");
                     else if (/HTTP 429/.test(e.message || "")) setLocalStatus("local.status.rateLimited");
+                    else if (/HTTP 404/.test(e.message || "") && els.llmProvider.value === "gemini")
+                        // a retired model name answers 404: point at the alias instead of letting it look like a bad key
+                        setLocalStatus("local.status.error", `${e.message} — model "${els.llmModel.value.trim()}" not found; try "${LLM_DEFAULT_MODELS.gemini}"`);
                     else setLocalStatus("local.status.error", e.message || "");
                 } finally {
                     localAbort = null;

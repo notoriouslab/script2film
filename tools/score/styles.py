@@ -38,6 +38,18 @@ LOUNGE_ROLE_TABLE = {
     "outro":   (["ii", "V", "I"], ["comp", "walk", "swing"], 0, 0),
 }
 
+# 聖誕 christmas（大調三和弦、鋼片琴與音樂盒）：做給聖誕特別篇；試過 verse／body 加雪橇鈴（shaker_key 83），聽起來吵，拿掉（2026-11-25）
+CHRISTMAS_ROLE_TABLE = {
+    "intro":   (["I", "vi", "IV", "V"], ["pad", "harp"], -1, 0),
+    "title":   (["IV", "V", "iii", "vi"], ["pad", "arp"], -2, -1),
+    "verse":   (["I", "vi", "IV", "V"], ["pad", "arp", "bass"], -3, -1),
+    "body":    (["I", "IV", "V", "I", "vi", "ii", "V"], ["pad", "arp", "bass"], -4, -1),
+    "warm":    (["IV", "I", "ii", "V"], ["pad", "bass", "harp"], -3, -1),
+    "reflect": (["IV", "I", "vi", "V"], ["pad"], -5, -1),
+    "pause":   (["I", "IV"], ["pad", "arp"], 1, 0),
+    "outro":   (["IV", "V", "I"], ["pad", "bass", "harp"], 0, 0),
+}
+
 STYLES = {
     "devotion": dict(
         programs={"motif": 10, "lead": 0, "harp": 46, "arp": 0, "pad": 49, "bass": 42},
@@ -66,6 +78,11 @@ STYLES = {
     "bazaar": dict(
         programs={"motif": 75, "lead": 71, "harp": 46, "arp": 104, "pad": 48, "bass": 32},
         bpm=(90, 106), target=98, tonic=62, final="i", shaker_roles=("verse", "body")),
+    # 聖誕 christmas：鋼片琴主題、長笛旋律、豎琴、音樂盒分解和弦、弦樂鋪底、撥弦低音；G 大調，沒有打擊
+    "christmas": dict(
+        programs={"motif": 8, "lead": 73, "harp": 46, "arp": 10, "pad": 48, "bass": 45},
+        bpm=(88, 104), target=96, tonic=67, final="I", shaker_roles=(), mode="major",
+        roles=CHRISTMAS_ROLE_TABLE, triads=True),
 }
 SHAKER = dict(channel=9, bank=128, key=70, vel_on=30, vel_off=48)
 
