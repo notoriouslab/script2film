@@ -7,6 +7,7 @@
 ## 打開
 
 - 用任何瀏覽器打開 [`prompt-studio.html`](prompt-studio.html)，不用安裝，不用帳號。
+- 主要用法：按提示上方的 **⧉ ChatGPT**、**⧉ Gemini** 或 **⧉ Claude**，會複製提示並開啟該聊天頁，貼上後直接在對話裡討論修改，不用 API 金鑰。用 API 金鑰或 Ollama 自動展開收在提示下方的「進階」。
 - 要用本機的 Ollama 模型展開提示，改用啟動檔打開：macOS 點兩下 `PromptStudio.command`，Windows 點兩下 `PromptStudio.bat`。它會把這個資料夾開在 `http://localhost:8765`，因為 Ollama 不接受直接點開檔案的頁面送來的請求。
 
 ## 修改它

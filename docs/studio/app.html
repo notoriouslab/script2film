@@ -904,24 +904,30 @@
                                         title="Collapse / expand"
                                     >▾</button>
                                     <button
-                                        class="btn btn-primary btn-sm"
+                                        class="btn btn-secondary btn-sm"
                                         id="copyPromptBtn"
                                         data-i18n="btn.copy"
                                     >
                                         Copy Prompt
                                     </button>
                                     <button
-                                        class="btn btn-secondary btn-sm"
+                                        class="btn btn-primary btn-sm"
                                         id="openChatGptBtn"
                                         data-i18n="btn.copyOpenChatGpt"
                                         title="Copy prompt and open ChatGPT"
                                     >⧉ ChatGPT</button>
                                     <button
-                                        class="btn btn-secondary btn-sm"
+                                        class="btn btn-primary btn-sm"
                                         id="openGeminiBtn"
                                         data-i18n="btn.copyOpenGemini"
                                         title="Copy prompt and open Gemini"
                                     >⧉ Gemini</button>
+                                    <button
+                                        class="btn btn-primary btn-sm"
+                                        id="openClaudeBtn"
+                                        data-i18n="btn.copyOpenClaude"
+                                        title="Copy prompt and open Claude"
+                                    >⧉ Claude</button>
                                     <button
                                         class="btn btn-secondary btn-sm"
                                         id="downloadPromptBtn"
@@ -935,6 +941,10 @@
                             <!-- AI expand bridge: local ollama (auto-detected) or a user-supplied cloud API key -->
                             <div id="localLlmSection">
                                 <div class="divider"></div>
+                                <!-- Main path is the web-chat buttons above (a full-size chat model beats a free-tier or local one);
+                                     API / Ollama expansion stays available here, closed by default -->
+                                <details id="localLlmDetails">
+                                <summary class="tiny muted" style="cursor: pointer; margin: 0 0 8px" data-i18n="local.advanced">Advanced: expand automatically with an API key or local Ollama</summary>
                                 <div class="panel-head">
                                     <h2 style="margin: 0">
                                         <span data-i18n="local.title">AI Expand</span>
@@ -1010,6 +1020,7 @@
                                     <button class="btn btn-primary btn-sm" id="localReviseBtn" data-i18n="local.revise">Revise</button>
                                 </div>
                                 <div class="code tall md-view" id="localOutput"></div>
+                                </details>
                             </div>
                         </section>
                         <section class="panel">
@@ -1122,13 +1133,15 @@
                     "ph.llmModel": "模型名稱",
                     "ph.llmBase": "Base URL，例 https://openrouter.ai/api/v1",
                     "local.keyHint": "取得免費 Gemini API key →",
-                    "local.status.noOllama": "未偵測到本地 Ollama——改選 Gemini API（免費 key），或複製上方 prompt 貼到任一 AI 聊天",
+                    "local.status.noOllama": "未偵測到本地 Ollama——改選 Gemini API，或用上方 ⧉ 鈕複製到網頁 AI",
                     "local.status.noOllamaFile": "file:// 開啟連不到本地 Ollama（CORS）——改用 PromptStudio.command 啟動，或直接用 Gemini API",
                     "local.status.noKey": "請先填 API Key 與模型名稱",
-                    "local.status.rateLimited": "免費層速率限制（HTTP 429）——等半分鐘再展開",
+                    "local.status.rateLimited": "額度用完（HTTP 429）——每分鐘限制等一下再試；當日額度用完就改用上方 ⧉ ChatGPT／Gemini／Claude 鈕在網頁 AI 展開",
                     "btn.copyOpenChatGpt": "⧉ ChatGPT",
                     "btn.copyOpenGemini": "⧉ Gemini",
-                    "status.copiedOpen": "已複製，貼到開啟的聊天視窗即可",
+                    "btn.copyOpenClaude": "⧉ Claude",
+                    "local.advanced": "進階：用 API 金鑰或本機 Ollama 自動展開",
+                    "local.status.overloaded": "Google 伺服器滿載（HTTP 503）——稍後再試，或改用上方 ⧉ ChatGPT／Gemini／Claude 鈕在網頁 AI 展開",
                     "local.stop": "停止",
                     "local.copy": "複製 Markdown",
                     "ph.localIdea": "一小段 IDEA，或直接貼完整劇本（自動辨識）；只有一句故事概念的話，勾下方「先寫成劇本」",
@@ -1241,13 +1254,15 @@
                     "ph.llmModel": "Model",
                     "ph.llmBase": "Base URL, e.g. https://openrouter.ai/api/v1",
                     "local.keyHint": "Get a free Gemini API key →",
-                    "local.status.noOllama": "No local Ollama detected — pick Gemini API (free key), or copy the prompt above into any AI chat",
+                    "local.status.noOllama": "No local Ollama detected — pick Gemini API, or use the ⧉ buttons above to copy into a web AI chat",
                     "local.status.noOllamaFile": "file:// pages can't reach local Ollama (CORS) — launch via PromptStudio.command, or just use Gemini API",
                     "local.status.noKey": "Enter an API key and model first",
-                    "local.status.rateLimited": "Free-tier rate limit (HTTP 429) — wait ~30s and expand again",
+                    "local.status.rateLimited": "Quota used up (HTTP 429) — a per-minute limit clears shortly; for a daily limit, use the ⧉ ChatGPT / Gemini / Claude buttons above",
                     "btn.copyOpenChatGpt": "⧉ ChatGPT",
                     "btn.copyOpenGemini": "⧉ Gemini",
-                    "status.copiedOpen": "Copied — paste into the chat tab that just opened",
+                    "btn.copyOpenClaude": "⧉ Claude",
+                    "local.advanced": "Advanced: expand automatically with an API key or local Ollama",
+                    "local.status.overloaded": "Google's servers are overloaded (HTTP 503) — try later, or use the ⧉ ChatGPT / Gemini / Claude buttons above",
                     "local.stop": "Stop",
                     "local.copy": "Copy Markdown",
                     "ph.localIdea": "An IDEA in one short paragraph, or a full screenplay (auto-detected); for a one-line story concept tick \"write a screenplay first\" below",
@@ -1429,6 +1444,8 @@
                 "llmKeyHint",
                 "openChatGptBtn",
                 "openGeminiBtn",
+                "openClaudeBtn",
+                "localLlmDetails",
                 "localExpandBtn",
                 "localStopBtn",
                 "localCopyBtn",
@@ -3184,13 +3201,16 @@ ${tagRule(zh)}${media.faceLock ? `\n\n${faceLockRule(media)}` : "" /* no closeUp
                 );
             });
             // 零門檻路徑：複製 prompt 並開啟聊天服務，貼上即用
-            function copyAndOpen(url) {
+            // the AI expand section (where the status line lives) is folded away, so the button itself confirms the copy
+            function copyAndOpen(btn, key, url) {
                 navigator.clipboard.writeText(els.promptOutput.textContent || "");
                 window.open(url, "_blank", "noopener");
-                setLocalStatus("status.copiedOpen");
+                btn.textContent = t("btn.copied");
+                setTimeout(() => (btn.textContent = t(key)), 1800);
             }
-            els.openChatGptBtn.addEventListener("click", () => copyAndOpen("https://chatgpt.com/"));
-            els.openGeminiBtn.addEventListener("click", () => copyAndOpen("https://gemini.google.com/"));
+            els.openChatGptBtn.addEventListener("click", () => copyAndOpen(els.openChatGptBtn, "btn.copyOpenChatGpt", "https://chatgpt.com/"));
+            els.openGeminiBtn.addEventListener("click", () => copyAndOpen(els.openGeminiBtn, "btn.copyOpenGemini", "https://gemini.google.com/"));
+            els.openClaudeBtn.addEventListener("click", () => copyAndOpen(els.openClaudeBtn, "btn.copyOpenClaude", "https://claude.ai/new"));
             els.downloadPromptBtn.addEventListener("click", () => {
                 const blob = new Blob([els.promptOutput.textContent || ""], {
                     type: "text/markdown",
@@ -3285,8 +3305,9 @@ ${tagRule(zh)}${media.faceLock ? `\n\n${faceLockRule(media)}` : "" /* no closeUp
                 syncLlmUi();
                 if (fellBack)
                     setLocalStatus(location.protocol === "file:" ? "local.status.noOllamaFile" : "local.status.noOllama");
+                // the prompt is what the main path copies, so it starts open; a hand-collapsed choice is remembered
                 const saved = localStorage.getItem("ps_spec_collapsed");
-                setSpecCollapsed(saved === null ? true : saved === "1", false);
+                setSpecCollapsed(saved === "1", false);
             }
 
             // provider → fetch request 描述；stream 解析交給 parseLlmChunkLine
@@ -3659,6 +3680,7 @@ Hard rules:
                     els.localOutput.innerHTML = renderLocalMd(localRaw);
                     if (e.name === "AbortError") setLocalStatus("local.status.stopped");
                     else if (/HTTP 429/.test(e.message || "")) setLocalStatus("local.status.rateLimited");
+                    else if (/HTTP 503/.test(e.message || "")) setLocalStatus("local.status.overloaded");
                     else if (/HTTP 404/.test(e.message || "") && els.llmProvider.value === "gemini")
                         // a retired model name answers 404: point at the alias instead of letting it look like a bad key
                         setLocalStatus("local.status.error", `${e.message} — model "${els.llmModel.value.trim()}" not found; try "${LLM_DEFAULT_MODELS.gemini}"`);
@@ -3694,6 +3716,12 @@ Hard rules:
                 setTimeout(() => (els.localCopyBtn.textContent = t("local.copy")), 1200);
             });
             if (typeof window.fetch === "function") detectLocalLlm();
+            // the advanced section stays as the user left it
+            try {
+                els.localLlmDetails.open = localStorage.getItem("ps_llm_advanced_open") === "1";
+            } catch {}
+            els.localLlmDetails.addEventListener("toggle", () =>
+                localStorage.setItem("ps_llm_advanced_open", els.localLlmDetails.open ? "1" : "0"));
             els.themeToggle.addEventListener("click", () => {
                 document.documentElement.dataset.theme =
                     document.documentElement.dataset.theme === "dark"

@@ -12,6 +12,9 @@ the last syllable is still sounding, so it ends on a hard cut that sounds unfini
 doc.json voice.pitch (off by default; true or {"tol": 0.05}): among the takes whose score is within tol of the line's best, take
 the one nearest the film's median pitch instead of the highest score (cloned English read 104-225 Hz line to line, 2026-11-13;
 tol 0.05 is a first value, not yet tuned). Pitches are cached in tts/pitch.json; lines.json gets "f0".
+doc.json voice.pick: {"<line n>": "<take file name in tts_lines/>"} uses that take for the line whatever its score: for a
+line whose top-scoring takes misread a word while the right reading lost to a homophone in the transcript. The pinned take
+is still scored and reported, marked "pinned".
 doc.json gaps: {"default": 0.32, "after": {"<line n>": seconds}} (pause after line n; lengthen before/after the climax line).
 doc.json voice.punct_pause (on by default; false turns it off):
   {"weak": 0.4, "strong": 0.65, "max_rate": 5.6, "max_slow": 0.05, "target_rate": 5.1}.
@@ -105,6 +108,18 @@ def by_pitch(rows, tol):
     if not f0:
         return None, ok
     return float(np.median(f0)), ok
+
+
+def pinned(row, n, picks):
+    """The take voice.pick names for line n, or None. A name that is not one of the line's takes stops the run: the
+    pick was written for a take that has since been regenerated or renamed."""
+    name = (picks or {}).get(str(n))
+    if not name:
+        return None
+    for c in row:
+        if c[1].name == name:
+            return c
+    sys.exit(f"✗ voice.pick line {n}: {name} is not among its takes ({', '.join(c[1].name for c in row)})")
 
 
 def pitch_targets(rows, speakers, tol):
@@ -233,7 +248,10 @@ def main():
             print(f"  pitch{who}: median {target:.0f} Hz over takes within {pm['tol']} of each line's best score" if target else f"  pitch{who}: no voiced takes", flush=True)
     for n, line in enumerate(doc["lines"], 1):
         row, target, v = rows[n - 1], targets.get(spk[n - 1]), voice_of(doc, line)
-        if target and ok[n - 1]:
+        pin = pinned(row, n, doc["voice"].get("pick"))
+        if pin:
+            best = pin
+        elif target and ok[n - 1]:
             best = min(ok[n - 1], key=lambda c: (abs(c[7] - target), -c[3], c[6]))   # nearest the film's pitch, then pauses, then pace
         else:
             best = max(row, key=lambda c: (c[0], c[3], -c[6]))   # same score: more pauses, then nearer 5.1/s
@@ -251,8 +269,8 @@ def main():
         meta.append({"n": n, "speaker": spk[n - 1], "text": line["text"], "start": round(start + PAD, 3),
                      "end": round(t - PAD, 3), "pick": best[1].name, "score": best[0], "heard": cache[best[1].name],
                      "pauses": [[round(a, 2), round(b, 2)] for a, b in best[2]], "atempo": f,
-                     **({"f0": round(best[7])} if best[7] else {})})
-        extra = f" +{sum(b for _, b in best[2]):.2f}s/{len(best[2])}" + (f" atempo {f}" if f else "")
+                     **({"f0": round(best[7])} if best[7] else {}), **({"pinned": True} if pin else {})})
+        extra = f" +{sum(b for _, b in best[2]):.2f}s/{len(best[2])}" + (f" atempo {f}" if f else "") + (" pinned" if pin else "")
         print(f"{n:2d} {best[0]:.2f} {best[1].name:10s}{extra} {line['text'][:40]}")
     sf.write(P / "tts/voice.wav", np.concatenate(pieces), SR, subtype="PCM_16")
     (P / "tts/lines.json").write_text(json.dumps(meta, ensure_ascii=False, indent=1), encoding="utf-8")

@@ -7,6 +7,7 @@ The full introduction, screenshots and an online copy are on the Prompt Studio p
 ## Open it
 
 - Open [`prompt-studio.html`](prompt-studio.html) in any browser. Nothing to install, no account.
+- Main path: press **⧉ ChatGPT**, **⧉ Gemini** or **⧉ Claude** above the prompt. It copies the prompt and opens that chat, where you paste it and keep refining in conversation. No API key needed. Automatic expansion with an API key or Ollama is under "Advanced" below the prompt.
 - To expand prompts with a local Ollama model, start it with the launcher instead: double-click `PromptStudio.command` (macOS) or `PromptStudio.bat` (Windows). It serves this folder on `http://localhost:8765`, because Ollama does not accept requests from a page opened as a file.
 
 ## Working on it

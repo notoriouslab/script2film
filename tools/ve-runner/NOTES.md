@@ -24,6 +24,7 @@ S2F_VE_HEADED=1 python3 ve_runner.py --login               # first time on a mac
 python3 ve_runner.py x.md --step                           # confirm before every click
 python3 ve_runner.py x.md --takes 3                         # 3 videos per shot from the same first frame, to pick one
 python3 ve_runner.py x.md --auto-pick                      # accept candidate 1 at every image QC gate (official VOX: first take ships)
+python3 ve_until_done.py x.md --run-dir DIR --shots 49-96 -- --auto-pick   # rerun ve_runner on the shots not yet submitted until all are in (VE errors, a closed browser)
 python3 ve_collect.py --submitted runs/<ts>/submitted.json --out DIR   # download finished clips
 python3 ve_voice.py --submitted runs/<ts>/submitted.json --labels shot21_t2 --ref voice.wav --out DIR [--run-dir …/ve-runs]  # re-voice clips (Voice Changer)
 python3 ve_wallcuts.py join out.mp4 a.mp4:0:6.2 b.mp4:3.55:end   # occlusion one-take: join clips behind a wall (also: spans, sheet; styles/live.md)
