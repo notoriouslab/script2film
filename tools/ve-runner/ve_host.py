@@ -190,6 +190,8 @@ def main():
     ap.add_argument("--prefix", required=True, help="media library name prefix, e.g. Ep01")
     ap.add_argument("--look", required=True, help="the look image (a file; the same rules as for TalkingPhotos)")
     ap.add_argument("--who", help='who is on screen, for the prompt, e.g. "A man in a grey blazer"')
+    ap.add_argument("--prompt", help="the whole Lipsync prompt instead of the built-in one (e.g. a side-angle host who "
+                                     "looks off camera); --who is then ignored")
     ap.add_argument("--parts", type=int, nargs="*", help="only these parts (default: all of parts.json)")
     ap.add_argument("--aspect", default="16:9", choices=["16:9", "9:16"])
     ap.add_argument("--timeout", type=int, default=20, help="minutes to wait for the takes after sending")
@@ -221,7 +223,7 @@ def main():
     up.mkdir(parents=True, exist_ok=True)
     run_dir = up / time.strftime("%Y%m%d_%H%M%S")
     run_dir.mkdir()
-    prompt = prompt_for(a.who)
+    prompt = a.prompt.strip() if a.prompt else prompt_for(a.who)
     todo = [p for p in parts if state["sent"].get(f"part{p['k']}", {}).get("audio_sha256") != sha256(p["mp3"])]
     if todo:
         with sync_playwright() as pw:

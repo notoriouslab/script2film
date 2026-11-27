@@ -167,3 +167,25 @@ Start checklist: when the run sheet sits inside an episode folder (one with `doc
 `ve_runner.py` runs `tools/checklist` (start stage) before submitting anything and stops if an item fails;
 `--skip-checklist "<reason>"` runs anyway and logs a line in `<episode>/nightly/checklist_skips.jsonl`.
 A run sheet outside any episode folder (a story film) is not checked.
+
+12. Side-angle host looks and VE voice paths (2026-11-27, devotional pilot):
+   - TalkingPhotos would not render two three-quarter side-face looks uploaded as our own images: after Render Video no
+     "Being Rendered" came, on every retry and after clearing old audio from the library; the same audio with a frontal
+     look rendered at once.
+   - What works (found by the user the same day): Create New Character → Choose from Media Library puts the frontal look
+     in the Consistent Character slot; a prompt such as 「使用這張圖片，更高解析度／側身45度左右看向鏡頭左方」 → Generate
+     gives a side-angle character TP does render. Saving that generated image and uploading it again is refused like
+     any other side image; to use the character again pick it under Choose Previous Character (it is listed under the
+     video's name, so `TP_ORIGINAL="<that video name>" tp_host.py ...` works) or Re-use the video in My Videos.
+     Seen in the renders: a 45° close-up turned back towards the camera while talking and the sign text behind
+     came out garbled; a 45° wider shot facing the other way stayed side-on and kept the sign clean. An "eyes closed,
+     praying" prompt gave a closed-eye still, but the render opened the eyes to talk, so prayer lines went to VE shots.
+   - TP lip timing: one line rendered on its own twice came out with the mouth about 0.48 s behind the voice both
+     times (other lines within about 0.1 s), so it follows the audio, not the position in the take; moving the
+     picture 0.48 s earlier still looked odd to the user, and the line was rendered on another camera instead.
+   - Lipsync Video (`ve_host.py`, now with `--prompt` for a host who looks off camera) on the side look: picture fine,
+     Chinese lip sync judged poor by the user, as in item 11.
+   - Lines spoken from the prompt (`--speech-in-prompt`) on the side look, then Voice Changer: lip sync acceptable, but
+     the voice drifts from the host's; a 30 s sample of the episode's own synthetic narration as the Voice Changer
+     reference came out closer than the 17 s real-voice sample. Pacing is VE's own, so it does not match the other lines.
+   - The CloneVoice.ai tab of Create Audio is a separate paid product (not owned); not an option.

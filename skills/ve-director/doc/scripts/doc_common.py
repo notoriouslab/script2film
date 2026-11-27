@@ -463,6 +463,24 @@ def asset(kind, name):
              f"or set S2F_ASSETS / S2F_ASSETS_LOCAL")
 
 
+DOC_FONT = "Doc Font"   # CSS family name the doc.json "font" file is loaded under
+
+
+def doc_font(doc):
+    """doc.json "font": one font file from the fonts asset layers (e.g. "LXGWWenKaiTC-Medium.ttf") for the code cards
+    instead of Noto (2026-11-27, devotional pilot: 楷體 cards read as devotional; the burned subtitles stay Noto Serif, the user
+    tried 楷體 there too and kept Noto). Returns the file's path, or None when the key is absent. The @font-face spans
+    weights 100–900 so the browser draws the file's own weight and never fakes a bold. LXGW WenKai TC draws 真 and 為
+    in their older forms (眞, 爲); the user accepted that."""
+    name = doc.get("font")
+    return asset("fonts", name) if name else None
+
+
+def doc_font_face(path):
+    return (f'@font-face {{ font-family: "{DOC_FONT}"; src: url("fonts/{path.name}") format("truetype"); '
+            f'font-weight: 100 900; }}')
+
+
 def gsap_file():
     """GSAP for the rendered pages: the repo root's node_modules/gsap/dist/gsap.min.js (root package.json, `npm ci`).
     Copied next to every page as gsap.min.js, so rendering needs no network."""

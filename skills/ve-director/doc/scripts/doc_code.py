@@ -12,7 +12,7 @@ consecutive code shots that continue one board).
 import json, re, shutil, subprocess, sys
 from pathlib import Path
 
-from doc_common import SKILL_DOC, asset, gsap_file, hyperframes, load, log_tail, read_beats, read_json, tokens
+from doc_common import DOC_FONT, SKILL_DOC, asset, doc_font, doc_font_face, gsap_file, hyperframes, load, log_tail, read_beats, read_json, tokens
 from doc_credits import credit_groups
 from doc_cutout import fg_auto
 from doc_themes import CODE_THEMES, code_theme
@@ -680,6 +680,11 @@ def build(P, doc, b, spec, theme, out_root=None):
     (out / "fonts").mkdir(parents=True, exist_ok=True)
     for f in ("NotoSerifTC-Variable.ttf", "NotoSansTC-Variable.ttf"):
         shutil.copy(asset("fonts", f), out / "fonts" / f)
+    font = doc_font(doc)
+    font_css = ""   # doc.json "font": the card's big and ui text both in that file (#root overrides the theme's :root vars)
+    if font:        # added to the css at the end: a bg_video beat swaps th for its tone theme below
+        shutil.copy(font, out / "fonts" / font.name)
+        font_css = f"\n  {doc_font_face(font)}\n  #root {{ --font-big: '{DOC_FONT}'; --font-ui: '{DOC_FONT}'; }}"
     shutil.copy(gsap_file(), out / "gsap.min.js")   # the page loads it from its own folder: no CDN
     params = fg_auto(P, spec.get("params", {}))   # photo layers with "fg": "auto" → cut-out png next to the photo
     if spec["scene"] == "credits" and not params.get("groups"):
@@ -725,7 +730,7 @@ def build(P, doc, b, spec, theme, out_root=None):
     big = params.get("big_size", 230 if doc["lang"] == "zh" else 170)
     rep = {"__LANG__": doc["lang"], "__ID__": b["id"], "__VARS__": th["vars"], "__PAPER__": th["paper"], "__TEXTURE__": th["texture"],
            "__FILTERS__": th["filters"], "__VIGNETTE__": th["vignette"], "__DIM__": th["dim"], "__FLASH__": th["flash"],
-           "__CSS__": th["css"], "__BIGSIZE__": str(big), "__D__": str(d), "__TAIL__": str(TAIL), "__THEME__": theme,
+           "__CSS__": th["css"] + font_css, "__BIGSIZE__": str(big), "__D__": str(d), "__TAIL__": str(TAIL), "__THEME__": theme,
            "__TORN__": "true" if th["torn"] else "false", "__PHEASE__": th["photo_ease"],
            "__TOKENS__": json.dumps(b["tokens"], ensure_ascii=False), "__VIN__": "true" if vin else "false",
            "__VOUT__": "true" if vout else "false", "__PARAMS__": json.dumps(params, ensure_ascii=False),
