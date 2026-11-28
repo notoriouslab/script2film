@@ -10,14 +10,14 @@ import lexicon  # noqa: E402
 CASES = [("姪兒來了", "侄兒來了"), ("不要罣慮", "不要掛慮"), ("徬徨的時候", "彷徨的時候"), ("仇敵常藉環境", "仇敵常借環境"),
          ("眾人唱和散那", "眾人唱，和散那"), ("什一奉獻", "十一奉獻"), ("使徒行傳十八章", "使徒行撰十八章"),
          ("一他連得銀子", "一「他連得」銀子"), ("讓應許成為禱告", "讓硬許成為禱告"), ("白髮為老年人的尊榮", "白法為老年人的尊榮"),
-         ("帶著孩子", "帶着孩子"), ("照 docs/INSTALL.md 裝好", "照 docs 斜線 install 點 M D 裝好")]
+         ("用甚麼量給人", "用什麼量給人"), ("帶著孩子", "帶着孩子"), ("照 docs/INSTALL.md 裝好", "照 docs 斜線 install 點 M D 裝好")]
 
 
 EN_CASES = [("follow docs/INSTALL.md.", "follow docs slash install dot M D.")]
 
 
-def test_table_has_these_thirteen_rules():
-    assert len(lexicon.load()) == len(CASES) + len(EN_CASES) == 13 and lexicon.problems(lexicon.load()) == []
+def test_table_has_these_fourteen_rules():
+    assert len(lexicon.load()) == len(CASES) + len(EN_CASES) == 14 and lexicon.problems(lexicon.load()) == []
 
 
 @pytest.mark.parametrize("text,want", EN_CASES)
